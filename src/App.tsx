@@ -1,5 +1,7 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import React, { useMemo } from 'react';
 import './App.css';
 import logo from './logo.svg';
@@ -40,7 +42,9 @@ const App: React.FC = () => {
 
     return <ThemeProvider theme={theme}>
         <CssBaseline />
-        <SampleHome />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <SampleHome />
+        </LocalizationProvider>
     </ThemeProvider>;
 };
 
