@@ -3,7 +3,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import React, { useMemo } from 'react';
+import { IntlProvider } from 'react-intl';
 import './App.css';
+import { Locales } from './i18n/locales';
+import { MESSAGES } from './i18n/messages';
 import logo from './logo.svg';
 
 const SampleHome: React.FC = () => {
@@ -28,6 +31,8 @@ const SampleHome: React.FC = () => {
 };
 
 const App: React.FC = () => {
+    const locale = Locales.ENGLISH;
+
     const theme = useMemo(() => createTheme({
         palette: {
             mode: "light",
@@ -43,7 +48,13 @@ const App: React.FC = () => {
     return <ThemeProvider theme={theme}>
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <SampleHome />
+            <IntlProvider
+                messages={MESSAGES[locale]}
+                locale={locale}
+                defaultLocale={Locales.ENGLISH}
+            >
+                <SampleHome />
+            </IntlProvider>
         </LocalizationProvider>
     </ThemeProvider>;
 };
