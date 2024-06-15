@@ -2,12 +2,14 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { IntlProvider } from 'react-intl';
 import './App.css';
+import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
 import { MESSAGES } from './i18n/messages';
 import logo from './logo.svg';
+import Session from './model/Session';
 
 const SampleHome: React.FC = () => {
     return (
@@ -45,6 +47,17 @@ const App: React.FC = () => {
         },
     }), []);
 
+    const session = useMemo(() => Session.loadFromLocalStorage(), []);
+    useEffect(() => {
+        const confirmSaveChanges = (event: BeforeUnloadEvent) => {
+            if (session.isDirty()) {
+                event.preventDefault();
+            }
+        };
+        window.addEventListener("beforeunload", confirmSaveChanges);
+        return () => window.removeEventListener("beforeunload", confirmSaveChanges);
+    }, [session]);
+
     return <ThemeProvider theme={theme}>
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -53,7 +66,9 @@ const App: React.FC = () => {
                 locale={locale}
                 defaultLocale={Locales.ENGLISH}
             >
-                <SampleHome />
+                <SessionContext.Provider value={session}>
+                    <SampleHome />
+                </SessionContext.Provider>
             </IntlProvider>
         </LocalizationProvider>
     </ThemeProvider>;
