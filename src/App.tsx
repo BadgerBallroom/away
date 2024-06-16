@@ -4,6 +4,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import React, { useEffect, useMemo } from 'react';
 import { IntlProvider } from 'react-intl';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
@@ -31,6 +32,22 @@ const SampleHome: React.FC = () => {
         </div>
     );
 };
+
+const enum RoutePaths {
+    home = "/",
+}
+
+interface Page {
+    path: string;
+    element: React.ReactNode;
+}
+
+const PAGES: Page[] = [
+    {
+        path: RoutePaths.home,
+        element: <SampleHome />
+    },
+];
 
 const App: React.FC = () => {
     const locale = Locales.ENGLISH;
@@ -67,7 +84,14 @@ const App: React.FC = () => {
                 defaultLocale={Locales.ENGLISH}
             >
                 <SessionContext.Provider value={session}>
-                    <SampleHome />
+                    <BrowserRouter>
+                        <Routes>
+                            {PAGES.map(({ path, element }) => (
+                                <Route key={path} path={path} element={element} />
+                            ))}
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </BrowserRouter>
                 </SessionContext.Provider>
             </IntlProvider>
         </LocalizationProvider>
