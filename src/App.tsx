@@ -6,9 +6,11 @@ import React, { useEffect, useMemo } from 'react';
 import { IntlProvider } from 'react-intl';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
+import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
+import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
-import { MESSAGES } from './i18n/messages';
+import { MessageID, MESSAGES } from './i18n/messages';
 import logo from './logo.svg';
 import Session from './model/Session';
 
@@ -37,14 +39,14 @@ const enum RoutePaths {
     home = "/",
 }
 
-interface Page {
-    path: string;
+interface Page extends AppNavigationPage {
     element: React.ReactNode;
 }
 
 const PAGES: Page[] = [
     {
         path: RoutePaths.home,
+        messageID: MessageID.navHome,
         element: <SampleHome />
     },
 ];
@@ -85,9 +87,20 @@ const App: React.FC = () => {
             >
                 <SessionContext.Provider value={session}>
                     <BrowserRouter>
+                        <AppNavigation
+                            pages={PAGES}
+                        />
                         <Routes>
-                            {PAGES.map(({ path, element }) => (
-                                <Route key={path} path={path} element={element} />
+                            {PAGES.map(({ path, messageID, element }) => (
+                                <Route
+                                    key={path}
+                                    path={path}
+                                    element={
+                                        <PageContent titleMessageID={messageID}>
+                                            {element}
+                                        </PageContent>
+                                    }
+                                />
                             ))}
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
