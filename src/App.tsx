@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -7,6 +8,7 @@ import { IntlProvider } from 'react-intl';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
+import DarkModeButton, { useDarkModeToggle } from './components/DarkModeButton';
 import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
@@ -54,17 +56,18 @@ const PAGES: Page[] = [
 const App: React.FC = () => {
     const locale = Locales.ENGLISH;
 
+    const [themeMode, toggleThemeMode] = useDarkModeToggle();
     const theme = useMemo(() => createTheme({
         palette: {
-            mode: "light",
+            mode: themeMode,
             primary: {
-                main: "#c5050c",
+                main: themeMode !== "dark" ? "#c5050c" : "#fc6469",
             },
             secondary: {
-                main: "#fc6469",
+                main: themeMode === "dark" ? "#c5050c" : "#fc6469",
             },
         },
-    }), []);
+    }), [themeMode]);
 
     const session = useMemo(() => Session.loadFromLocalStorage(), []);
     useEffect(() => {
@@ -89,6 +92,11 @@ const App: React.FC = () => {
                     <BrowserRouter>
                         <AppNavigation
                             pages={PAGES}
+                            drawerFooter={
+                                <Box>
+                                    <DarkModeButton onClick={toggleThemeMode} />
+                                </Box>
+                            }
                         />
                         <Routes>
                             {PAGES.map(({ path, messageID, element }) => (
