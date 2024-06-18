@@ -11,6 +11,8 @@ export const enum MessageID {
     menu = "menu",
     /** The name of the home page */
     navHome = "navHome",
+    /** "Toggle Dark Mode" */
+    toggleDarkMode = "toggleDarkMode",
 }
 
 type ForEach<T extends string, V> = {
@@ -26,5 +28,6 @@ export const MESSAGES: Messages = {
         logoAlt: "BBDT Logo",
         menu: "Menu",
         navHome: "Home",
+        toggleDarkMode: "Toggle Dark Mode",
     },
 };
