@@ -13,6 +13,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageID } from '../i18n/messages';
 import LogoIcon from './LogoIcon';
+import SessionNameField from './SessionNameField';
 
 export interface AppNavigationPage {
     /** The URL path to this page */
@@ -74,11 +75,18 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ pages, drawerFooter }) =>
                 >
                     <MenuIcon />
                 </IconButton>
+                <SessionNameField />
                 <Tabs
                     value={location.pathname}
                     variant="scrollable"
                     scrollButtons="auto"
                     allowScrollButtonsMobile
+                    sx={{
+                        display: {
+                            xs: "none",
+                            sm: "flex",
+                        }
+                    }}
                 >{tabs}</Tabs>
             </Toolbar>
         </ThemeProvider>
