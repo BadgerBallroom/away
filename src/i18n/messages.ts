@@ -11,6 +11,8 @@ export const enum MessageID {
     menu = "menu",
     /** The name of the home page */
     navHome = "navHome",
+    /** Label for the text field that lets the user set the session name */
+    sessionNameFieldLabel = "sessionNameFieldLabel",
     /** "Toggle Dark Mode" */
     toggleDarkMode = "toggleDarkMode",
 }
@@ -28,6 +30,7 @@ export const MESSAGES: Messages = {
         logoAlt: "BBDT Logo",
         menu: "Menu",
         navHome: "Home",
+        sessionNameFieldLabel: "Competition Name",
         toggleDarkMode: "Toggle Dark Mode",
     },
 };
