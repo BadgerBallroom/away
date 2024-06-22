@@ -9,6 +9,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
 import DarkModeButton, { useDarkModeToggle } from './components/DarkModeButton';
+import FabZoomer, { FabZoomerProps } from './components/FabZoomer';
 import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
@@ -41,7 +42,7 @@ const enum RoutePaths {
     home = "/",
 }
 
-interface Page extends AppNavigationPage {
+interface Page extends AppNavigationPage, FabZoomerProps {
     element: React.ReactNode;
 }
 
@@ -112,6 +113,9 @@ const App: React.FC = () => {
                             ))}
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
+                        {PAGES.map(page => (
+                            <FabZoomer key={page.path} {...page} />
+                        ))}
                     </BrowserRouter>
                 </SessionContext.Provider>
             </IntlProvider>

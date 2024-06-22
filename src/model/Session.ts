@@ -25,6 +25,8 @@ export default class Session extends DeepStateObject<SessionProps, {
     private _isDirty = false;
     /** The ID of the timeout for saving the session in localStorage */
     private _saveTimeout: ReturnType<typeof setTimeout> | undefined;
+    /** Functions to call when the Floating Action Button (FAB) is clicked */
+    private _fabHandlers: (() => void)[] = [];
 
     /**
      * Represents one trip for the ballroom dance team.
@@ -106,6 +108,34 @@ export default class Session extends DeepStateObject<SessionProps, {
         }
 
         return result;
+    }
+    // #endregion
+
+    // #region Floating Action Button
+    /** Registers a callback for when the Floating Action Button (FAB) is clicked. */
+    public registerFABHandler(handler: () => void): void {
+        const index = this._fabHandlers.indexOf(handler);
+        if (index === -1) {
+            this._fabHandlers.push(handler);
+        }
+    }
+
+    /** Unregisters a callback that was previously registered with `registerFABHandler`. */
+    public unregisterFABHandler(handler: () => void): void {
+        const index = this._fabHandlers.indexOf(handler);
+        if (index !== -1) {
+            this._fabHandlers.splice(index, 1);
+        }
+    }
+
+    /**
+     * Call this when the Floating Action Button (FAB) is clicked.
+     * Calls the callbacks that were registered with `registerFABHandler`.
+     */
+    public triggerFABHandlers(): void {
+        for (const handler of this._fabHandlers) {
+            handler();
+        }
     }
     // #endregion
 }
