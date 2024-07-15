@@ -1,13 +1,18 @@
+import { DancerKLM, DancerKLMState } from "./DancerKLM";
 import { DeepStateObject, DeepStatePrimitive } from "./DeepState";
+import KeyListAndMap from "./KeyListAndMap";
 
 export interface SessionProps {
     /** The name of the competition */
     name: string;
+    /** The dancers who are going to the competition */
+    dancers: DancerKLM;
 }
 
 export namespace SessionProps {
     export const DEFAULT: SessionProps = {
         name: "",
+        dancers: KeyListAndMap.empty(),
     };
 }
 
@@ -17,6 +22,7 @@ export namespace SessionProps {
  */
 export default class Session extends DeepStateObject<SessionProps, {
     name: DeepStatePrimitive<string>,
+    dancers: DancerKLMState,
 }> {
     /** The key for storing the session in localStorage */
     private static readonly STORAGE_KEY = "session";
@@ -34,6 +40,10 @@ export default class Session extends DeepStateObject<SessionProps, {
      */
     constructor(value?: SessionProps) {
         super(undefined, (key, value): any => {
+            switch (key) {
+                case "dancers":
+                    return new DancerKLMState(value as SessionProps["dancers"]);
+            }
             return new DeepStatePrimitive(value);
         }, true);
         this.setValue(value ?? SessionProps.DEFAULT);
@@ -53,6 +63,7 @@ export default class Session extends DeepStateObject<SessionProps, {
     protected override validateNewValue(newValue: any): SessionProps {
         const {
             name,
+            dancers,
             ...unrecognizedChildren
         } = super.validateNewValue(newValue);
 
@@ -60,6 +71,7 @@ export default class Session extends DeepStateObject<SessionProps, {
 
         return {
             name: typeof name === "string" ? name : "",
+            dancers, // DancerKLMState.validateNewValue will validate further.
         };
     }
 
@@ -80,8 +92,14 @@ export default class Session extends DeepStateObject<SessionProps, {
             clearTimeout(this._saveTimeout);
         }
 
+        this.garbageCollect();
         localStorage.setItem(Session.STORAGE_KEY, this.toString());
         this._isDirty = false;
+    }
+
+    /** Removes dancers who aren't referenced from anywhere else. */
+    protected garbageCollect(): void {
+        this.getChildState("dancers").garbageCollect();
     }
 
     /** Returns whether there are data pending to be saved to localStorage. */
