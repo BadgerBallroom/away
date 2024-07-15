@@ -103,12 +103,29 @@ export function useDeepStateChangeHandler<Item>(deepState: DeepStateBase<Item[]>
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateChangeHandler<T extends object, K extends keyof T>(deepState: DeepStateObject<T>, path: readonly [K]): DeepStateChangeHandler<T[K]>;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
-export function useDeepStateChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (keyof T)[]): DeepStateChangeHandler<any>;
-export function useDeepStateChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (keyof T)[]): DeepStateChangeHandler<any> {
+export function useDeepStateChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (string | number)[]): DeepStateChangeHandler<any>;
+export function useDeepStateChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (string | number)[]): DeepStateChangeHandler<any> {
     path = useArray(path);
     const value = useDeepState(deepState, path);
     const onChange = useCallback((event: ChangeEvent) => {
         deepState.setDescendantValue(path, event.target.value);
+    }, [deepState, path]);
+
+    return [value, onChange];
+}
+
+type CheckChangeEvent = { target: { checked: boolean } };
+type DeepStateCheckChangeHandler = [boolean, (event: CheckChangeEvent) => void];
+/** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
+export function useDeepStateCheckChangeHandler(deepState: DeepStateBase<boolean>, path: readonly []): DeepStateCheckChangeHandler;
+/** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
+export function useDeepStateCheckChangeHandler<T extends { [n in K]: boolean }, K extends keyof T>(deepState: DeepStateObject<T>, path: readonly [K]): DeepStateCheckChangeHandler;
+/** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
+export function useDeepStateCheckChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (string | number)[]): DeepStateCheckChangeHandler;
+export function useDeepStateCheckChangeHandler<T>(deepState: DeepStateBase<T>, path: readonly (string | number)[]): DeepStateCheckChangeHandler {
+    const value = useDeepState(deepState, path);
+    const onChange = useCallback((event: CheckChangeEvent) => {
+        deepState.setDescendantValue(path, event.target.checked);
     }, [deepState, path]);
 
     return [value, onChange];
