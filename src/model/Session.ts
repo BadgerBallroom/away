@@ -1,3 +1,4 @@
+import { CarpoolArrangementKLM, CarpoolArrangementKLMState } from "./CarpoolArrangementKLM";
 import { DancerKLM, DancerKLMState } from "./DancerKLM";
 import { DeepStateObject, DeepStatePrimitive } from "./DeepState";
 import KeyListAndMap from "./KeyListAndMap";
@@ -7,12 +8,15 @@ export interface SessionProps {
     name: string;
     /** The dancers who are going to the competition */
     dancers: DancerKLM;
+    /** Possible ways to arrange the carpools */
+    carpoolArrangements: CarpoolArrangementKLM;
 }
 
 export namespace SessionProps {
     export const DEFAULT: SessionProps = {
         name: "",
         dancers: KeyListAndMap.empty(),
+        carpoolArrangements: KeyListAndMap.empty(),
     };
 }
 
@@ -23,6 +27,7 @@ export namespace SessionProps {
 export default class Session extends DeepStateObject<SessionProps, {
     name: DeepStatePrimitive<string>,
     dancers: DancerKLMState,
+    carpoolArrangements: CarpoolArrangementKLMState,
 }> {
     /** The key for storing the session in localStorage */
     private static readonly STORAGE_KEY = "session";
@@ -43,6 +48,8 @@ export default class Session extends DeepStateObject<SessionProps, {
             switch (key) {
                 case "dancers":
                     return new DancerKLMState(value as SessionProps["dancers"]);
+                case "carpoolArrangements":
+                    return new CarpoolArrangementKLMState(this, value as SessionProps["carpoolArrangements"]);
             }
             return new DeepStatePrimitive(value);
         }, true);
@@ -64,6 +71,7 @@ export default class Session extends DeepStateObject<SessionProps, {
         const {
             name,
             dancers,
+            carpoolArrangements,
             ...unrecognizedChildren
         } = super.validateNewValue(newValue);
 
@@ -72,6 +80,7 @@ export default class Session extends DeepStateObject<SessionProps, {
         return {
             name: typeof name === "string" ? name : "",
             dancers, // DancerKLMState.validateNewValue will validate further.
+            carpoolArrangements, // CarpoolArrangementKLMState.validateNewValue will validate further.
         };
     }
 
@@ -100,6 +109,7 @@ export default class Session extends DeepStateObject<SessionProps, {
     /** Removes dancers who aren't referenced from anywhere else. */
     protected garbageCollect(): void {
         this.getChildState("dancers").garbageCollect();
+        this.getChildState("carpoolArrangements").garbageCollect();
     }
 
     /** Returns whether there are data pending to be saved to localStorage. */
