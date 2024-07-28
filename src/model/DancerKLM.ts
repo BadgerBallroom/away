@@ -1,8 +1,9 @@
 import Dancer from "./Dancer";
 import DancerState from "./DancerState";
 import { DeepReadonly } from "./DeepState";
-import KeyListAndMap from "./KeyListAndMap";
+import KeyListAndMap, { ID } from "./KeyListAndMap";
 import KeyListAndMapState, { KeyListState, KeyMapState } from "./KeyListAndMapState";
+import Session from "./Session";
 
 /** A map of ID-dancer pairs and an array to store the order of IDs. */
 export type DancerKLM = KeyListAndMap<Dancer>;
@@ -25,6 +26,20 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
     /** An extra empty dancer that appears at the end of the array from `getDancerStates` */
     public get temporaryDancer(): DancerState | null {
         return this._temporaryDancer;
+    }
+
+    /**
+     * Constructs a `DancerListState` and registers it with the `DancerKLMState` at `session.getChildState("dancers")`
+     * so that the dancers whose IDs are in the new `DancerListState` aren't garbage collected.
+     * @param session The `Session` object
+     * @param initialValue The initial dancer IDs to hold
+     * @returns The new `DancerListState`
+     */
+    public static makeAndRegister(session: Session, initialValue?: ID[]): DancerListState {
+        const dancerKLMState = session.getChildState("dancers");
+        const result = new DancerListState(dancerKLMState, initialValue ?? []);
+        dancerKLMState.registerListState(result);
+        return result;
     }
 
     public override getReferencedStates(): DancerState[] {

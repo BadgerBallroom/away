@@ -16,6 +16,7 @@ import { Locales } from './i18n/locales';
 import { MessageID, MESSAGES } from './i18n/messages';
 import logo from './logo.svg';
 import Session from './model/Session';
+import CarpoolsPage from './pages/CarpoolsPage';
 import DancersPage, { DANCERS_FAB } from './pages/DancersPage';
 
 const SampleHome: React.FC = () => {
@@ -42,6 +43,7 @@ const SampleHome: React.FC = () => {
 const enum RoutePaths {
     home = "/",
     dancers = "/dancers",
+    carpools = "/carpools",
 }
 
 interface Page extends AppNavigationPage, FabZoomerProps {
@@ -59,6 +61,11 @@ const PAGES: Page[] = [
         messageID: MessageID.navDancers,
         element: <DancersPage />,
         fab: DANCERS_FAB
+    },
+    {
+        path: RoutePaths.carpools,
+        messageID: MessageID.navCarpools,
+        element: <CarpoolsPage />
     },
 ];
 
