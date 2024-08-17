@@ -1,3 +1,4 @@
+import { Dayjs } from "dayjs";
 import { validateDayjsValue, validateEnumValue } from "../utilities/validation";
 import Carpool from "./Carpool";
 import Dancer, { Accommodation, CanDriveCarpool, Gender } from "./Dancer";
@@ -16,6 +17,39 @@ export class DancerState extends DeepStateObject<Dancer> {
      */
     public get evanescentID(): number {
         return this._evanescentID;
+    }
+
+    /**
+     * Returns the number of people that this person can drive, including themselves.
+     * Returns 0 if this person cannot drive a carpool.
+     */
+    public get canDriveMaxPeople(): number {
+        if (Dancer.canDriveCarpool(this.getChildValue("canDriveCarpool"))) {
+            return this.getChildValue("canDriveMaxPeople");
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the earliest date and time that the person could leave.
+     * Returns `null` if the person is not traveling with the team.
+     */
+    public get earliestPossibleDeparture(): Dayjs | null {
+        if (this.getChildValue("canDriveCarpool") !== CanDriveCarpool.TravelingOnOwn) {
+            return this.getChildValue("earliestPossibleDeparture");
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether the person wants to stay with only others of the same gender.
+     * Returns `null` if the person is not staying in team-organized housing.
+     */
+    public get prefersSameGender(): boolean | null {
+        if (this.getChildValue("accommodation") !== Accommodation.StayingOnOwn) {
+            return this.getChildValue("prefersSameGender");
+        }
+        return null;
     }
 
     /**

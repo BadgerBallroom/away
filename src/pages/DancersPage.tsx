@@ -1,8 +1,12 @@
 import AddIcon from '@mui/icons-material/Add';
+import SortIcon from '@mui/icons-material/Sort';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 import DancerCard from '../components/DancerCard';
+import DancerSortDialog from '../components/DancerSortDialog';
 import { FabZoomerFabProps } from '../components/FabZoomer';
 import WorkspaceWithToolbar from '../components/WorkspaceWithToolbar';
 import { MessageID } from '../i18n/messages';
@@ -20,6 +24,10 @@ const DancersPage: React.FC = () => {
     const session = useSession();
 
     const dancerListState = useDancerListState();
+
+    const [showSortDialog, setShowSortDialog] = useState(false);
+    const onSortClick = useCallback(() => setShowSortDialog(true), []);
+    const onSortClose = useCallback(() => setShowSortDialog(false), []);
 
     useEffect(() => {
         dancerListState.addTemporaryDancer();
@@ -49,8 +57,12 @@ const DancersPage: React.FC = () => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
+            <Button startIcon={<SortIcon />} onClick={onSortClick} disabled={dancerListState.length < 2}>
+                <FormattedMessage id={MessageID.sort} />
+            </Button>
         </>}
     >
+        <DancerSortDialog open={showSortDialog} onClose={onSortClose} toSort={dancerListState} />
         <Grid
             container
             spacing={2}

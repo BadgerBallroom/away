@@ -323,6 +323,10 @@ export class DeepStateArray<
      * @param compareFn A function that determines the order of the elements, just like with `Array.prototype.sort`
      */
     public sort(compareFn: (a: ItemState, b: ItemState) => number): void {
+        if (this.length < 2) {
+            return;
+        }
+
         // Associate each item with its index in the array of items.
         // JavaScript sort is unstable; this will make it stable.
         const indexedItems = this._items.map<[number, DeepStateChild<Item, ItemState>]>((item, i) => [i, item]);
