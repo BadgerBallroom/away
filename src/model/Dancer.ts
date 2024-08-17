@@ -1,4 +1,5 @@
 import { Dayjs } from "dayjs";
+import EnumCollator from "./EnumCollator";
 
 export enum CanDriveCarpool {
     No = "N",
@@ -7,6 +8,13 @@ export enum CanDriveCarpool {
     TravelingOnOwn = "NA",
 }
 
+export const CanDriveCarpoolCollator = new EnumCollator([
+    CanDriveCarpool.Yes,
+    CanDriveCarpool.YesIfNeeded,
+    CanDriveCarpool.No,
+    CanDriveCarpool.TravelingOnOwn,
+]);
+
 export enum Accommodation {
     NoPreference = "ANY",
     FreeHousingPreferred = "FREE",
@@ -14,11 +22,30 @@ export enum Accommodation {
     StayingOnOwn = "NA",
 }
 
+export const AccommodationCollator = new EnumCollator([
+    Accommodation.FreeHousingPreferred,
+    Accommodation.HotelPreferred,
+    Accommodation.NoPreference,
+    Accommodation.StayingOnOwn,
+]);
+
+export const PrefersSameGenderCollator = new EnumCollator([
+    true,
+    false,
+    null,
+]);
+
 export enum Gender {
     Male = "M",
     Female = "F",
     Other = "X",
 }
+
+export const GenderCollator = new EnumCollator([
+    Gender.Male,
+    Gender.Female,
+    Gender.Other,
+]);
 
 /** A member of the dance team who may or may not be going to this competition. */
 export interface Dancer {

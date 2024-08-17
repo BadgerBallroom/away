@@ -73,6 +73,16 @@ export const enum MessageID {
     noTime = "noTime",
     /** Label for the text field that lets the user set the session name */
     sessionNameFieldLabel = "sessionNameFieldLabel",
+    /** Label for a button that sorts something */
+    sort = "sort",
+    /** Label for an option to sort something in ascending order */
+    sortAsc = "sortAsc",
+    /** Label for a field that selects by what property some items are sorted */
+    sortBy = "sortBy",
+    /** Label for an option to sort something in descending order */
+    sortDesc = "sortDesc",
+    /** Label for a field that selects whether something is sorted in ascending or descending order */
+    sortOrder = "sortOrder",
     /** "Toggle Dark Mode" */
     toggleDarkMode = "toggleDarkMode",
     /** A placeholder name for anything that doesn't have a name */
@@ -127,6 +137,11 @@ export const MESSAGES: Messages = {
         noDate: "No Date",
         noTime: "No Time",
         sessionNameFieldLabel: "Competition Name",
+        sort: "Sort",
+        sortAsc: "Ascending",
+        sortBy: "Sort by",
+        sortDesc: "Descending",
+        sortOrder: "Order",
         toggleDarkMode: "Toggle Dark Mode",
         untitled: "Untitled",
         yes: "Yes",
