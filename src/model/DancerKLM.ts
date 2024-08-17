@@ -1,4 +1,5 @@
-import Dancer from "./Dancer";
+import dayjsComparator from "../utilities/dayjsComparator";
+import Dancer, { AccommodationCollator, CanDriveCarpoolCollator, GenderCollator, PrefersSameGenderCollator } from "./Dancer";
 import DancerState from "./DancerState";
 import { DeepReadonly } from "./DeepState";
 import KeyListAndMap, { ID } from "./KeyListAndMap";
@@ -50,6 +51,76 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
         }
 
         return result;
+    }
+
+    /**
+     * Sorts the dancers.
+     * @param by The property on which to sort the dancers
+     * @param locales The value to pass to `Intl.Collator` (needed for sorting strings)
+     * @param descending Whether to sort in descending order
+     */
+    public sortDancers(by: keyof Dancer, locales?: string | string[], descending?: boolean): void {
+        if (this.length < 2) {
+            return;
+        }
+
+        let compare: (a: DancerState, b: DancerState) => number;
+        switch (by) {
+            case "name":
+                const collator = Intl.Collator(locales);
+                compare = (a, b) => collator.compare(a.getChildValue("name"), b.getChildValue("name"));
+                break;
+            case "canDriveCarpool":
+                compare = (a, b) => CanDriveCarpoolCollator.comparator(
+                    a.getChildValue("canDriveCarpool"),
+                    b.getChildValue("canDriveCarpool"),
+                );
+                break;
+            case "canDriveMaxPeople":
+                compare = (a, b) => a.canDriveMaxPeople - b.canDriveMaxPeople;
+                break;
+            case "earliestPossibleDeparture":
+                compare = (a, b) => dayjsComparator(a.earliestPossibleDeparture, b.earliestPossibleDeparture);
+                break;
+            case "accommodation":
+                compare = (a, b) => AccommodationCollator.comparator(
+                    a.getChildValue("accommodation"),
+                    b.getChildValue("accommodation"),
+                );
+                break;
+            case "prefersSameGender":
+                compare = (a, b) => PrefersSameGenderCollator.comparator(a.prefersSameGender, b.prefersSameGender);
+                break;
+            case "gender":
+                compare = (a, b) => GenderCollator.comparator(a.getChildValue("gender"), b.getChildValue("gender"));
+                break;
+            default:
+                compare = () => 0;
+                break;
+        }
+
+        const mapState = this.parent.map;
+        this.sort((idA, idB) => {
+            const dancerStateA = mapState.getChildState(idA.getValue());
+            const dancerStateB = mapState.getChildState(idB.getValue());
+
+            if (dancerStateA) {
+                if (dancerStateB) {
+                    const result = compare(dancerStateA, dancerStateB);
+                    return descending ? -result : result;
+                }
+
+                // A should go before B.
+                return -1;
+            }
+
+            if (dancerStateB) {
+                // B should go before A.
+                return 1;
+            }
+
+            return 0;
+        });
     }
 
     // #region Temporary dancer
