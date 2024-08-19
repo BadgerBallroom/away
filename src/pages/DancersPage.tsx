@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import SortIcon from '@mui/icons-material/Sort';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -25,6 +26,18 @@ const DancersPage: React.FC = () => {
     const session = useSession();
 
     const dancerListState = useDancerListState();
+
+    const importCSVInputID = "dancers-csv-file-input";
+    const onImportCSVClick = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files?.length) {
+            return;
+        }
+
+        await dancerListState.importCSV(event.target.files[0], console.warn.bind(console));
+
+        // Clear the input element so that selecting the same file again triggers this handler.
+        event.target.value = "";
+    }, [dancerListState]);
 
     const onExportCSVClick = useCallback(() => dancerListState.exportCSV(), [dancerListState]);
 
@@ -60,6 +73,18 @@ const DancersPage: React.FC = () => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
+            <Button startIcon={<FileUploadIcon />} component="label">
+                <FormattedMessage id={MessageID.importCSV} />
+                <input
+                    hidden
+                    tabIndex={-1}
+                    role="none"
+                    id={importCSVInputID}
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={onImportCSVClick}
+                />
+            </Button>
             <Button startIcon={<FileDownloadIcon />} onClick={onExportCSVClick}>
                 <FormattedMessage id={MessageID.exportCSV} />
             </Button>

@@ -4,7 +4,7 @@ import saveToDownload from "../utilities/saveToDownload";
 import Dancer, { AccommodationCollator, CanDriveCarpoolCollator, GenderCollator, PrefersSameGenderCollator } from "./Dancer";
 import DancerState from "./DancerState";
 import { DeepReadonly } from "./DeepState";
-import KeyListAndMap, { ID } from "./KeyListAndMap";
+import KeyListAndMap, { ID, ValueWithID } from "./KeyListAndMap";
 import KeyListAndMapState, { KeyListState, KeyMapState } from "./KeyListAndMapState";
 import Session from "./Session";
 
@@ -174,6 +174,38 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
             "fields": ["id", ...DancerState.CSV_HEADING],
             "data": this.getValue().map(id => [id, ...mapState.getChildState(id)?.toCSVRow() ?? []]),
         }), "text/csv");
+    }
+
+    /**
+     * Imports dancers from a CSV file. It is assumed that the file is a CSV file.
+     * If the CSV file contains IDs, dancers with the same IDs will be updated.
+     * @param file A file from an `<input type="file" accept=".csv,text/csv">` element
+     * @param onErrors A handler for parse errors, perhaps to display an error message
+     */
+    public importCSV(file: File, onErrors?: (errors: Papa.ParseError[]) => void): Promise<void> {
+        return new Promise(resolve => {
+            const existingDancerIDs = new Set(this.getValue());
+            const mapState = this.parent.map;
+            const config: Papa.ParseLocalConfig<ValueWithID<Dancer>, File> = {
+                header: true,
+                step: ({ data, errors }) => {
+                    if (errors.length) {
+                        if (onErrors) {
+                            onErrors(errors);
+                        }
+                        return;
+                    }
+
+                    const dancerID = mapState.addOrUpdate(data);
+                    if (!existingDancerIDs.has(dancerID)) {
+                        this.push(dancerID);
+                    }
+                },
+                complete: () => resolve(),
+                skipEmptyLines: "greedy",
+            };
+            Papa.parse(file, config);
+        });
     }
     // #endregion
 }
