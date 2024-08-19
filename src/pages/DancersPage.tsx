@@ -1,4 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import SortIcon from '@mui/icons-material/Sort';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -24,6 +25,8 @@ const DancersPage: React.FC = () => {
     const session = useSession();
 
     const dancerListState = useDancerListState();
+
+    const onExportCSVClick = useCallback(() => dancerListState.exportCSV(), [dancerListState]);
 
     const [showSortDialog, setShowSortDialog] = useState(false);
     const onSortClick = useCallback(() => setShowSortDialog(true), []);
@@ -57,6 +60,9 @@ const DancersPage: React.FC = () => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
+            <Button startIcon={<FileDownloadIcon />} onClick={onExportCSVClick}>
+                <FormattedMessage id={MessageID.exportCSV} />
+            </Button>
             <Button startIcon={<SortIcon />} onClick={onSortClick} disabled={dancerListState.length < 2}>
                 <FormattedMessage id={MessageID.sort} />
             </Button>

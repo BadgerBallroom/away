@@ -55,6 +55,8 @@ export const enum MessageID {
     dancersAdd = "dancersAdd",
     /** Title for a button that deletes something */
     delete = "delete",
+    /** Label for a button that lets the user export a CSV file */
+    exportCSV = "exportCSV",
     /** Alt text for the logo at the top */
     logoAlt = "logoAlt",
     /** ARIA label for a menu */
@@ -128,6 +130,7 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
+        exportCSV: "Export CSV",
         logoAlt: "BBDT Logo",
         menu: "Menu",
         navHome: "Home",

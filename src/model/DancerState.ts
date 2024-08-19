@@ -107,6 +107,31 @@ export class DancerState extends DeepStateObject<Dancer> {
             gender: validateEnumValue(Gender, gender),
         };
     }
+
+    // #region CSV
+    public static readonly CSV_HEADING: (keyof Dancer)[] = [
+        "name",
+        "canDriveCarpool",
+        "canDriveMaxPeople",
+        "earliestPossibleDeparture",
+        "accommodation",
+        "prefersSameGender",
+        "gender",
+    ];
+
+    /** Returns a representation of this object as an array of strings. */
+    public toCSVRow(): string[] {
+        return [
+            this.getChildValue("name"),
+            this.getChildValue("canDriveCarpool"),
+            this.getChildValue("canDriveMaxPeople").toString(10),
+            this.getChildValue("earliestPossibleDeparture")?.toISOString() ?? "",
+            this.getChildValue("accommodation"),
+            this.getChildValue("prefersSameGender") ? "TRUE" : "FALSE",
+            this.getChildValue("gender"),
+        ];
+    }
+    // #endregion
 }
 
 export namespace DancerState {

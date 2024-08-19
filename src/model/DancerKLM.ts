@@ -1,4 +1,6 @@
+import Papa from "papaparse";
 import dayjsComparator from "../utilities/dayjsComparator";
+import saveToDownload from "../utilities/saveToDownload";
 import Dancer, { AccommodationCollator, CanDriveCarpoolCollator, GenderCollator, PrefersSameGenderCollator } from "./Dancer";
 import DancerState from "./DancerState";
 import { DeepReadonly } from "./DeepState";
@@ -161,6 +163,17 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
         this._temporaryDancer.removeChangeListener(this._temporaryDancerChangeListener);
         this._temporaryDancer = null;
         this.dispatchValueChange(this.getValue(), false);
+    }
+    // #endregion
+
+    // #region CSV
+    /** Exports the dancers to a CSV file and prompts the user to download it. */
+    public exportCSV(): void {
+        const mapState = this.parent.map;
+        saveToDownload(Papa.unparse({
+            "fields": ["id", ...DancerState.CSV_HEADING],
+            "data": this.getValue().map(id => [id, ...mapState.getChildState(id)?.toCSVRow() ?? []]),
+        }), "text/csv");
     }
     // #endregion
 }
