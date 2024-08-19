@@ -57,6 +57,8 @@ export const enum MessageID {
     delete = "delete",
     /** Label for a button that lets the user export a CSV file */
     exportCSV = "exportCSV",
+    /** Label for a button that lets the user import a CSV file */
+    importCSV = "importCSV",
     /** Alt text for the logo at the top */
     logoAlt = "logoAlt",
     /** ARIA label for a menu */
@@ -131,6 +133,7 @@ export const MESSAGES: Messages = {
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
         exportCSV: "Export CSV",
+        importCSV: "Import CSV",
         logoAlt: "BBDT Logo",
         menu: "Menu",
         navHome: "Home",
