@@ -29,16 +29,30 @@ interface DancerFieldProps {
 
 interface DancerCardProps extends DancerFieldProps {
     onDelete?: () => void;
+    onSelect?: React.MouseEventHandler;
+    selected?: boolean;
 }
 
 /** Allows the user to edit the details of one dancer. */
 const DancerCard = React.forwardRef(function DancerCard(
-    { id, dancerState, onDelete }: DancerCardProps,
+    { id, dancerState, onDelete, onSelect, selected }: DancerCardProps,
     ref: React.ForwardedRef<HTMLDivElement>
 ) {
+    const onClick = useCallback((event: React.MouseEvent) => {
+        if (
+            event.target instanceof HTMLElement
+            && event.target.tagName === "DIV"
+            && !event.target.classList.contains("MuiBackdrop-root")
+        ) {
+            onSelect!(event);
+        }
+    }, [onSelect]);
+
     return <DancerCardPaper
         id={id}
         ref={ref}
+        onClick={onSelect ? onClick : undefined}
+        className={selected ? "selected" : ""}
     >
         <Stack spacing={1}>
             <NameControl id={`${id}-name`} dancerState={dancerState} />
@@ -70,9 +84,20 @@ const DancerCardPaper = styled(Paper)(({ theme }) => {
         "0 1px 3px 0px rgba(0, 0, 0, 0.12)"
     ].join(",");
 
+    const darkMode = theme.palette.mode === "dark";
+
     return `
         width: 292px;
         box-shadow: ${boxShadow};
+        user-select: none;
+
+        &:hover, &:focus-within {
+            box-shadow: inset 0 0 0 1px ${darkMode ? "#fff" : "rgba(0, 0, 0, 0.87)"}, ${boxShadow};
+        }
+
+        &.selected {
+            box-shadow: inset 0 0 0 3px ${theme.palette.primary.main}, ${boxShadow};
+        }
     `;
 });
 

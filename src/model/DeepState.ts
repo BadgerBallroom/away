@@ -319,6 +319,29 @@ export class DeepStateArray<
     }
 
     /**
+     * Given a set of indices, removes array elements at those indices.
+     * Invalid indices will be ignored.
+     * @param indices The set of indices of elements to remove
+     */
+    public removeMulti(indices: ReadonlySet<number>): void {
+        if (!indices.size) {
+            return;
+        }
+
+        // Build a new array of items whose indices in the current array are NOT in the set.
+        const newItems: DeepStateChild<Item, ItemState>[] = [];
+        const newValue: DeepReadonly<Item>[] = [];
+        this._items.forEach((item, index) => {
+            if (!indices.has(index)) {
+                newItems.push(item);
+                newValue.push(item.deepState.getValue());
+            }
+        });
+        this.dispatchValueChange(newValue, false);
+        this._items = newItems;
+    }
+
+    /**
      * Sorts the elements of the array in-place. Guarantees a stable sort.
      * @param compareFn A function that determines the order of the elements, just like with `Array.prototype.sort`
      */
