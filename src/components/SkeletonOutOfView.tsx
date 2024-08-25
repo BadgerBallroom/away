@@ -30,7 +30,7 @@ export function useSkeletonOutOfView(
     inViewOptions?: IntersectionOptions
 ): SkeletonOutOfView {
     const { ref: refInView, inView } = useInView({
-        rootMargin: "25% 0%",
+        rootMargin: "100% 0%",
         ...inViewOptions
     });
 
