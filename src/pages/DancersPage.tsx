@@ -6,14 +6,17 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage } from 'react-intl';
 import DancerCard from '../components/DancerCard';
 import DancerSortDialog from '../components/DancerSortDialog';
+import DeleteButton from '../components/DeleteButton';
 import { FabZoomerFabProps } from '../components/FabZoomer';
 import WorkspaceWithToolbar from '../components/WorkspaceWithToolbar';
 import { MessageID } from '../i18n/messages';
 import { DancerListState } from '../model/DancerKLM';
 import DancerState from '../model/DancerState';
+import SelectionManager, { useSelectionManager } from '../model/SelectionManager';
 import { useDancerListState, useSession } from '../model/SessionHooks';
 
 const DancersPage: React.FC = () => {
@@ -24,6 +27,13 @@ const DancersPage: React.FC = () => {
     }, []);
 
     const session = useSession();
+
+    const {
+        selection: { set: selectionSet },
+        clearSelection,
+        addRangeToSelection,
+        onSelectableElementClick
+    } = useSelectionManager();
 
     const dancerListState = useDancerListState();
 
@@ -44,6 +54,22 @@ const DancersPage: React.FC = () => {
     const [showSortDialog, setShowSortDialog] = useState(false);
     const onSortClick = useCallback(() => setShowSortDialog(true), []);
     const onSortClose = useCallback(() => setShowSortDialog(false), []);
+
+    const onDeleteSelectionClick = useCallback(() => {
+        if (selectionSet.size < 1) {
+            return;
+        }
+        // The selection manager stores the indices of the dancer cards that are selected.
+        // Remove the dancer IDs that are at those indices.
+        dancerListState.removeMulti(selectionSet);
+        clearSelection();
+    }, [dancerListState, selectionSet, clearSelection]);
+    useHotkeys("Delete", onDeleteSelectionClick);
+
+    const onSelectAllClick = useCallback(() => {
+        addRangeToSelection(0, dancerListState.length);
+    }, [addRangeToSelection, dancerListState]);
+    useHotkeys("Ctrl+A", onSelectAllClick, { preventDefault: true });
 
     useEffect(() => {
         dancerListState.addTemporaryDancer();
@@ -91,6 +117,9 @@ const DancersPage: React.FC = () => {
             <Button startIcon={<SortIcon />} onClick={onSortClick} disabled={dancerListState.length < 2}>
                 <FormattedMessage id={MessageID.sort} />
             </Button>
+            {selectionSet.size > 0 &&
+                <DeleteButton onClick={onDeleteSelectionClick} />
+            }
         </>}
     >
         <DancerSortDialog open={showSortDialog} onClose={onSortClose} toSort={dancerListState} />
@@ -98,6 +127,7 @@ const DancersPage: React.FC = () => {
             container
             spacing={2}
             padding={2}
+            onClick={clearSelection}
         >
             {loading
                 ? <>
@@ -113,7 +143,9 @@ const DancersPage: React.FC = () => {
                             dancerListState,
                             dancerState,
                             index,
+                            onSelectableElementClick,
                         }}
+                        selected={selectionSet.has(index)}
                     />
                 )
             }
@@ -139,6 +171,10 @@ interface GridItemProps {
     dancerState: DancerState;
     /** The index of `dancerState` in `dancerListState` */
     index: number;
+    /** A callback for when the user selects this dancer by clicking */
+    onSelectableElementClick: SelectionManager["onSelectableElementClick"];
+    /** Whether this dancer is selected */
+    selected: boolean;
 }
 
 const GridItem = React.forwardRef(function GridItem(
@@ -146,6 +182,8 @@ const GridItem = React.forwardRef(function GridItem(
         dancerListState,
         dancerState,
         index,
+        onSelectableElementClick,
+        selected,
     }: GridItemProps,
     ref: React.ForwardedRef<HTMLDivElement>
 ) {
@@ -153,12 +191,18 @@ const GridItem = React.forwardRef(function GridItem(
     const onDelete = useCallback(() => {
         dancerListState.pop(index);
     }, [dancerListState, index]);
+    const onSelect = useCallback((event: React.MouseEvent) => {
+        event.stopPropagation();
+        onSelectableElementClick(event, index);
+    }, [onSelectableElementClick, index]);
 
     return <Grid item ref={ref}>
         <DancerCard
             id={`dancer-${dancerState.evanescentID}`}
             dancerState={dancerState}
             onDelete={isTemporaryDancer ? undefined : onDelete}
+            onSelect={isTemporaryDancer ? undefined : onSelect}
+            selected={selected}
         />
     </Grid>;
 });
