@@ -1,3 +1,4 @@
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
@@ -5,7 +6,7 @@ import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/system";
 import { useCallback, useMemo } from "react";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangement from '../model/CarpoolArrangement';
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
@@ -62,6 +63,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick 
                 {onDeleteClick && <DeleteButton onClick={onDeleteClick} />}
             </Toolbar>
         </Heading>
+        <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
         <Unassigned state={state} />
         <Schedule state={state} />
     </>;
