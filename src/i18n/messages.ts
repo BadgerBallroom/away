@@ -95,6 +95,8 @@ export const enum MessageID {
     yes = "yes",
     /** "Yes, if needed" */
     yesIfNeeded = "yesIfNeeded",
+    /** A banner that explains future changes to the Carpools page */
+    zCarpoolsFuture = "zCarpoolsFuture",
 }
 
 type ForEach<T extends string, V> = {
@@ -152,6 +154,7 @@ export const MESSAGES: Messages = {
         untitled: "Untitled",
         yes: "Yes",
         yesIfNeeded: "Yes, if needed",
+        zCarpoolsFuture: "In the future, you will be able to edit carpools manually.",
     },
 };
 
