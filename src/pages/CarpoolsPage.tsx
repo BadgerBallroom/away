@@ -1,4 +1,5 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import PrintIcon from '@mui/icons-material/Print';
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -10,6 +11,7 @@ import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
 import CarpoolMakerProgressDialog from "../components/CarpoolMakerProgressDialog";
+import { CarpoolPrintDialogFromID } from "../components/CarpoolPrintDialog";
 import WorkspaceWithToolbar from "../components/WorkspaceWithToolbar";
 import ZeroState from "../components/ZeroState";
 import { MessageID } from "../i18n/messages";
@@ -76,14 +78,20 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
     }, [carpoolMaker, session]);
 
+    const [printingID, setPrintingID] = useState("");
+    const onPrint = useCallback(() => setPrintingID(selectedCarpoolArrangement), [selectedCarpoolArrangement]);
+    const onPrintDialogClose = useCallback(() => setPrintingID(""), []);
+
     return <WorkspaceWithToolbar
         toolbarChildren={<>
             {!hideAutoGen &&
                 <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} />
             }
+            <PrintButton onClick={onPrint} />
         </>}
     >
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
+        <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
         {carpoolArrangementList.length ? <>
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />
             <CarpoolArrangerFromID arrangementID={selectedCarpoolArrangement} />
@@ -161,4 +169,20 @@ const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfi
             </DialogActions>
         </Dialog>
     </>;
+};
+
+interface PrintButtonProps {
+    onClick: () => void;
+}
+
+/** A button for printing the carpools. Displays a preview dialog. */
+const PrintButton: React.FC<PrintButtonProps> = ({ onClick }) => {
+    const dancerListState = useDancerListState();
+
+    return <Button
+        onClick={onClick}
+        disabled={!dancerListState.length}
+        startIcon={<PrintIcon />} >
+        <FormattedMessage id={MessageID.print} />
+    </Button>;
 };

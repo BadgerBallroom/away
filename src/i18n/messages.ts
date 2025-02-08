@@ -9,6 +9,14 @@ export const enum MessageID {
     cancel = "cancel",
     /** Label for a carpool arrangement's name's field */
     carpoolArrangementNameLabel = "carpoolArrangementNameLabel",
+    /** Heading for the "Suggested Departure" heading in a printout of a carpool arrangement */
+    carpoolArrangementPrintedDepartureHeading = "carpoolArrangementPrintedDepartureHeading",
+    /** Heading for the "Driver" heading in a printout of a carpool arrangement */
+    carpoolArrangementPrintedDriverHeading = "carpoolArrangementPrintedDriverHeading",
+    /** `title` attribute for the `<iframe>` that displays a preview of a printout of a carpool arrangement */
+    carpoolArrangementPrintedFrameTitle = "carpoolArrangementPrintedFrameTitle",
+    /** Heading for the "Passengers" heading in a printout of a carpool arrangement */
+    carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
     /** Text or title for any button that makes carpools automatically */
     carpoolsGenerate = "carpoolsGenerate",
     /** Text for the body of a confirmation dialog for making carpools automatically */
@@ -75,6 +83,8 @@ export const enum MessageID {
     noDate = "noDate",
     /** Placeholder for when a time is missing */
     noTime = "noTime",
+    /** Label for a button that prints something */
+    print = "print",
     /** Label for the text field that lets the user set the session name */
     sessionNameFieldLabel = "sessionNameFieldLabel",
     /** Label for a button that sorts something */
@@ -111,6 +121,10 @@ export const MESSAGES: Messages = {
         appNameForTitle: "{pageTitle} - BBDT Away",
         cancel: "Cancel",
         carpoolArrangementNameLabel: "Description",
+        carpoolArrangementPrintedDepartureHeading: "Suggested Departure",
+        carpoolArrangementPrintedDriverHeading: "Driver",
+        carpoolArrangementPrintedFrameTitle: "Carpools Printed",
+        carpoolArrangementPrintedPassengersHeading: "Passengers",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",
@@ -144,6 +158,7 @@ export const MESSAGES: Messages = {
         no: "No",
         noDate: "No Date",
         noTime: "No Time",
+        print: "Print",
         sessionNameFieldLabel: "Competition Name",
         sort: "Sort",
         sortAsc: "Ascending",
