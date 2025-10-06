@@ -6,7 +6,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import React, { useEffect, useMemo } from 'react';
 import { IntlProvider } from 'react-intl';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import './App.css';
 import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
 import DarkModeButton, { useDarkModeToggle } from './components/DarkModeButton';
 import FabZoomer, { FabZoomerProps } from './components/FabZoomer';
@@ -14,31 +13,10 @@ import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
 import { MessageID, MESSAGES } from './i18n/messages';
-import logo from './logo.svg';
 import Session from './model/Session';
 import CarpoolsPage from './pages/CarpoolsPage';
 import DancersPage, { DANCERS_FAB } from './pages/DancersPage';
-
-const SampleHome: React.FC = () => {
-    return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React
-                </a>
-            </header>
-        </div>
-    );
-};
+import HomePage from './pages/HomePage';
 
 const enum RoutePaths {
     home = "/",
@@ -54,7 +32,7 @@ const PAGES: Page[] = [
     {
         path: RoutePaths.home,
         messageID: MessageID.navHome,
-        element: <SampleHome />
+        element: <HomePage getPages={() => PAGES} />
     },
     {
         path: RoutePaths.dancers,

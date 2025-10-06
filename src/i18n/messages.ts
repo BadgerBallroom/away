@@ -63,10 +63,17 @@ export const enum MessageID {
     dancersAdd = "dancersAdd",
     /** Title for a button that deletes something */
     delete = "delete",
+    /** A \n-delimited string of future development for this application */
+    developmentRoadmap = "developmentRoadmap",
     /** Label for a button that lets the user export a CSV file */
     exportCSV = "exportCSV",
     /** Label for a button that lets the user import a CSV file */
     importCSV = "importCSV",
+    /**
+     * General instructions to the user on using this application, with paragraphs are separated by \n and placeholders
+     * for links to other pages denoted with their message ID like `{navCarpools}` or `{navDancers}`
+     */
+    instructions = "instructions",
     /** Alt text for the logo at the top */
     logoAlt = "logoAlt",
     /** ARIA label for a menu */
@@ -148,8 +155,10 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
+        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
         exportCSV: "Export CSV",
         importCSV: "Import CSV",
+        instructions: "The purpose of this tool is to help a collegiate ballroom dance team organize travel to other teams\u2019 competitions. Head to the {navDancers} page to input dancers. Then, go to the {navCarpools} page and click \u201cGenerate Carpools\u201d to put them into carpools automatically.",
         logoAlt: "BBDT Logo",
         menu: "Menu",
         navHome: "Home",
