@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import SortIcon from '@mui/icons-material/Sort';
+import Alert from "@mui/material/Alert";
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Skeleton from '@mui/material/Skeleton';
@@ -123,6 +124,7 @@ const DancersPage: React.FC = () => {
         </>}
     >
         <DancerSortDialog open={showSortDialog} onClose={onSortClose} toSort={dancerListState} />
+        <Alert severity="info"><FormattedMessage id={MessageID.zDancersFuture} /></Alert>
         <Grid
             container
             spacing={2}
