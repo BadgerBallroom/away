@@ -102,7 +102,11 @@ export default class Session extends DeepStateObject<SessionProps, {
         }
 
         this.garbageCollect();
-        localStorage.setItem(Session.STORAGE_KEY, this.toString());
+        if (this.isDefault()) {
+            localStorage.removeItem(Session.STORAGE_KEY);
+        } else {
+            localStorage.setItem(Session.STORAGE_KEY, this.toString());
+        }
         this._isDirty = false;
     }
 

@@ -74,6 +74,13 @@ export abstract class DeepStateBase<T> {
     public abstract setValue(newValue: T): void;
 
     /**
+     * Returns whether the value is the default value. If there is no default
+     * value, returns false.
+     * @returns whether the value of this state is the default value
+     */
+    public abstract isDefault(): boolean;
+
+    /**
      * Coerces the given value to be valid for setValue.
      * @param newValue The value to check
      * @throws An error if the given value cannot be coerced to be valid for setValue
@@ -204,6 +211,10 @@ export class DeepStateArray<
         newValue = this.validateNewValue(newValue);
         this._clear();
         this.extend(newValue);
+    }
+
+    public override isDefault(): boolean {
+        return this.length === 0;
     }
 
     /**
@@ -461,6 +472,19 @@ export class DeepStateObject<
         }
     }
 
+    public override isDefault(): boolean {
+        // If any child's `isDefault` method returns false, return false.
+        for (const key in this._entries) {
+            if (!this._castAsKey(key)) {
+                continue;
+            }
+            if (!this._entries[key].deepState?.isDefault()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public override getChildState<K extends keyof T & string>(key: K): TChildrenStates[K];
     public override getChildState<K extends keyof T>(key: K): undefined;
     public override getChildState<K extends keyof T>(key: K): DeepStateBaseOrUndefined<any> {
@@ -620,6 +644,10 @@ export class DeepStatePrimitive<T> extends DeepStateBase<T> {
         newValue = this.validateNewValue(newValue);
         this.dispatchValueChange(newValue as DeepReadonly<T>, false);
         this._value = newValue;
+    }
+
+    public override isDefault(): boolean {
+        return !this._value;
     }
 
     protected override getChildState(_: any): undefined {
