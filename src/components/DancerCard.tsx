@@ -1,3 +1,4 @@
+import { NumberFieldRootChangeEventDetails } from "@base-ui/react/number-field";
 import Box from "@mui/material/Box";
 import CardActions from "@mui/material/CardActions";
 import Checkbox from "@mui/material/Checkbox";
@@ -174,10 +175,10 @@ const CanDriveMaxPeopleControl: React.FC<DancerFieldProps> = ({ id, dancerState 
     const { ref, skeleton } = useSkeletonOutOfView("DancerCard_CanDriveMaxPeopleControl");
 
     const value = useDeepState(dancerState, PATH_TO_CAN_DRIVE_MAX_PEOPLE);
-    const onChange = useCallback(
+    const onValueChange = useCallback(
         (
-            _event: React.FocusEvent<HTMLInputElement> | React.PointerEvent | React.KeyboardEvent,
-            value: number | null
+            value: number | null,
+            _event: NumberFieldRootChangeEventDetails
         ) => dancerState.setDescendantValue(PATH_TO_CAN_DRIVE_MAX_PEOPLE, value ?? 0),
         [dancerState]
     );
@@ -189,7 +190,7 @@ const CanDriveMaxPeopleControl: React.FC<DancerFieldProps> = ({ id, dancerState 
             id={id}
             labelMessageID={MessageID.dancerCanDriveMaxPeople}
             value={value}
-            onChange={onChange}
+            onValueChange={onValueChange}
             min={Carpool.MIN_DANCERS}
         />;
     }
