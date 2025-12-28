@@ -106,7 +106,7 @@ function makeCarpoolMaker(
     setCarpoolMakerProgress: (value: React.SetStateAction<CarpoolMakerProgress | null>) => void,
     handleFinishedCarpools: (carpoolStrings: string[]) => void,
 ): Worker {
-    const carpoolMaker = new Worker(new URL("../workers/carpoolMaker.ts", import.meta.url));
+    const carpoolMaker = new Worker(new URL("../workers/carpoolMaker.ts", import.meta.url), { type: "module" });
     carpoolMaker.onmessage = (e: MessageEvent<CarpoolMakerMessage>) => {
         switch (e.data.command) {
             case "handleProgressUpdate":

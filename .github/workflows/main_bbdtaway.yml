@@ -28,6 +28,7 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
+          rm -rf node_modules
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -62,4 +63,4 @@ jobs:
           app-name: 'bbdtaway'
           slot-name: 'Production'
           package: .
-          
+          startup-command: 'pm2 serve /home/site/wwwroot/dist --no-daemon --spa'
