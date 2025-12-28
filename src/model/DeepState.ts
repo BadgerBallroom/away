@@ -74,6 +74,13 @@ export abstract class DeepStateBase<T> {
     public abstract setValue(newValue: T): void;
 
     /**
+     * Returns whether the value is the default value. If there is no default
+     * value, returns false.
+     * @returns whether the value of this state is the default value
+     */
+    public abstract isDefault(): boolean;
+
+    /**
      * Coerces the given value to be valid for setValue.
      * @param newValue The value to check
      * @throws An error if the given value cannot be coerced to be valid for setValue
@@ -198,6 +205,10 @@ export class DeepStateArray<
     // #region Mutation
     public override getValue(): DeepReadonly<Item[]> {
         return this._items.map(({ deepState }) => deepState.getValue()) as DeepReadonly<Item[]>;
+    }
+
+    public override isDefault(): boolean {
+        return this.length === 0;
     }
 
     public override setValue(newValue: Item[]): void {
@@ -443,6 +454,19 @@ export class DeepStateObject<
         return result as DeepReadonly<T>;
     }
 
+    public override isDefault(): boolean {
+        // If any child's `isDefault` method returns false, return false.
+        for (const key in this._entries) {
+            if (!this._castAsKey(key)) {
+                continue;
+            }
+            if (!this._entries[key].deepState?.isDefault()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public override setValue(newValue: T): void {
         newValue = this.validateNewValue(newValue);
         this.dispatchValueChange(newValue as DeepReadonly<T>, false);
@@ -614,6 +638,10 @@ export class DeepStatePrimitive<T> extends DeepStateBase<T> {
     // #region Mutation
     public override getValue(): DeepReadonly<T> {
         return this._value as DeepReadonly<T>;
+    }
+
+    public override isDefault(): boolean {
+        return !this._value;
     }
 
     public override setValue(newValue: T): void {
