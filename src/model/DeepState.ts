@@ -58,7 +58,7 @@ interface DeepStateChild<T, TState = DeepStateBaseOrUndefined<T>> {
     changeCallback: DeepStateChangeCallback<T>;
 }
 
-/** 
+/**
  * Holds an array of values, an object, or a primitive value.
  * Calls change listeners when any item in the array is updated.
  */
@@ -388,7 +388,7 @@ export class DeepStateObject<
     = { [K in keyof T & string]: DeepStateBaseOrUndefined<T[K]> }
 > extends DeepStateBase<T> {
     private _entries: DeepStateObject.Entries<T, TChildrenStates>;
-    /** 
+    /**
      * The `validateNewValue` method in a derived class might only accept some keys and ignore the rest. There is a
      * legitimate reason that `setValue` might be called with an object that contains extra keys: a newer version of
      * this software might have added additional properties. To prevent data loss from simply using this version, this

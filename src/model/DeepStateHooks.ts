@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useArray } from "../utilities/ArrayHooks";
 import { DeepStateBase, DeepStateObject } from "./DeepState";
 
-/** 
+/**
  * Returns the value in the given `DeepStateBase`. If the value is an array or object, it is reconstructed when any
  * nested value changes, thereby triggering a re-render.
  * @param deepState A `DeepStateBase`
