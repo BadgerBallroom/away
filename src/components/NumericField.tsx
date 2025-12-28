@@ -4,7 +4,7 @@ import {
 } from '@mui/base/unstable_useNumberInput';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 import { unstable_useForkRef as useForkRef } from '@mui/utils';
 import * as React from 'react';
 import { useIntl } from 'react-intl';

@@ -1,4 +1,3 @@
-import styled from "@emotion/styled";
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
@@ -6,6 +5,7 @@ import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography, { TypographyOwnProps } from "@mui/material/Typography";
+import { styled } from '@mui/material/styles';
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { EnumToMessageID, MessageID } from "../i18n/messages";

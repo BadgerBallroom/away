@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import { styled } from "@mui/system";
+import { styled } from '@mui/material/styles';
 import { useCallback } from "react";
 import { useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
