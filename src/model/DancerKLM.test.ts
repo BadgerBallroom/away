@@ -9,7 +9,9 @@ import Session, { SessionProps } from "./Session";
 
 expect.addEqualityTesters([areMultilineStringsEqual]);
 
-jest.mock("../utilities/saveToDownload", () => jest.fn());
+vi.mock("../utilities/saveToDownload", () => ({
+    default: vi.fn(),
+}));
 
 describe("DancerListState", () => {
     let session: Session;
@@ -192,7 +194,7 @@ describe("DancerListState", () => {
             });
 
             test("it calls onError", async () => {
-                const fn = jest.fn();
+                const fn = vi.fn();
 
                 await dancerListState.importCSV(file, fn);
 

@@ -119,6 +119,7 @@ export abstract class DeepStateBase<T> {
     >(path: readonly [K1, K2]): ReturnType<NonNullable<ReturnType<DeepStateBase<T>["getChildState"]>>["getChildState"]>;
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any>;
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any> {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let value: DeepStateBase<any> | undefined = this;
         for (const key of path) {
             value = value.getChildState(key);
