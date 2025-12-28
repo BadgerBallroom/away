@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
-import { styled } from "@mui/system";
+import { styled } from '@mui/material/styles';
 import { useCallback, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
