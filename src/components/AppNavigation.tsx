@@ -1,5 +1,7 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
@@ -8,11 +10,13 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import { styled } from "@mui/system";
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageID } from '../i18n/messages';
 import LogoIcon from './LogoIcon';
+import SessionClearDialog from './SessionClearDialog';
 import SessionNameField from './SessionNameField';
 
 export interface AppNavigationPage {
@@ -61,6 +65,10 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ pages, drawerFooter }) =>
         />
     ));
 
+    const [showSessionClearDialog, setShowSessionClearDialog] = useState(false);
+    const confirmSessionClear = useCallback(() => setShowSessionClearDialog(true), []);
+    const dismissSessionClear = useCallback(() => setShowSessionClearDialog(false), []);
+
     // The default z-index for an AppBar is 1100. Raise this one to 1110 so that it is above other AppBars.
     return <AppBar position="fixed" color="primary" sx={{ zIndex: 1110 }}>
         <ThemeProvider theme={toolbarTheme}>
@@ -102,11 +110,21 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ pages, drawerFooter }) =>
                 value={location.pathname}
                 variant="scrollable"
                 orientation="vertical"
-                sx={{ flexGrow: 1 }}
             >{tabs}</Tabs>
+            <Divider />
+            <Box sx={{ flexGrow: 1 }}>
+                <MenuCommand onClick={confirmSessionClear}><FormattedMessage id={MessageID.fileNew} /></MenuCommand>
+                <SessionClearDialog open={showSessionClearDialog} onClose={dismissSessionClear} />
+            </Box>
             {drawerFooter}
         </Drawer>
     </AppBar>;
 };
 
 export default AppNavigation;
+
+const MenuCommand = styled(Button)(() => `
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+`);

@@ -67,6 +67,10 @@ export const enum MessageID {
     developmentRoadmap = "developmentRoadmap",
     /** Label for a button that lets the user export a CSV file */
     exportCSV = "exportCSV",
+    /** Label for a button that unloads all data and starts fresh */
+    fileNew = "fileNew",
+    /** A prompt for confirmation before clearing all data */
+    fileNewConfirm = "fileNewConfirm",
     /** Label for a button that lets the user import a CSV file */
     importCSV = "importCSV",
     /**
@@ -159,6 +163,8 @@ export const MESSAGES: Messages = {
         delete: "Delete",
         developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
         exportCSV: "Export CSV",
+        fileNew: "New Session",
+        fileNewConfirm: "Are you sure that you want to start a new session? This will discard all data!",
         importCSV: "Import CSV",
         instructions: "The purpose of this tool is to help a collegiate ballroom dance team organize travel to other teams\u2019 competitions. Head to the {navDancers} page to input dancers. Then, go to the {navCarpools} page and click \u201cGenerate Carpools\u201d to put them into carpools automatically.",
         logoAlt: "BBDT Logo",
