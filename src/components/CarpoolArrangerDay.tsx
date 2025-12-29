@@ -102,4 +102,25 @@ const CarpoolContainer = styled(Paper)(({ theme }) => ({
     alignItems: "center",
     borderColor: getBorderColor(theme),
 }));
-const DancerTileContainer = styled(Box)({ margin: 2 });
+
+const DancerTileContainerBox = styled(Box)(() => `
+    margin: 2px;
+`);
+
+export const DANCER_TILE_CONTAINER_CLASSNAME = "dancer-tile-container";
+
+interface DancerTileContainerProps {
+    /** The `DancerTile` or `DancerTilePlaceholder` */
+    children?: React.ReactNode;
+}
+
+/**
+ * A `Box` that wraps around a dancer tile or a dancer placeholder.
+ */
+const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
+    children,
+}) => {
+    return <DancerTileContainerBox
+        className={DANCER_TILE_CONTAINER_CLASSNAME}
+    >{children}</DancerTileContainerBox>;
+};
