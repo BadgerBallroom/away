@@ -16,6 +16,7 @@ import Carpool from "../model/Carpool";
 import { Accommodation, CanDriveCarpool, Gender } from "../model/Dancer";
 import DancerState from "../model/DancerState";
 import { useDeepState, useDeepStateChangeHandler, useDeepStateCheckChangeHandler } from "../model/DeepStateHooks";
+import SelectionColors from "../utilities/SelectionColors";
 import DeleteButton from "./DeleteButton";
 import NumericField from "./NumericField";
 import SelectField from "./SelectField";
@@ -85,15 +86,13 @@ const DancerCardPaper = styled(Paper)(({ theme }) => {
         "0 1px 3px 0px rgba(0, 0, 0, 0.12)"
     ].join(",");
 
-    const darkMode = theme.palette.mode === "dark";
-
     return `
         width: 292px;
         box-shadow: ${boxShadow};
         user-select: none;
 
         &:hover, &:focus-within {
-            box-shadow: inset 0 0 0 1px ${darkMode ? "#fff" : "rgba(0, 0, 0, 0.87)"}, ${boxShadow};
+            box-shadow: inset 0 0 0 1px ${SelectionColors.hover(theme)}, ${boxShadow};
         }
 
         &.selected {
