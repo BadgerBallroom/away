@@ -41,7 +41,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         return JSON.stringify(this.getValue());
     }
 
-    /** Creates a new `FleetState` from the output of `toString`. */
+    /** Creates a new `CarpoolArrangementState` from the output of `toString`. */
     public static fromString(session: Session, s: string | null | undefined): CarpoolArrangementState {
         if (s) {
             return new CarpoolArrangementState(session, JSON.parse(s));
