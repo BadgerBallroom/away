@@ -13,8 +13,8 @@ interface MessagePayloads {
     /**
      * Sent from the worker to the UI thread in response to `makeCarpools`.
      * Sent when the dancers have been arranged into carpools.
-     * The payload is an array of strings. Each string is the output of `toString` of the `FleetState` object that
-     * represents one possible arrangment of carpools.
+     * The payload is an array of strings. Each string is the output of `toString` of the `CarpoolArrangementState`
+     * object that represents one possible arrangment of carpools.
      */
     handleMadeCarpools: string[];
 }
@@ -41,7 +41,7 @@ export interface CarpoolMakerProgress {
     numArrangementsExplored: number;
     /**
      * The last arrangement that was evaluated.
-     * The string is the output of `toString` of the `FleetState` object that represents the arrangement.
+     * The string is the output of `toString` of the `CarpoolArrangementState` object that represents the arrangement.
      */
     latestArrangementExplored: string | null;
 }
