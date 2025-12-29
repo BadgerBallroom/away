@@ -10,6 +10,7 @@ import { styled } from '@mui/material/styles';
 import { FormattedMessage } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
+import CarpoolState from '../model/CarpoolState';
 import DancerTile, { DancerTilePlaceholder } from './DancerTile';
 
 const EVEN_ROW_SX = {} as const;
@@ -35,37 +36,12 @@ const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay 
                             </Typography>
                         </ScheduleCell>
                         <ScheduleCell>
-                            {carpoolsForHour.carpoolStates.map(carpoolState => {
-                                const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
-
-                                const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
-                                const emptySeats: string[] = [];
-                                for (let i = dancerStates.length; i < carCapacity; ++i) {
-                                    emptySeats.push(`${dancerStates[0].evanescentID} empty ${i}`);
-                                }
-
-                                return <CarpoolContainerContainer key={carpoolState.evanescentID}>
-                                    <CarpoolContainer variant="outlined">
-                                        <Box textAlign="center" sx={CAR_HEADING_SX}>
-                                            <div><DirectionsCarIcon /></div>
-                                            <div><Typography variant="body2">{
-                                                carpoolState.getChildValue("departure")?.format("LT")
-                                                ?? <FormattedMessage id={MessageID.noTime} />
-                                            }</Typography></div>
-                                        </Box>
-                                        {dancerStates.map(dancerState =>
-                                            <DancerTileContainer key={dancerState.evanescentID}>
-                                                <DancerTile dancerState={dancerState} elevation={3} />
-                                            </DancerTileContainer>
-                                        )}
-                                        {emptySeats.map(key =>
-                                            <DancerTileContainer key={key}>
-                                                <DancerTilePlaceholder />
-                                            </DancerTileContainer>
-                                        )}
-                                    </CarpoolContainer>
-                                </CarpoolContainerContainer>;
-                            })}
+                            {carpoolsForHour.carpoolStates.map(carpoolState =>
+                                <CarpoolContainerContainer
+                                    key={carpoolState.evanescentID}
+                                    carpoolState={carpoolState}
+                                />
+                            )}
                         </ScheduleCell>
                     </ScheduleRow>
                 )}
@@ -94,7 +70,45 @@ const ScheduleCell = styled(Box)(`
         padding-left: 5px;
     }
 `);
-const CarpoolContainerContainer = styled(Box)({ display: "block", margin: "10px" });
+
+const CarpoolContainerContainerBox = styled(Box)({ display: "block", margin: "10px" });
+
+interface CarpoolContainerContainerProps {
+    carpoolState: CarpoolState;
+}
+
+const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({ carpoolState }) => {
+    const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
+
+    const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
+    const emptySeats: string[] = [];
+    for (let i = dancerStates.length; i < carCapacity; ++i) {
+        emptySeats.push(`${dancerStates[0].evanescentID} empty ${i}`);
+    }
+
+    return <CarpoolContainerContainerBox>
+        <CarpoolContainer variant="outlined">
+            <Box textAlign="center" sx={CAR_HEADING_SX}>
+                <div><DirectionsCarIcon /></div>
+                <div><Typography variant="body2">{
+                    carpoolState.getChildValue("departure")?.format("LT")
+                    ?? <FormattedMessage id={MessageID.noTime} />
+                }</Typography></div>
+            </Box>
+            {dancerStates.map(dancerState => {
+                return <DancerTileContainer key={dancerState.evanescentID}>
+                    <DancerTile dancerState={dancerState} elevation={3} />
+                </DancerTileContainer>;
+            })}
+            {emptySeats.map(key => {
+                return <DancerTileContainer key={key}>
+                    <DancerTilePlaceholder />
+                </DancerTileContainer>;
+            })}
+        </CarpoolContainer>
+    </CarpoolContainerContainerBox>;
+};
+
 const CarpoolContainer = styled(Paper)(({ theme }) => ({
     display: "inline-flex",
     flexWrap: "nowrap",
