@@ -37,7 +37,7 @@ export function useDeepState<Item>(
  * @returns The value for the given key in the `DeepStateObject`
  */
 export function useDeepState<T extends object, K extends keyof T>(
-    deepState: DeepStateObject<T>,
+    deepState: DeepStateObject<T, any>,
     path: readonly [K],
     ignoreDescendants?: boolean
 ): T[K];
@@ -105,7 +105,7 @@ export function useDeepStateChangeHandler<Item>(
 ): DeepStateChangeHandler<Item>;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateChangeHandler<T extends object, K extends keyof T>(
-    deepState: DeepStateObject<T>,
+    deepState: DeepStateObject<T, any>,
     path: readonly [K],
 ): DeepStateChangeHandler<T[K]>;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
@@ -135,7 +135,7 @@ export function useDeepStateCheckChangeHandler(
 ): DeepStateCheckChangeHandler;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateCheckChangeHandler<T extends { [n in K]: boolean }, K extends keyof T>(
-    deepState: DeepStateObject<T>,
+    deepState: DeepStateObject<T, any>,
     path: readonly [K],
 ): DeepStateCheckChangeHandler;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
