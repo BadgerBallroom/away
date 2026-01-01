@@ -84,6 +84,8 @@ export const enum MessageID {
     navDancers = "navDancers",
     /** The name of the Carpools page */
     navCarpools = "navCarpools",
+    /** The name of the Partnerships page */
+    navPartnerships = "navPartnerships",
     /** "No" */
     no = "no",
     /** Placeholder for when a date is missing */
@@ -157,7 +159,7 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
-        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
+        developmentRoadmap: "Some features are planned for the future:\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
         exportCSV: "Export CSV",
         importCSV: "Import CSV",
         instructions: "The purpose of this tool is to help a collegiate ballroom dance team organize travel to other teams\u2019 competitions. Head to the {navDancers} page to input dancers. Then, go to the {navCarpools} page and click \u201cGenerate Carpools\u201d to put them into carpools automatically.",
@@ -166,6 +168,7 @@ export const MESSAGES: Messages = {
         navHome: "Home",
         navDancers: "Dancers",
         navCarpools: "Carpools",
+        navPartnerships: "Partnerships",
         no: "No",
         noDate: "No Date",
         noTime: "No Time",

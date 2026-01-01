@@ -22,6 +22,7 @@ const enum RoutePaths {
     home = "/",
     dancers = "/dancers",
     carpools = "/carpools",
+    partnerships = "/partnerships",
 }
 
 interface Page extends AppNavigationPage, FabZoomerProps {
@@ -44,6 +45,11 @@ const PAGES: Page[] = [
         path: RoutePaths.carpools,
         messageID: MessageID.navCarpools,
         element: <CarpoolsPage />
+    },
+    {
+        path: RoutePaths.partnerships,
+        messageID: MessageID.navPartnerships,
+        element: <div>Partnerships</div>
     },
 ];
 
