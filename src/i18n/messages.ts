@@ -89,6 +89,8 @@ export const enum MessageID {
     navDancers = "navDancers",
     /** The name of the Carpools page */
     navCarpools = "navCarpools",
+    /** The name of the Partnerships page */
+    navPartnerships = "navPartnerships",
     /** "No" */
     no = "no",
     /** Placeholder for when a date is missing */
@@ -162,7 +164,7 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
-        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
+        developmentRoadmap: "Some features are planned for the future:\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
         exportCSV: "Export CSV",
         fileNew: "New Session",
         fileNewConfirm: "Are you sure that you want to start a new session? This will discard all data!",
@@ -173,6 +175,7 @@ export const MESSAGES: Messages = {
         navHome: "Home",
         navDancers: "Dancers",
         navCarpools: "Carpools",
+        navPartnerships: "Partnerships",
         no: "No",
         noDate: "No Date",
         noTime: "No Time",

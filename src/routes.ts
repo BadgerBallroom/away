@@ -30,6 +30,13 @@ const routes: RouteObject[] = [
         },
     },
     {
+        path: "partnerships",
+        lazy: () => import("./pages/PartnershipsPage"),
+        handle: {
+            titleMessageID: MessageID.navPartnerships,
+        },
+    },
+    {
         path: "*",
         loader: () => redirect("/"),
     },
