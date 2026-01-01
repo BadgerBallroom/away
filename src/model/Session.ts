@@ -129,7 +129,10 @@ export default class Session extends DeepStateObject<SessionProps, {
             if (stored) {
                 result = Session.fromString(stored);
             }
-        } catch (e) { }
+        } catch (e) {
+            // TODO: display error message
+            debugger;
+        }
 
         if (!result) {
             result = new Session();
@@ -166,4 +169,24 @@ export default class Session extends DeepStateObject<SessionProps, {
         }
     }
     // #endregion
+
+    /** Constructs a Session from a blob. */
+    public static loadFromFile(blob: Blob): Promise<Session> {
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                let result: Session;
+
+                try {
+                    result = Session.fromString(reader.result as string);
+                } catch (e) {
+                    result = new Session();
+                    debugger;
+                }
+
+                resolve(result);
+            });
+            reader.readAsText(blob);
+        });
+    }
 }
