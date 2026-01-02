@@ -42,7 +42,6 @@ export default defineConfig(
                 }
             ],
             "prefer-rest-params": "off",
-            "react/jsx-key": "warn",
             "react/prop-types": "off",
             "react/react-in-jsx-scope": "off",
             "react-hooks/exhaustive-deps": "error",

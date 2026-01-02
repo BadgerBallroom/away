@@ -127,7 +127,7 @@ const CarpoolArrangementPrinted: React.FC<CarpoolArrangementPrintedProps> = ({ s
             </thead>
             <tbody>
                 {arrangementState.getCarpoolStatesOrderedByDeparture().map(
-                    carpoolState => <CarpoolPrinted state={carpoolState} />
+                    carpoolState => <CarpoolPrinted key={carpoolState.evanescentID} state={carpoolState} />
                 )}
             </tbody>
         </table>
@@ -151,7 +151,7 @@ const CarpoolPrinted: React.FC<CarpoolPrintedProps> = ({ state }) => {
         <td className="time">{departure?.format("LLL")}</td>
         <td><DancerPrinted state={dancerStates.shift()!} /></td>
         <td>{dancerStates.map(dancerState =>
-            <div><DancerPrinted state={dancerState} /></div>
+            <div key={dancerState.evanescentID}><DancerPrinted state={dancerState} /></div>
         )}</td>
     </tr>;
 };
