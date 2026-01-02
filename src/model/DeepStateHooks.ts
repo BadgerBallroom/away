@@ -37,7 +37,7 @@ export function useDeepState<Item>(
  * @returns The value for the given key in the `DeepStateObject`
  */
 export function useDeepState<T extends object, K extends keyof T>(
-    deepState: DeepStateObject<T, any>,
+    deepState: DeepStateObject<T, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
     path: readonly [K],
     ignoreDescendants?: boolean
 ): T[K];
@@ -54,12 +54,12 @@ export function useDeepState<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
     ignoreDescendants?: boolean
-): any;
+): unknown;
 export function useDeepState<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
     ignoreDescendants?: boolean
-): any {
+): unknown {
     ignoreDescendants = !!ignoreDescendants;
 
     const descendantState = deepState.getDescendantState(path);
@@ -78,7 +78,7 @@ export function useDeepState<T>(
     // Update `value` when the value of `descendantState` changes.
     useEffect(() => {
         const changeListener = ignoreDescendants
-            ? (newValue: any, fromDescendant: boolean) => {
+            ? (newValue: unknown, fromDescendant: boolean) => {
                 if (fromDescendant && ignoreDescendants) {
                     return;
                 }
@@ -105,18 +105,18 @@ export function useDeepStateChangeHandler<Item>(
 ): DeepStateChangeHandler<Item>;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateChangeHandler<T extends object, K extends keyof T>(
-    deepState: DeepStateObject<T, any>,
+    deepState: DeepStateObject<T, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
     path: readonly [K],
 ): DeepStateChangeHandler<T[K]>;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateChangeHandler<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
-): DeepStateChangeHandler<any>;
+): DeepStateChangeHandler<unknown>;
 export function useDeepStateChangeHandler<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
-): DeepStateChangeHandler<any> {
+): DeepStateChangeHandler<unknown> {
     path = useArray(path);
     const value = useDeepState(deepState, path);
     const onChange = useCallback((event: ChangeEvent) => {
@@ -135,7 +135,7 @@ export function useDeepStateCheckChangeHandler(
 ): DeepStateCheckChangeHandler;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
 export function useDeepStateCheckChangeHandler<T extends { [n in K]: boolean }, K extends keyof T>(
-    deepState: DeepStateObject<T, any>,
+    deepState: DeepStateObject<T, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
     path: readonly [K],
 ): DeepStateCheckChangeHandler;
 /** Like `useDeepState`, but also returns a callback that sets the value to `event.target.value`. */
@@ -147,7 +147,7 @@ export function useDeepStateCheckChangeHandler<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
 ): DeepStateCheckChangeHandler {
-    const value = useDeepState(deepState, path);
+    const value = useDeepState(deepState, path) as boolean;
     const onChange = useCallback((event: CheckChangeEvent) => {
         deepState.setDescendantValue(path, event.target.checked);
     }, [deepState, path]);
