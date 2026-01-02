@@ -8,13 +8,13 @@ import { useCallback } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolState from "../model/CarpoolState";
-import { ShowCarpoolDepartureDialog } from "./CarpoolDepartureDialog";
+import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile, { DancerTilePlaceholder } from "./DancerTile";
 import DancerTileContainer from "./DancerTileContainer";
 
 interface CarpoolContainerContainerProps {
     carpoolState: CarpoolState;
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 const CAR_HEADING_SX = { padding: "0 5px" } as const;
@@ -22,15 +22,15 @@ const CARPOOL_DEPARTURE_TIME_SX = { whiteSpace: "nowrap" } as const;
 
 export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({
     carpoolState,
-    showCarpoolDepartureDialog,
+    showCarpoolDeparturePopover,
 }) => {
     const intl = useIntl();
 
     const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
 
     const onEditDepartureTimeClick = useCallback(() => {
-        showCarpoolDepartureDialog({ carpoolState });
-    }, [carpoolState, showCarpoolDepartureDialog]);
+        showCarpoolDeparturePopover({ carpoolState });
+    }, [carpoolState, showCarpoolDeparturePopover]);
 
     const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
     const emptySeats: string[] = [];
@@ -43,6 +43,7 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
             <Box textAlign="center" sx={CAR_HEADING_SX}>
                 <div><DirectionsCarIcon /></div>
                 <Button
+                    id={`carpool-${carpoolState.evanescentID}-departure-time`}
                     color="inherit"
                     variant="outlined"
                     endIcon={<EditIcon />}
