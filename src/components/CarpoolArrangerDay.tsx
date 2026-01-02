@@ -1,16 +1,20 @@
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
+import Button from '@mui/material/Button';
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { styled } from '@mui/material/styles';
-import { FormattedMessage } from "react-intl";
+import { useCallback } from 'react';
+import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import CarpoolState from '../model/CarpoolState';
+import { SetCarpoolWhoseDepartureToEdit } from './CarpoolDepartureDialog';
 import DancerTile, { DancerTilePlaceholder } from './DancerTile';
 
 const EVEN_ROW_SX = {} as const;
@@ -18,10 +22,13 @@ const ODD_ROW_SX = { bgcolor: "rgba(128, 128, 128, 0.2)" } as const;
 const CAR_HEADING_SX = { padding: "0 5px" } as const;
 
 interface CarpoolArrangerDayProps {
+    /** The carpools that depart on the day */
     carpoolsForDay: CarpoolArrangementState.CarpoolsForDay;
+    /** A callback that opens the dialog to edit a date and time */
+    setCarpoolWhoseDepartureToEdit: SetCarpoolWhoseDepartureToEdit;
 }
 
-const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay }) => {
+const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay, setCarpoolWhoseDepartureToEdit }) => {
     return <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {carpoolsForDay.day?.format("LL") ?? <FormattedMessage id={MessageID.noDate} />}
@@ -40,6 +47,7 @@ const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay 
                                 <CarpoolContainerContainer
                                     key={carpoolState.evanescentID}
                                     carpoolState={carpoolState}
+                                    setCarpoolWhoseDepartureToEdit={setCarpoolWhoseDepartureToEdit}
                                 />
                             )}
                         </ScheduleCell>
@@ -75,9 +83,18 @@ const CarpoolContainerContainerBox = styled(Box)({ display: "block", margin: "10
 
 interface CarpoolContainerContainerProps {
     carpoolState: CarpoolState;
+    setCarpoolWhoseDepartureToEdit: SetCarpoolWhoseDepartureToEdit;
 }
 
-const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({ carpoolState }) => {
+const CARPOOL_DEPARTURE_TIME_SX = { whiteSpace: "nowrap" } as const;
+
+const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({ carpoolState, setCarpoolWhoseDepartureToEdit }) => {
+    const intl = useIntl();
+
+    const onEditDepartureTimeClick = useCallback(() => {
+        setCarpoolWhoseDepartureToEdit(carpoolState);
+    }, [carpoolState, setCarpoolWhoseDepartureToEdit]);
+
     const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
 
     const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
@@ -90,10 +107,19 @@ const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({ c
         <CarpoolContainer variant="outlined">
             <Box textAlign="center" sx={CAR_HEADING_SX}>
                 <div><DirectionsCarIcon /></div>
-                <div><Typography variant="body2">{
-                    carpoolState.getChildValue("departure")?.format("LT")
-                    ?? <FormattedMessage id={MessageID.noTime} />
-                }</Typography></div>
+                <Button
+                    color="inherit"
+                    variant="outlined"
+                    endIcon={<EditIcon />}
+                    title={intl.formatMessage({ id: MessageID.carpoolEditDepartureTime })}
+                    onClick={onEditDepartureTimeClick}
+                    sx={CARPOOL_DEPARTURE_TIME_SX}
+                >
+                    {
+                        carpoolState.getChildValue("departure")?.format("LT")
+                        ?? <FormattedMessage id={MessageID.noTime} />
+                    }
+                </Button>
             </Box>
             {dancerStates.map(dancerState => {
                 return <DancerTileContainer key={dancerState.evanescentID}>
