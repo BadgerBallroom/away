@@ -1,24 +1,36 @@
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import EditIcon from "@mui/icons-material/Edit";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
-import { FormattedMessage } from "react-intl";
+import { useCallback } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolState from "../model/CarpoolState";
+import { ShowCarpoolDepartureDialog } from "./CarpoolDepartureDialog";
 import DancerTile, { DancerTilePlaceholder } from "./DancerTile";
 import DancerTileContainer from "./DancerTileContainer";
 
 interface CarpoolContainerContainerProps {
     carpoolState: CarpoolState;
+    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
 }
 
 const CAR_HEADING_SX = { padding: "0 5px" } as const;
+const CARPOOL_DEPARTURE_TIME_SX = { whiteSpace: "nowrap" } as const;
 
 export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({
     carpoolState,
+    showCarpoolDepartureDialog,
 }) => {
+    const intl = useIntl();
+
     const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
+
+    const onEditDepartureTimeClick = useCallback(() => {
+        showCarpoolDepartureDialog({ carpoolState });
+    }, [carpoolState, showCarpoolDepartureDialog]);
 
     const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
     const emptySeats: string[] = [];
@@ -30,10 +42,19 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
         <CarpoolContainer variant="outlined">
             <Box textAlign="center" sx={CAR_HEADING_SX}>
                 <div><DirectionsCarIcon /></div>
-                <div><Typography variant="body2">{
-                    carpoolState.getChildValue("departure")?.format("LT")
-                    ?? <FormattedMessage id={MessageID.noTime} />
-                }</Typography></div>
+                <Button
+                    color="inherit"
+                    variant="outlined"
+                    endIcon={<EditIcon />}
+                    title={intl.formatMessage({ id: MessageID.carpoolEditDepartureTime })}
+                    onClick={onEditDepartureTimeClick}
+                    sx={CARPOOL_DEPARTURE_TIME_SX}
+                >
+                    {
+                        carpoolState.getChildValue("departure")?.format("LT")
+                        ?? <FormattedMessage id={MessageID.noTime} />
+                    }
+                </Button>
             </Box>
             {dancerStates.map(dancerState => {
                 return <DancerTileContainer key={dancerState.evanescentID}>

@@ -8,6 +8,8 @@ export const enum MessageID {
     appNameForTitle = "appNameForTitle",
     /** "Cancel" */
     cancel = "cancel",
+    /** "Close" */
+    close = "close",
     /** Label for a carpool arrangement's name's field */
     carpoolArrangementNameLabel = "carpoolArrangementNameLabel",
     /** Heading for the "Suggested Departure" heading in a printout of a carpool arrangement */
@@ -18,6 +20,8 @@ export const enum MessageID {
     carpoolArrangementPrintedFrameTitle = "carpoolArrangementPrintedFrameTitle",
     /** Heading for the "Passengers" heading in a printout of a carpool arrangement */
     carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
+    /** Tooltip for a button to edit a car's departure time */
+    carpoolEditDepartureTime = "carpoolEditDepartureTime",
     /** Text or title for any button that makes carpools automatically */
     carpoolsGenerate = "carpoolsGenerate",
     /** Text for the body of a confirmation dialog for making carpools automatically */
@@ -134,11 +138,13 @@ export const MESSAGES: Messages = {
         appName: "Away",
         appNameForTitle: "{pageTitle} - BBDT Away",
         cancel: "Cancel",
+        close: "Close",
         carpoolArrangementNameLabel: "Description",
         carpoolArrangementPrintedDepartureHeading: "Suggested Departure",
         carpoolArrangementPrintedDriverHeading: "Driver",
         carpoolArrangementPrintedFrameTitle: "Carpools Printed",
         carpoolArrangementPrintedPassengersHeading: "Passengers",
+        carpoolEditDepartureTime: "Edit Departure Time",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",
