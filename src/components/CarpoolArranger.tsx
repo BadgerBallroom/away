@@ -15,7 +15,7 @@ import { useDeepState, useDeepStateChangeHandler } from "../model/DeepStateHooks
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from './CarpoolArrangerDay';
-import { ShowCarpoolDepartureDialog } from "./CarpoolDepartureDialog";
+import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
 import DeleteButton from "./DeleteButton";
 
@@ -23,7 +23,7 @@ interface CarpoolArrangerFromIDProps {
     /** The ID of the `CarpoolArrangement` that the user will edit */
     arrangementID: ID;
     /** A callback that opens the dialog to edit a date and time */
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDepartureDialog: ShowCarpoolDeparturePopover;
 }
 
 /** Lets the user edit the `CarpoolArrangement` with the given ID. */
@@ -63,7 +63,7 @@ interface CarpoolArrangerProps extends SharedProps {
     /** A function to execute when the user clicks on the Delete button */
     onDeleteClick?: () => void;
     /** A callback that opens the dialog to edit a date and time */
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDepartureDialog: ShowCarpoolDeparturePopover;
 }
 
 /** Lets the user edit the given `CarpoolArrangement`. */
@@ -131,7 +131,7 @@ const UnassignedBar = styled(Box)(({ theme }) => {
 });
 
 interface ScheduleProps extends SharedProps {
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDepartureDialog: ShowCarpoolDeparturePopover;
 }
 
 /** A table of departure times and carpools. */

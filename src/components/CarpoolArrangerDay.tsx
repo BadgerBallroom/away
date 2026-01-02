@@ -9,7 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { CarpoolContainerContainer } from './CarpoolArrangerCar';
-import { ShowCarpoolDepartureDialog } from './CarpoolDepartureDialog';
+import { ShowCarpoolDeparturePopover } from './CarpoolDeparturePopover';
 
 const EVEN_ROW_SX = {} as const;
 const ODD_ROW_SX = { bgcolor: "rgba(128, 128, 128, 0.2)" } as const;
@@ -18,7 +18,7 @@ interface CarpoolArrangerDayProps {
     /** The carpools that depart on the day */
     carpoolsForDay: CarpoolArrangementState.CarpoolsForDay;
     /** A callback that opens the dialog to edit a date and time */
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDepartureDialog: ShowCarpoolDeparturePopover;
 }
 
 const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({

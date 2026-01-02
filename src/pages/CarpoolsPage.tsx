@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
-import CarpoolDepartureDialog, { CarpoolDepartureDialogProps } from "../components/CarpoolDepartureDialog";
+import CarpoolDeparturePopover, { CarpoolDeparturePopoverProps } from "../components/CarpoolDeparturePopover";
 import CarpoolMakerProgressDialog from "../components/CarpoolMakerProgressDialog";
 import { CarpoolPrintDialogFromID } from "../components/CarpoolPrintDialog";
 import WorkspaceWithToolbar from "../components/WorkspaceWithToolbar";
@@ -88,7 +88,7 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
     const onCarpoolDepartureDialogClose = useCallback(() => setCarpoolWhoseDepartureToEdit(null), []);
     const showCarpoolDepartureDialog = useCallback(({
         carpoolState,
-    }: Omit<CarpoolDepartureDialogProps, "onClose">) => {
+    }: Omit<CarpoolDeparturePopoverProps, "onClose">) => {
         setCarpoolWhoseDepartureToEdit(carpoolState);
     }, []);
 
@@ -101,7 +101,7 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         </>}
     >
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
-        <CarpoolDepartureDialog
+        <CarpoolDeparturePopover
             carpoolState={carpoolWhoseDepartureToEdit}
             onClose={onCarpoolDepartureDialogClose}
         />
