@@ -36,19 +36,18 @@ export default class KeyListAndMapState<
         };
 
         // `super` is called with `delayedSet === true` to ensure that `this` is usable before `setValue` is called.
-        super(undefined, (key, value): any => {
+        super(undefined, (key, value) => {
             switch (key) {
                 case "list":
                     return makeList!(this, value as KeyListAndMap<V>["list"]);
                 case "map":
                     return makeMap!(value as KeyListAndMap<V>["map"]);
             }
-            throw new Error("Unknown key: " + key);
         }, true);
         this.setValue(initialValue ?? KeyListAndMap.empty());
     }
 
-    protected override validateNewValue(newValue: any): KeyListAndMap<V> {
+    protected override validateNewValue(newValue: unknown): KeyListAndMap<V> {
         const { list, map, ...unrecognizedChildren } = super.validateNewValue(newValue);
         this.unrecognizedChildren = unrecognizedChildren;
         return {
@@ -165,7 +164,7 @@ export class KeyListState<V, VState extends DeepStateBaseOrUndefined<V>> extends
         this._parent = parent;
     }
 
-    protected override validateNewValue(newValue: any): ID[] {
+    protected override validateNewValue(newValue: unknown): ID[] {
         if (!Array.isArray(newValue)) {
             return [];
         }
@@ -262,7 +261,7 @@ export class KeyMapState<V, VState extends DeepStateBaseOrUndefined<V>>
         }
     }
 
-    protected override validateNewValue(newValue: any): KeyMap<V> {
+    protected override validateNewValue(newValue: unknown): KeyMap<V> {
         const result: KeyMap<V> = {};
 
         if (typeof newValue !== "object" || Array.isArray(newValue) || newValue === null) {
@@ -273,7 +272,7 @@ export class KeyMapState<V, VState extends DeepStateBaseOrUndefined<V>>
         // `VState.validateNewValue` will validate further.
         for (const id in newValue) {
             if (KeyMapState.isValidID(id)) {
-                result[id] = newValue[id];
+                result[id] = (newValue as KeyMap<V>)[id];
             }
             // We could send invalid IDs to `unrecognizedChildren`, but for this class, other code may be depending on
             // `getValue()` returning only valid IDs.

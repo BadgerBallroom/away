@@ -25,7 +25,7 @@ export default DarkModeButton;
 
 export type DarkMode = "light" | "dark";
 
-function isValidMode(value: any): value is DarkMode {
+function isValidMode(value: unknown): value is DarkMode {
     return value === "light" || value === "dark";
 }
 

@@ -44,14 +44,15 @@ export default class Session extends DeepStateObject<SessionProps, {
      * @param value The initial session information
      */
     constructor(value?: SessionProps) {
-        super(undefined, (key, value): any => {
+        super(undefined, (key, value) => {
             switch (key) {
+                case "name":
+                    return new DeepStatePrimitive(value as SessionProps["name"]);
                 case "dancers":
                     return new DancerKLMState(value as SessionProps["dancers"]);
                 case "carpoolArrangements":
                     return new CarpoolArrangementKLMState(this, value as SessionProps["carpoolArrangements"]);
             }
-            return new DeepStatePrimitive(value);
         }, true);
         this.setValue(value ?? SessionProps.DEFAULT);
         this.addChangeListener(() => this._saveToLocalStorageAfterDelay());
@@ -67,7 +68,7 @@ export default class Session extends DeepStateObject<SessionProps, {
         this.setValue(SessionProps.DEFAULT);
     }
 
-    protected override validateNewValue(newValue: any): SessionProps {
+    protected override validateNewValue(newValue: unknown): SessionProps {
         const {
             name,
             dancers,

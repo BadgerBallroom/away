@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import dayjs from "dayjs";
 
 /**
@@ -46,10 +48,19 @@ export function makeDeepState<T>(value: T): DeepStateBase<T> {
     return new DeepStatePrimitive(value);
 }
 
-export type DeepStateBaseOrUndefined<T> =
-    T extends undefined
-    ? DeepStateBase<NonNullable<T>> | undefined
-    : DeepStateBase<T>;
+export type DeepStateBaseOrUndefined<T> = (
+    T extends null | undefined
+    ? DeepStateBase<NonNullable<T>> | null | undefined
+    : (
+        T extends null
+        ? DeepStateBase<NonNullable<T>> | null
+        : (
+            T extends undefined
+            ? DeepStateBase<NonNullable<T>> | undefined
+            : DeepStateBase<T>
+        )
+    )
+);
 
 interface DeepStateChild<T, TState = DeepStateBaseOrUndefined<T>> {
     /** A child value */
@@ -86,7 +97,7 @@ export abstract class DeepStateBase<T> {
      * @throws An error if the given value cannot be coerced to be valid for setValue
      * @returns A value that has been coerced into being valid for setValue
      */
-    protected abstract validateNewValue(newValue: any): T;
+    protected abstract validateNewValue(newValue: unknown): T;
 
     /**
      * Given a path of keys, gets a child of this state and sets its value to the given value. For example,
@@ -127,7 +138,7 @@ export abstract class DeepStateBase<T> {
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any>;
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any> {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        let value: DeepStateBase<any> | undefined = this;
+        let value: DeepStateBase<any> | null | undefined = this;
         for (const key of path) {
             value = value.getChildState(key);
             if (!value) {
@@ -389,14 +400,16 @@ export class DeepStateArray<
     // #endregion
 }
 
+export type StringKeys<T> = Extract<keyof T, string>;
+
 /**
  * Holds an object of values.
  * Calls change listeners when any value in the object is updated.
  */
 export class DeepStateObject<
     T extends object,
-    TChildrenStates extends { [K in keyof T & string]: DeepStateBaseOrUndefined<T[K]> }
-    = { [K in keyof T & string]: DeepStateBaseOrUndefined<T[K]> }
+    TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
+    = { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
 > extends DeepStateBase<T> {
     private _entries: DeepStateObject.Entries<T, TChildrenStates>;
     /**
@@ -438,8 +451,8 @@ export class DeepStateObject<
     }
 
     // #region Mutation
-    /** A type guard to make TypeScript think that `key` is a `keyof T & string`. */
-    private _castAsKey(key: unknown): key is keyof T & string {
+    /** A type guard to make TypeScript think that `key` is a `StringKeys<T>`. */
+    private _castAsKey(key: unknown): key is StringKeys<T> {
         return typeof key === "string";
     }
 
@@ -449,7 +462,7 @@ export class DeepStateObject<
             if (!this._castAsKey(key)) {
                 continue;
             }
-            result[key] = this._entries[key].deepState?.getValue() as T[Extract<keyof T, string>];
+            result[key] = this._entries[key].deepState?.getValue() as T[StringKeys<T>];
         }
         return result as DeepReadonly<T>;
     }
@@ -485,17 +498,17 @@ export class DeepStateObject<
         return true;
     }
 
-    public override getChildState<K extends keyof T & string>(key: K): TChildrenStates[K];
+    public override getChildState<K extends StringKeys<T>>(key: K): TChildrenStates[K];
     public override getChildState<K extends keyof T>(key: K): undefined;
     public override getChildState<K extends keyof T>(key: K): DeepStateBaseOrUndefined<any> {
         if (this._castAsKey(key)) {
-            return this._entries[key]?.deepState as K extends keyof T & string ? TChildrenStates[K] : any;
+            return this._entries[key]?.deepState as K extends StringKeys<T> ? TChildrenStates[K] : any;
         }
         return undefined;
     }
 
     /** Adds an existing `DeepStateBase` to the object. */
-    public setChildState<K extends keyof T & string>(key: K, deepState: TChildrenStates[K]): void {
+    public setChildState<K extends StringKeys<T>>(key: K, deepState: TChildrenStates[K]): void {
         this.dispatchValueChange({ ...this.getValue(), [key]: deepState?.getValue() }, false);
 
         if (this._entries[key]) {
@@ -510,7 +523,9 @@ export class DeepStateObject<
      * Deletes a child `DeepStateBase` of this object.
      * @param key A key whose value can be undefined
      */
-    public removeChildState(key: { [P in keyof T]: undefined extends T[P] ? P : never }[keyof T] & string): void {
+    public removeChildState(
+        key: { [K in StringKeys<T>]: undefined extends T[K] ? K : never }[StringKeys<T>] & string,
+    ): void {
         if (!this._entries[key]) {
             return;
         }
@@ -531,7 +546,7 @@ export class DeepStateObject<
      * @param deepState The `DeepStateBase` that will become a child of this object
      * @returns `deepState` and the listener, which must be removed from `deepState` when it is no longer a child
      */
-    protected makeChild<K extends keyof T & string>(
+    protected makeChild<K extends StringKeys<T>>(
         key: K,
         deepState: TChildrenStates[K]
     ): DeepStateChild<T[K], TChildrenStates[K]> {
@@ -607,14 +622,14 @@ export class DeepStateObject<
 export namespace DeepStateObject {
     export type Entries<
         T extends object,
-        TChildrenStates extends { [K in keyof T & string]: DeepStateBaseOrUndefined<T[K]> }
-    > = { [K in keyof T & string]: DeepStateChild<T[K], TChildrenStates[K]> };
+        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
+    > = { [K in StringKeys<T>]: DeepStateChild<T[K], TChildrenStates[K]> };
 
     export interface ChildStateMaker<
         T extends object,
-        TChildrenStates extends { [K in keyof T & string]: DeepStateBaseOrUndefined<T[K]> }
+        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
     > {
-        <K extends keyof T & string>(key: K, value: T[K]): TChildrenStates[K];
+        <K extends StringKeys<T>>(key: K, value: T[K]): TChildrenStates[StringKeys<T>];
     }
 }
 
@@ -625,6 +640,26 @@ export namespace DeepStateObject {
 export class DeepStatePrimitive<T> extends DeepStateBase<T> {
     /** The value of the property */
     private _value!: T;
+
+    /**
+     * A helper to satisfy something that must be a `DeepStateBaseOrUndefined<T>`.
+     * @param value `null`, `undefined`, or a non-nullable value to construct a `DeepStatePrimitive` with
+     * @returns `null` or `undefined` if `value` is `null` or `undefined`, else a new `DeepStatePrimitive` with `value`
+     */
+    static NewOrUndefined<T>(value: T | null): DeepStatePrimitive<T> | null;
+    static NewOrUndefined<T>(value: T | undefined): DeepStatePrimitive<T> | undefined;
+    static NewOrUndefined<T>(value: T | null | undefined): DeepStatePrimitive<T> | null | undefined;
+    static NewOrUndefined<T>(value: T | null | undefined): DeepStatePrimitive<T> | null | undefined {
+        if (value === null) {
+            return null;
+        }
+
+        if (value === undefined) {
+            return undefined;
+        }
+
+        return new DeepStatePrimitive(value as T);
+    }
 
     /**
      * Holds a value that does not have children (i.e. not an object or array).

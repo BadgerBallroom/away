@@ -32,9 +32,9 @@ export class MultilineString {
 }
 
 /** A custom Jest matcher that compares whether two multi-line strings are equal, except for their line endings. */
-export default function areMultilineStringsEqual(a: any, b: any): boolean | undefined {
+export default function areMultilineStringsEqual(a: unknown, b: unknown): boolean | undefined {
     let multilineString: MultilineString;
-    let other: any;
+    let other: unknown;
     if (a instanceof MultilineString) {
         multilineString = a;
         other = b;

@@ -6,7 +6,7 @@ import dayjs from "dayjs";
  * @param value A value that might be a valid value in `enumObject`
  * @returns The value in `enumObject` that equals `value` if it is found, else `""`
  */
-export function validateEnumValue<E extends object>(enumObject: E, value: any): E[keyof E] | "" {
+export function validateEnumValue<E extends object>(enumObject: E, value: unknown): E[keyof E] | "" {
     let key: keyof E;
     for (key in enumObject) {
         if (value === enumObject[key]) {

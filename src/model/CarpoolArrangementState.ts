@@ -22,12 +22,15 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
      * @param value The initial arrangement
      */
     constructor(session: Session, value?: CarpoolArrangement) {
-        super(undefined, (key, value): any => {
+        super(undefined, (key, value) => {
             switch (key) {
+                case "auto":
+                    return DeepStatePrimitive.NewOrUndefined<true>(value as CarpoolArrangement["auto"]);
+                case "name":
+                    return new DeepStatePrimitive(value as CarpoolArrangement["name"]);
                 case "carpools":
                     return new CarpoolStateArray(session, value as CarpoolArrangement["carpools"]);
             }
-            return new DeepStatePrimitive(value);
         }, true);
         this._session = session;
         this.setValue(value ?? CarpoolArrangement.DEFAULT);
@@ -49,7 +52,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         return new CarpoolArrangementState(session);
     }
 
-    protected override validateNewValue(newValue: any): CarpoolArrangement {
+    protected override validateNewValue(newValue: unknown): CarpoolArrangement {
         const {
             auto,
             name,

@@ -61,7 +61,7 @@ export class DancerState extends DeepStateObject<Dancer> {
         this._evanescentID = ++DancerState.nextEvanescentID;
     }
 
-    protected override validateNewValue(newValue: any): Dancer {
+    protected override validateNewValue(newValue: unknown): Dancer {
         const {
             name,
             canDriveCarpool,
