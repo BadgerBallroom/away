@@ -14,7 +14,7 @@ export type DeepReadonly<T> =
         // Don't mess with the Dayjs type.
         T :
         // Remove all methods and make everything else read-only.
-        { readonly [P in keyof T]: T[P] extends Function ? never : DeepReadonly<T[P]> }
+        { readonly [P in keyof T]: T[P] extends () => void ? never : DeepReadonly<T[P]> }
     ) :
     // T is not an array or object, so don't mess with it.
     T;
