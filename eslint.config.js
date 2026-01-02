@@ -40,7 +40,6 @@ export default defineConfig(
                     "varsIgnorePattern": "^_",
                 }
             ],
-            "prefer-const": "warn",
             "prefer-rest-params": "off",
             "react/jsx-key": "warn",
             "react/prop-types": "off",
