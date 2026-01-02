@@ -14,6 +14,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import CarpoolState from '../model/CarpoolState';
+import SelectionColors from '../utilities/SelectionColors';
 import { SetCarpoolWhoseDepartureToEdit } from './CarpoolDepartureDialog';
 import DancerTile, { DancerTilePlaceholder } from './DancerTile';
 
@@ -28,7 +29,10 @@ interface CarpoolArrangerDayProps {
     setCarpoolWhoseDepartureToEdit: SetCarpoolWhoseDepartureToEdit;
 }
 
-const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay, setCarpoolWhoseDepartureToEdit }) => {
+const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({
+    carpoolsForDay,
+    setCarpoolWhoseDepartureToEdit,
+}) => {
     return <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {carpoolsForDay.day?.format("LL") ?? <FormattedMessage id={MessageID.noDate} />}
@@ -88,7 +92,10 @@ interface CarpoolContainerContainerProps {
 
 const CARPOOL_DEPARTURE_TIME_SX = { whiteSpace: "nowrap" } as const;
 
-const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({ carpoolState, setCarpoolWhoseDepartureToEdit }) => {
+const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({
+    carpoolState,
+    setCarpoolWhoseDepartureToEdit
+}) => {
     const intl = useIntl();
 
     const onEditDepartureTimeClick = useCallback(() => {
@@ -143,8 +150,17 @@ const CarpoolContainer = styled(Paper)(({ theme }) => ({
     borderColor: getBorderColor(theme),
 }));
 
-const DancerTileContainerBox = styled(Box)(() => `
+const DancerTileContainerBox = styled(Box)(({ theme }) => `
     margin: 2px;
+    user-select: none;
+
+    &:hover, &:focus-within {
+        box-shadow: 0 0 0 1px ${SelectionColors.hover(theme)};
+    }
+
+    &.selected {
+        box-shadow: 0 0 0 3px ${theme.palette.primary.main};
+    }
 `);
 
 interface DancerTileContainerProps {
@@ -156,6 +172,7 @@ interface DancerTileContainerProps {
 
 /**
  * A `Box` that wraps around a dancer tile or a dancer placeholder.
+ * Shows whether the dancer is selected and handles some other selection logic.
  */
 const DancerTileContainer: React.FC<DancerTileContainerProps> = ({ id, children }) => {
     return <DancerTileContainerBox id={id}>{children}</DancerTileContainerBox>;
