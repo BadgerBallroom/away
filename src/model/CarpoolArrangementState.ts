@@ -160,29 +160,26 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
 export namespace CarpoolArrangementState {
     /** A collection of carpools whose departure time is within the given hour. */
     export class CarpoolsForHour {
-        /**
-         * A `Dayjs` object that represents the hour of the day.
-         * The minutes are set to 0, but all smaller units should be ignored.
-         */
+        /** A `Dayjs` object that represents the hour of the day. The minutes and smaller units are truncated to 0. */
         public hour: dayjs.Dayjs | null;
         /** The `CarpoolStates` that depart within the hour. Should be sorted by departure time. */
         public carpoolStates: CarpoolState[];
 
         constructor(hour: CarpoolsForHour["hour"]) {
-            this.hour = hour === null ? null : hour.minute(0);
+            this.hour = hour === null ? null : hour.startOf("hour");
             this.carpoolStates = [];
         }
     }
 
     /** A collection of carpools whose departure time is within the given day. */
     export class CarpoolsForDay {
-        /** A `Dayjs` object that represents the date. Hours and all smaller units should be ignored. */
+        /** A `Dayjs` object that represents the date. Hours and all smaller units are truncated to 0. */
         public day: dayjs.Dayjs | null;
         /** A collection of `CarpoolsForHour` objects that contain carpools that depart within the day. */
         public carpoolsByHour: CarpoolsForHour[];
 
         constructor(day: CarpoolsForDay["day"]) {
-            this.day = day;
+            this.day = day === null ? null : day.startOf("day");
             this.carpoolsByHour = [new CarpoolsForHour(day)];
         }
     }
