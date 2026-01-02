@@ -62,25 +62,29 @@ export class DancerState extends DeepStateObject<Dancer> {
     }
 
     protected override validateNewValue(newValue: any): Dancer {
-        let {
+        const {
             name,
             canDriveCarpool,
-            canDriveMaxPeople,
+            canDriveMaxPeople: _canDriveMaxPeople,
             earliestPossibleDeparture,
             accommodation,
-            prefersSameGender,
+            prefersSameGender: _prefersSameGender,
             gender,
             ...unrecognizedChildren
         } = super.validateNewValue(newValue);
 
         this.unrecognizedChildren = unrecognizedChildren;
 
-        if (typeof canDriveMaxPeople === "string") {
-            canDriveMaxPeople = parseInt(canDriveMaxPeople, 10);
+        let canDriveMaxPeople;
+        if (typeof _canDriveMaxPeople === "string") {
+            canDriveMaxPeople = parseInt(_canDriveMaxPeople, 10);
+        } else {
+            canDriveMaxPeople = _canDriveMaxPeople;
         }
 
-        if (typeof prefersSameGender === "string") {
-            switch (prefersSameGender.toLowerCase()) {
+        let prefersSameGender;
+        if (typeof _prefersSameGender === "string") {
+            switch (_prefersSameGender.toLowerCase()) {
                 case "":
                 case "f":
                 case "false":
@@ -90,7 +94,7 @@ export class DancerState extends DeepStateObject<Dancer> {
                     prefersSameGender = true;
             }
         } else {
-            prefersSameGender = !!prefersSameGender;
+            prefersSameGender = !!_prefersSameGender;
         }
 
         return {

@@ -41,7 +41,6 @@ export default defineConfig(
                     "ignoreRestSiblings": true
                 }
             ],
-            "prefer-const": "warn",
             "prefer-rest-params": "off",
             "react/jsx-key": "warn",
             "react/prop-types": "off",
