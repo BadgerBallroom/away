@@ -158,7 +158,7 @@ const DancersPage: React.FC = () => {
 export default DancersPage;
 
 const GridItemSkeleton = React.forwardRef(function GridItemSkeleton(
-    _: {},
+    _props: object,
     ref: React.ForwardedRef<HTMLDivElement>
 ) {
     return <Grid item ref={ref}>
