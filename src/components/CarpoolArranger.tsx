@@ -14,21 +14,21 @@ import { useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
-import { ShowCarpoolDepartureDialog } from "./CarpoolDepartureDialog";
+import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
 import DeleteButton from "./DeleteButton";
 
 interface CarpoolArrangerFromIDProps {
     /** The ID of the `CarpoolArrangement` that the user will edit */
     arrangementID: ID;
-    /** A callback that opens the dialog to edit a date and time */
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    /** A callback that opens the popover to edit a date and time */
+    showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 /** Lets the user edit the `CarpoolArrangement` with the given ID. */
 export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
     arrangementID,
-    showCarpoolDepartureDialog,
+    showCarpoolDeparturePopover,
 }) => {
     const session = useSession();
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
@@ -49,7 +49,7 @@ export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
     return <CarpoolArranger
         state={carpoolArrangementState}
         onDeleteClick={onDeleteClick}
-        showCarpoolDepartureDialog={showCarpoolDepartureDialog}
+        showCarpoolDeparturePopover={showCarpoolDeparturePopover}
     />;
 };
 
@@ -62,11 +62,11 @@ interface CarpoolArrangerProps extends SharedProps {
     /** A function to execute when the user clicks on the Delete button */
     onDeleteClick?: () => void;
     /** A callback that opens the dialog to edit a date and time */
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 /** Lets the user edit the given `CarpoolArrangement`. */
-const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick, showCarpoolDepartureDialog }) => {
+const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick, showCarpoolDeparturePopover }) => {
     return <>
         <Heading>
             <Toolbar>
@@ -76,7 +76,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick,
         </Heading>
         <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
         <Unassigned state={state} />
-        <Schedule state={state} showCarpoolDepartureDialog={showCarpoolDepartureDialog} />
+        <Schedule state={state} showCarpoolDeparturePopover={showCarpoolDeparturePopover} />
     </>;
 };
 
@@ -132,11 +132,11 @@ const UnassignedBar = styled(Box)(({ theme }) => {
 });
 
 interface ScheduleProps extends SharedProps {
-    showCarpoolDepartureDialog: ShowCarpoolDepartureDialog;
+    showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 /** A table of departure times and carpools. */
-const Schedule: React.FC<ScheduleProps> = ({ state, showCarpoolDepartureDialog }) => {
+const Schedule: React.FC<ScheduleProps> = ({ state, showCarpoolDeparturePopover }) => {
     const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
     useDeepStateChangeListener(state, () => {
         setCarpoolsByDay(state.groupByDepartureTime());
@@ -146,7 +146,7 @@ const Schedule: React.FC<ScheduleProps> = ({ state, showCarpoolDepartureDialog }
         <CarpoolArrangerDay
             key={carpoolsForDay.day?.valueOf()}
             carpoolsForDay={carpoolsForDay}
-            showCarpoolDepartureDialog={showCarpoolDepartureDialog}
+            showCarpoolDeparturePopover={showCarpoolDeparturePopover}
         />,
     )}</>;
 };

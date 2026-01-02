@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
-import CarpoolDepartureDialog, { CarpoolDepartureDialogProps } from "../components/CarpoolDepartureDialog";
+import CarpoolDeparturePopover, { CarpoolDeparturePopoverProps } from "../components/CarpoolDeparturePopover";
 import CarpoolMakerProgressDialog from "../components/CarpoolMakerProgressDialog";
 import { CarpoolPrintDialogFromID } from "../components/CarpoolPrintDialog";
 import WorkspaceWithToolbar from "../components/WorkspaceWithToolbar";
@@ -89,10 +89,10 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
     const onPrintDialogClose = useCallback(() => setPrintingID(""), []);
 
     const [carpoolWhoseDepartureToEdit, setCarpoolWhoseDepartureToEdit] = useState<CarpoolState | null>(null);
-    const onCarpoolDepartureDialogClose = useCallback(() => setCarpoolWhoseDepartureToEdit(null), []);
-    const showCarpoolDepartureDialog = useCallback(({
+    const onCarpoolDeparturePopoverClose = useCallback(() => setCarpoolWhoseDepartureToEdit(null), []);
+    const showCarpoolDeparturePopover = useCallback(({
         carpoolState,
-    }: Omit<CarpoolDepartureDialogProps, "onClose">) => {
+    }: Omit<CarpoolDeparturePopoverProps, "onClose">) => {
         setCarpoolWhoseDepartureToEdit(carpoolState);
     }, []);
 
@@ -105,16 +105,16 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         </>}
     >
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
-        <CarpoolDepartureDialog
+        <CarpoolDeparturePopover
             carpoolState={carpoolWhoseDepartureToEdit}
-            onClose={onCarpoolDepartureDialogClose}
+            onClose={onCarpoolDeparturePopoverClose}
         />
         <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
         {carpoolArrangementList.length ? <>
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />
             <CarpoolArrangerFromID
                 arrangementID={selectedCarpoolArrangement}
-                showCarpoolDepartureDialog={showCarpoolDepartureDialog}
+                showCarpoolDeparturePopover={showCarpoolDeparturePopover}
             />
         </> : <ZeroState><FormattedMessage id={MessageID.carpoolsZero} /></ZeroState>}
     </WorkspaceWithToolbar>;
