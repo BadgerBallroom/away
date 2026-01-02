@@ -6,7 +6,7 @@ import { DeepStateObject, DeepStatePrimitive } from "./DeepState";
 import Session from "./Session";
 
 export default class CarpoolState extends DeepStateObject<Carpool, {
-    departure: DeepStatePrimitive<Dayjs> | DeepStatePrimitive<null>,
+    departure: DeepStatePrimitive<Dayjs> | null,
     occupants: DancerListState,
 }> {
     private static nextEvanescentID = 0;
@@ -26,18 +26,19 @@ export default class CarpoolState extends DeepStateObject<Carpool, {
      * @param value The initial `Carpool` value to hold
      */
     constructor(session: Session, value?: Carpool) {
-        super(undefined, (key, value): any => {
+        super(undefined, (key, value) => {
             switch (key) {
+                case "departure":
+                    return DeepStatePrimitive.NewOrUndefined(value as Carpool["departure"]);
                 case "occupants":
                     return DancerListState.makeAndRegister(session, value as Carpool["occupants"]);
             }
-            return new DeepStatePrimitive(value);
         }, true);
         this.setValue(value ?? Carpool.DEFAULT);
         this._evanescentID = ++CarpoolState.nextEvanescentID;
     }
 
-    protected override validateNewValue(newValue: any): Carpool {
+    protected override validateNewValue(newValue: unknown): Carpool {
         const {
             departure,
             occupants,
