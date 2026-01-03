@@ -213,4 +213,4 @@ export const DANCERS_FAB: FabZoomerFabProps = {
     color: "primary",
     titleID: MessageID.dancersAdd,
     children: <AddIcon />,
-};
+} as const;
