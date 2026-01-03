@@ -145,7 +145,7 @@ export const CanDriveCarpoolMessageIDs: EnumToMessageID<CanDriveCarpool> = {
     [CanDriveCarpool.Yes]: MessageID.yes,
     [CanDriveCarpool.YesIfNeeded]: MessageID.yesIfNeeded,
     [CanDriveCarpool.TravelingOnOwn]: MessageID.dancerTravelingOnOwn,
-};
+} as const;
 
 const CanDriveCarpoolControl: React.FC<DancerFieldProps> = ({ id, dancerState }) => {
     const { ref, skeleton } = useSkeletonOutOfView("DancerCard_CanDriveCarpoolControl");
@@ -231,7 +231,7 @@ export const AccommodationMessageIDs: EnumToMessageID<Accommodation> = {
     [Accommodation.FreeHousingPreferred]: MessageID.dancerAccommodationFreeHousingPreferred,
     [Accommodation.HotelPreferred]: MessageID.dancerAccommodationHotelPreferred,
     [Accommodation.StayingOnOwn]: MessageID.dancerAccommodationStayingOnOwn,
-}
+} as const;
 
 const AccomdationControl: React.FC<DancerFieldProps> = ({ id, dancerState }) => {
     const { ref, skeleton } = useSkeletonOutOfView("DancerCard_AccomdationControl");
@@ -277,7 +277,7 @@ export const GenderMessageIDs: EnumToMessageID<Gender> = {
     [Gender.Male]: MessageID.dancerGenderMale,
     [Gender.Female]: MessageID.dancerGenderFemale,
     [Gender.Other]: MessageID.dancerGenderOther,
-}
+} as const;
 
 const GenderControl: React.FC<DancerFieldProps> = ({ id, dancerState }) => {
     const { ref, skeleton } = useSkeletonOutOfView("DancerCard_GenderControl");

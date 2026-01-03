@@ -7,7 +7,7 @@ import React, { useEffect, useMemo } from 'react';
 import { IntlProvider } from 'react-intl';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
-import DarkModeButton, { useDarkModeToggle } from './components/DarkModeButton';
+import DarkModeButton from './components/DarkModeButton';
 import FabZoomer, { FabZoomerProps } from './components/FabZoomer';
 import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
@@ -17,6 +17,7 @@ import Session from './model/Session';
 import CarpoolsPage from './pages/CarpoolsPage';
 import DancersPage, { DANCERS_FAB } from './pages/DancersPage';
 import HomePage from './pages/HomePage';
+import { useDarkModeToggle } from './utilities/DarkModeHooks';
 
 const enum RoutePaths {
     home = "/",
