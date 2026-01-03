@@ -53,7 +53,24 @@ const CarpoolDeparturePopoverInner: React.FC<CarpoolDeparturePopoverInnerProps> 
         if (anchorEl) {
             const anchorRect = anchorEl.getBoundingClientRect();
 
-            const top = anchorRect.bottom;
+            let offsetTop = 0;
+            if (anchorPosition) {
+                // If `anchorEl` has moved on the screen, attempt to scroll the window so that `anchorEl` is back where
+                // it was. `anchorPosition.top` is the previous `anchorRect.bottom`, so the amount to scroll is the
+                // difference between `anchorPosition.top` and the new `anchorRect.bottom`.
+                let newScrollY = window.scrollY - anchorPosition.top + anchorRect.bottom;
+                const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+                if (newScrollY < 0) {
+                    newScrollY = 0;
+                } else if (newScrollY > maxScrollY) {
+                    newScrollY = maxScrollY;
+                }
+                offsetTop = window.scrollY - newScrollY;
+
+                window.scrollTo({ top: newScrollY, behavior: "instant" });
+            }
+
+            const top = anchorRect.bottom + offsetTop;
             const left = anchorRect.left + anchorRect.width / 2;
 
             if (!anchorPosition
