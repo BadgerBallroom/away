@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { Dayjs } from "dayjs";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
@@ -89,11 +90,14 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
     const onPrintDialogClose = useCallback(() => setPrintingID(""), []);
 
     const [carpoolWhoseDepartureToEdit, setCarpoolWhoseDepartureToEdit] = useState<CarpoolState | null>(null);
+    const [carpoolSuggestedDeparture, setCarpoolSuggestedDeparture] = useState<Dayjs | null>(null);
     const onCarpoolDeparturePopoverClose = useCallback(() => setCarpoolWhoseDepartureToEdit(null), []);
     const showCarpoolDeparturePopover = useCallback(({
         carpoolState,
+        suggestedDepartureTime,
     }: Omit<CarpoolDeparturePopoverProps, "onClose">) => {
         setCarpoolWhoseDepartureToEdit(carpoolState);
+        setCarpoolSuggestedDeparture(suggestedDepartureTime === undefined ? null : suggestedDepartureTime);
     }, []);
 
     return <WorkspaceWithToolbar
@@ -107,6 +111,7 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
         <CarpoolDeparturePopover
             carpoolState={carpoolWhoseDepartureToEdit}
+            suggestedDepartureTime={carpoolSuggestedDeparture}
             onClose={onCarpoolDeparturePopoverClose}
         />
         <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
