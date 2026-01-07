@@ -19,6 +19,8 @@ export interface ShowCarpoolDeparturePopover {
 export interface CarpoolDeparturePopoverProps {
     /** The state object that holds the date and time to edit (or `null` to hide the popover) */
     carpoolState: CarpoolState | null;
+    /** A time to suggest to the user to use as the carpool's departure time */
+    suggestedDepartureTime?: Dayjs | null;
     /** A callback that sets `valueState` to `null` */
     onClose: () => void;
 }
@@ -41,6 +43,7 @@ interface CarpoolDeparturePopoverInnerProps extends Omit<CarpoolDeparturePopover
 /** The actual contents of the popup. This is a separate component because we cannot conditionally call hooks. */
 const CarpoolDeparturePopoverInner: React.FC<CarpoolDeparturePopoverInnerProps> = ({
     carpoolState,
+    suggestedDepartureTime,
     onClose,
 }) => {
     const value = useDeepState(carpoolState, ["departure"]);
@@ -85,6 +88,12 @@ const CarpoolDeparturePopoverInner: React.FC<CarpoolDeparturePopoverInnerProps> 
         carpoolState.setDescendantValue(["departure"], newValue);
     }, [carpoolState]);
 
+    const onUseSuggestedTime = useCallback(() => {
+        if (suggestedDepartureTime) {
+            onChange(suggestedDepartureTime);
+        }
+    }, [suggestedDepartureTime, onChange]);
+
     return <Popover
         open={!!anchorPosition}
         anchorPosition={anchorPosition ?? undefined}
@@ -103,6 +112,11 @@ const CarpoolDeparturePopoverInner: React.FC<CarpoolDeparturePopoverInnerProps> 
                     onChange={onChange}
                     autoFocus
                 />
+                {suggestedDepartureTime &&
+                    <Button onClick={onUseSuggestedTime} variant="contained">
+                        {suggestedDepartureTime.format("L LT")}
+                    </Button>
+                }
             </Stack>
         </DialogContent>
         <DialogActions>

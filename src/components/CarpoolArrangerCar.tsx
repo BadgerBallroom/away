@@ -41,8 +41,8 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
     });
 
     const onEditDepartureTimeClick = useCallback(() => {
-        showCarpoolDeparturePopover({ carpoolState });
-    }, [carpoolState, showCarpoolDeparturePopover]);
+        showCarpoolDeparturePopover({ carpoolState, suggestedDepartureTime });
+    }, [carpoolState, suggestedDepartureTime, showCarpoolDeparturePopover]);
 
     const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
     const emptySeats: string[] = [];
