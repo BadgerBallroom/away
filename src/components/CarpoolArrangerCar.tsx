@@ -57,8 +57,8 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
     }, [carpoolDepartureTime, dancerStates]);
 
     const onEditDepartureTimeClick = useCallback(() => {
-        showCarpoolDepartureDialog({ carpoolState });
-    }, [carpoolState, showCarpoolDepartureDialog]);
+        showCarpoolDepartureDialog({ carpoolState, suggestedDepartureTime });
+    }, [carpoolState, suggestedDepartureTime, showCarpoolDepartureDialog]);
 
     return <CarpoolContainerContainerBox>
         <CarpoolContainer variant="outlined">
