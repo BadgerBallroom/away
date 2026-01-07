@@ -1,4 +1,4 @@
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { validateDayjsValue } from "../utilities/validation";
 import Carpool from "./Carpool";
 import { DancerListState } from "./DancerKLM";
@@ -10,6 +10,7 @@ export default class CarpoolState extends DeepStateObject<Carpool, {
     occupants: DancerListState,
 }> {
     private static nextEvanescentID = 0;
+    private _session: Session;
     private _evanescentID: number;
 
     /**
@@ -35,6 +36,7 @@ export default class CarpoolState extends DeepStateObject<Carpool, {
             }
         }, true);
         this.setValue(value ?? Carpool.DEFAULT);
+        this._session = session;
         this._evanescentID = ++CarpoolState.nextEvanescentID;
     }
 
@@ -51,5 +53,37 @@ export default class CarpoolState extends DeepStateObject<Carpool, {
             departure: validateDayjsValue(departure),
             occupants,
         };
+    }
+
+    /**
+     * Computes the earliest time that this carpool could depart without departing too early for any occupants. Returns
+     * `null` if the carpool's current departure time already not too early for any occupant.
+     * @returns The suggested departure time (or `null` if the current departure time is fine)
+     */
+    public getSuggestedDepartureTime(): Dayjs | null {
+        const dancerIDs = this.getChildValue("occupants");
+        if (!dancerIDs.length) {
+            return null;
+        }
+
+        const dancerMap = this._session.getChildState("dancers").map;
+
+        // Of all the occupants in this carpool, find the last earliest departure time. This is the earliest time that
+        // would accommodate all occupants.
+        let earliestAccommodatingDeparture = dayjs(0);
+        for (const dancerID of dancerIDs) {
+            const dancerDeparture = dancerMap.getChildState(dancerID)?.earliestPossibleDeparture;
+            if (dancerDeparture?.isAfter(earliestAccommodatingDeparture)) {
+                earliestAccommodatingDeparture = dancerDeparture;
+            }
+        }
+
+        // If this carpool does not have a departure time or it departs too early for at least one occupant, return the
+        // earliest time that would accommodate all occupants.
+        const carpoolDeparture = this.getChildValue("departure");
+        if (!carpoolDeparture || carpoolDeparture.isBefore(earliestAccommodatingDeparture)) {
+            return earliestAccommodatingDeparture;
+        }
+        return null;
     }
 }
