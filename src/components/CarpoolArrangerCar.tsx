@@ -1,13 +1,16 @@
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EditIcon from '@mui/icons-material/Edit';
+import WarningIcon from '@mui/icons-material/Warning';
 import Box from "@mui/material/Box";
 import Button from '@mui/material/Button';
 import Paper from "@mui/material/Paper";
 import { styled } from '@mui/material/styles';
-import { useCallback } from 'react';
+import dayjs from 'dayjs';
+import { useCallback, useMemo } from 'react';
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolState from '../model/CarpoolState';
+import { useDeepState } from '../model/DeepStateHooks';
 import { ShowCarpoolDeparturePopover } from './CarpoolDeparturePopover';
 import DancerTile, { DancerTilePlaceholder } from './DancerTile';
 import DancerTileContainer from './DancerTileContainer';
@@ -26,6 +29,7 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
 }) => {
     const intl = useIntl();
 
+    const carpoolDepartureTime = useDeepState(carpoolState, ["departure"]);
     const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
 
     const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
@@ -33,6 +37,24 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
     for (let i = dancerStates.length; i < carCapacity; ++i) {
         emptySeats.push(`${dancerStates[0].evanescentID} empty ${i}`);
     }
+
+    // If the car departs too early for at least one occupant, this is the earliest time that would accommodate all
+    // occupants. Otherwise, it is null.
+    const suggestedDepartureTime = useMemo(() => {
+        if (!carpoolDepartureTime) {
+            return null;
+        }
+
+        let earliestAccommodatingDeparture = dayjs(0);
+        for (const dancerState of dancerStates) {
+            const dancerDeparture = dancerState.getChildValue("earliestPossibleDeparture");
+            if (dancerDeparture?.isAfter(earliestAccommodatingDeparture)) {
+                earliestAccommodatingDeparture = dancerDeparture;
+            }
+        }
+
+        return carpoolDepartureTime.isBefore(earliestAccommodatingDeparture) ? earliestAccommodatingDeparture : null;
+    }, [carpoolDepartureTime, dancerStates]);
 
     const onEditDepartureTimeClick = useCallback(() => {
         showCarpoolDepartureDialog({ carpoolState });
@@ -44,22 +66,26 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
                 <div><DirectionsCarIcon /></div>
                 <Button
                     id={`carpool-${carpoolState.evanescentID}-departure-time`}
-                    color="inherit"
+                    color={suggestedDepartureTime ? "warning" : "inherit"}
                     variant="outlined"
-                    endIcon={<EditIcon />}
-                    title={intl.formatMessage({ id: MessageID.carpoolEditDepartureTime })}
+                    endIcon={suggestedDepartureTime ? <WarningIcon /> : <EditIcon />}
+                    title={intl.formatMessage({
+                        id: suggestedDepartureTime
+                            ? MessageID.carpoolLeavesBeforeOneOfOccupantsCan
+                            : MessageID.carpoolEditDepartureTime
+                    })}
                     onClick={onEditDepartureTimeClick}
                     sx={CARPOOL_DEPARTURE_TIME_SX}
                 >
                     {
-                        carpoolState.getChildValue("departure")?.format("LT")
+                        carpoolDepartureTime?.format("LT")
                         ?? <FormattedMessage id={MessageID.noTime} />
                     }
                 </Button>
             </Box>
             {dancerStates.map(dancerState => {
                 return <DancerTileContainer key={dancerState.evanescentID}>
-                    <DancerTile dancerState={dancerState} elevation={3} />
+                    <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
                 </DancerTileContainer>;
             })}
             {emptySeats.map(key => {

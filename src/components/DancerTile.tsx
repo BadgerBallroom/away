@@ -3,11 +3,13 @@ import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { SxProps } from "@mui/material";
+import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { styled, Theme } from '@mui/material/styles';
 import Typography, { TypographyOwnProps } from "@mui/material/Typography";
-import React from "react";
+import { Dayjs } from 'dayjs';
+import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { EnumToMessageID, MessageID } from "../i18n/messages";
 import Dancer, { CanDriveCarpool, Gender } from "../model/Dancer";
@@ -30,18 +32,29 @@ const StyledPaperDashed = styled(StyledPaper)({ borderStyle: "dashed" });
 
 interface DancerTileProps {
     dancerState: DancerState;
+    carpoolDepartureTime?: Dayjs | null;
     elevation?: number;
     sx?: SxProps<Theme>;
 }
 
 /** Displays one dancer's details in a compact layout. */
-const DancerTile: React.FC<DancerTileProps> = ({ dancerState, elevation, sx }) => {
+const DancerTile: React.FC<DancerTileProps> = ({ dancerState, carpoolDepartureTime, elevation, sx }) => {
     const name = useDeepState(dancerState, ["name"]);
     const canDriveCarpool = useDeepState(dancerState, ["canDriveCarpool"]);
     const earliestPossibleDeparture = useDeepState(dancerState, ["earliestPossibleDeparture"]);
     const accommodation = useDeepState(dancerState, ["accommodation"]);
     const prefersSameGender = useDeepState(dancerState, ["prefersSameGender"]);
     const gender = useDeepState(dancerState, ["gender"]);
+
+    const carpoolDepartsBeforeDancer = useMemo(() => {
+        return !!(carpoolDepartureTime && earliestPossibleDeparture?.isAfter(carpoolDepartureTime));
+    }, [carpoolDepartureTime, earliestPossibleDeparture]);
+    const earliestPossibleDepartureSx = useMemo(() => {
+        return carpoolDepartsBeforeDancer ? {
+            bgcolor: "warning.main",
+            color: 'warning.contrastText',
+        } : undefined;
+    }, [carpoolDepartsBeforeDancer]);
 
     return <TooltipPropsContextProvider disableInteractive>
         <StyledPaper elevation={elevation} sx={sx}>
@@ -55,8 +68,14 @@ const DancerTile: React.FC<DancerTileProps> = ({ dancerState, elevation, sx }) =
             </TooltipPropsContextProvider>
             <TooltipPropsContextProvider placement="left">
                 <LineOfText
-                    titleMessageID={MessageID.dancerEarliestPossibleDeparture}
-                >{earliestPossibleDeparture?.format("L LT")}</LineOfText>
+                    titleMessageID={carpoolDepartsBeforeDancer
+                        ? MessageID.carpoolLeavesBeforeOccupantCan
+                        : MessageID.dancerEarliestPossibleDeparture}
+                >
+                    <Box component="span" sx={earliestPossibleDepartureSx}>
+                        {earliestPossibleDeparture?.format("L LT")}
+                    </Box>
+                </LineOfText>
             </TooltipPropsContextProvider>
             <TooltipPropsContextProvider placement="bottom">
                 <LineOfText
