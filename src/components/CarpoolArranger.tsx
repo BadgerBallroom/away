@@ -116,7 +116,9 @@ const Unassigned: React.FC<SharedProps> = ({ state }) => {
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getReferencedStates().map(dancerState =>
                 <Grid item key={dancerState.evanescentID}>
-                    <DancerTile dancerState={dancerState} elevation={3} />
+                    <DancerTileContainer>
+                        <DancerTile dancerState={dancerState} elevation={3} />
+                    </DancerTileContainer>
                 </Grid>
             )}
         </Grid>
