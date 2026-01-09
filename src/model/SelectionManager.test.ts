@@ -53,22 +53,22 @@ describe("SelectionManager", () => {
         const { selection, onSelectableElementClick: onClick } = renderSelectionManager();
 
         act(() => {
-            onClick(makeClickEvent(), 3); // should select 3
-            onClick(makeClickEvent({ shiftKey: true }), 5); // should select 4 and 5
+            onClick(makeClickEvent(), 8); // should select 8
+            onClick(makeClickEvent({ shiftKey: true }), 10); // should select 9 and 10
         });
 
-        expectSelectionToEqual(selection, [3, 4, 5]);
+        expectSelectionToEqual(selection, [8, 9, 10]);
     });
 
     test("selects range of items: click, Shift+Click on earlier item", () => {
         const { selection, onSelectableElementClick: onClick } = renderSelectionManager();
 
         act(() => {
-            onClick(makeClickEvent(), 5); // should select 5
-            onClick(makeClickEvent({ shiftKey: true }), 3); // should select 4 and 3
+            onClick(makeClickEvent(), 10); // should select 10
+            onClick(makeClickEvent({ shiftKey: true }), 8); // should select 9 and 8
         });
 
-        expectSelectionToEqual(selection, [3, 4, 5]);
+        expectSelectionToEqual(selection, [8, 9, 10]);
     });
 
     test("selects only last item: click, Shift+Click, click", () => {
