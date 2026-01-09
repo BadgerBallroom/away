@@ -96,7 +96,7 @@ const DancerCardPaper = styled(Paper)(({ theme }) => {
         }
 
         &.selected {
-            box-shadow: inset 0 0 0 3px ${theme.palette.primary.main}, ${boxShadow};
+            box-shadow: inset 0 0 0 3px ${SelectionColors.selected(theme)}, ${boxShadow};
         }
     `;
 });

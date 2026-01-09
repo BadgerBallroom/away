@@ -10,6 +10,15 @@ export namespace SelectionColors {
         const darkMode = theme.palette.mode === "dark";
         return darkMode ? "#fff" : "rgba(0, 0, 0, 0.87)";
     }
+
+    /**
+     * Computes the color of the outline of an element that is selected.
+     * @param theme The current theme
+     * @returns The color
+     */
+    export function selected(theme: Theme): string {
+        return theme.palette.primary.main;
+    }
 }
 
 export default SelectionColors;
