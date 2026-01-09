@@ -73,16 +73,16 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
                     }
                 </Button>
             </Box>
-            {dancerStates.map(dancerState => {
-                return <DancerTileContainer key={dancerState.evanescentID}>
+            {dancerStates.map(dancerState =>
+                <DancerTileContainer key={dancerState.evanescentID}>
                     <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
-                </DancerTileContainer>;
-            })}
-            {emptySeats.map(key => {
-                return <DancerTileContainer key={key}>
+                </DancerTileContainer>,
+            )}
+            {emptySeats.map(key =>
+                <DancerTileContainer key={key}>
                     <DancerTilePlaceholder />
-                </DancerTileContainer>;
-            })}
+                </DancerTileContainer>,
+            )}
         </CarpoolContainer>
     </CarpoolContainerContainerBox>;
 };
