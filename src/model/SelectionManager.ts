@@ -121,9 +121,10 @@ export function useSelectionManager(): SelectionManager {
                 // If the Shift key is pressed, add all items between this item and the item that was last selected
                 // without the Shift key being held down.
                 if (event.shiftKey && lastNonShiftSelectedRef.current !== -1) {
-                    const range = [index, lastNonShiftSelectedRef.current];
-                    range.sort();
-                    for (let i = range[0]; i <= range[1]; ++i) {
+                    const [start, end] = index < lastNonShiftSelectedRef.current
+                        ? [index, lastNonShiftSelectedRef.current]
+                        : [lastNonShiftSelectedRef.current, index];
+                    for (let i = start; i <= end; ++i) {
                         selectionSet.add(i);
                     }
                 } else {
