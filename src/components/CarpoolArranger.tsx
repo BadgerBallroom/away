@@ -16,6 +16,7 @@ import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
+import DancerTileContainer from "./DancerTileContainer";
 import DeleteButton from "./DeleteButton";
 
 interface CarpoolArrangerFromIDProps {
@@ -117,7 +118,9 @@ const Unassigned: React.FC<SharedProps> = ({ state }) => {
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getReferencedStates().map(dancerState =>
                 <Grid key={dancerState.evanescentID}>
-                    <DancerTile dancerState={dancerState} elevation={3} />
+                    <DancerTileContainer>
+                        <DancerTile dancerState={dancerState} elevation={3} />
+                    </DancerTileContainer>
                 </Grid>,
             )}
         </Grid>
