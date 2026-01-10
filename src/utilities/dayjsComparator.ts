@@ -1,6 +1,6 @@
 import { Dayjs } from "dayjs";
 
-export default function dayjsComparator(a: Dayjs | null, b: Dayjs | null) {
+export default function dayjsComparator(a: Dayjs | null, b: Dayjs | null): number {
     if (b) {
         if (a) {
             // If both times are not null, the earlier time goes before the later time.
