@@ -5,19 +5,22 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/material/styles";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { DancerListState } from "../model/DancerKLM";
 import { useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
+import { useElementSelectionManager } from "../model/ElementSelectionHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
-import DancerTileContainer from "./DancerTileContainer";
+import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
+import { isInsideDancerTileContainer } from "./DancerTileContainerUtils";
 import DeleteButton from "./DeleteButton";
+import ElementSelectionContext from "./ElementSelectionContext";
 
 interface CarpoolArrangerFromIDProps {
     /** The ID of the `CarpoolArrangement` that the user will edit */
@@ -68,6 +71,17 @@ interface CarpoolArrangerProps extends SharedProps {
 
 /** Lets the user edit the given `CarpoolArrangement`. */
 const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick, showCarpoolDeparturePopover }) => {
+    const selectionParentRef = useRef<HTMLElement>(undefined);
+    const { selection, clearSelection } = useElementSelectionManager<HTMLElement>(
+        selectionParentRef.current?.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`) ?? [],
+    );
+
+    const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
+        if (!isInsideDancerTileContainer(event.target)) {
+            clearSelection();
+        }
+    }, [clearSelection]);
+
     return <>
         <Heading>
             <Toolbar>
@@ -76,8 +90,12 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick,
             </Toolbar>
         </Heading>
         <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
-        <Unassigned state={state} />
-        <Schedule state={state} showCarpoolDeparturePopover={showCarpoolDeparturePopover} />
+        <ElementSelectionContext.Provider value={selection}>
+            <Box ref={selectionParentRef} onClick={onSelectionParentClick}>
+                <Unassigned state={state} />
+                <Schedule state={state} showCarpoolDeparturePopover={showCarpoolDeparturePopover} />
+            </Box>
+        </ElementSelectionContext.Provider>
     </>;
 };
 
