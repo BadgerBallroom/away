@@ -5,19 +5,22 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from '@mui/material/styles';
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangement from '../model/CarpoolArrangement';
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { DancerListState } from "../model/DancerKLM";
 import { useDeepState, useDeepStateChangeHandler } from "../model/DeepStateHooks";
+import { useElementSelectionManager } from "../model/ElementSelectionHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from './CarpoolArrangerDay';
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
+import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
 import DeleteButton from "./DeleteButton";
+import ElementSelectionContext from "./ElementSelectionContext";
 
 interface CarpoolArrangerFromIDProps {
     /** The ID of the `CarpoolArrangement` that the user will edit */
@@ -68,6 +71,11 @@ interface CarpoolArrangerProps extends SharedProps {
 
 /** Lets the user edit the given `CarpoolArrangement`. */
 const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick, showCarpoolDepartureDialog }) => {
+    const selectionParentRef = useRef<HTMLElement>();
+    const { selection, clearSelection } = useElementSelectionManager(
+        selectionParentRef.current?.getElementsByClassName(DANCER_TILE_CONTAINER_CLASSNAME) ?? []
+    );
+
     return <>
         <Heading>
             <Toolbar>
@@ -76,8 +84,12 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick,
             </Toolbar>
         </Heading>
         <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
-        <Unassigned state={state} />
-        <Schedule state={state} showCarpoolDepartureDialog={showCarpoolDepartureDialog} />
+        <ElementSelectionContext.Provider value={selection}>
+            <Box ref={selectionParentRef} onClick={clearSelection}>
+                <Unassigned state={state} />
+                <Schedule state={state} showCarpoolDepartureDialog={showCarpoolDepartureDialog} />
+            </Box>
+        </ElementSelectionContext.Provider>
     </>;
 };
 
