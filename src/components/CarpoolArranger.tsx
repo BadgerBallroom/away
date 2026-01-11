@@ -23,7 +23,9 @@ interface CarpoolArrangerFromIDProps {
 }
 
 /** Lets the user edit the `CarpoolArrangement` with the given ID. */
-export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({ arrangementID }) => {
+export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
+    arrangementID,
+}) => {
     const session = useSession();
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
 
@@ -40,7 +42,10 @@ export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({ ar
         return null;
     }
 
-    return <CarpoolArranger state={carpoolArrangementState} onDeleteClick={onDeleteClick} />;
+    return <CarpoolArranger
+        state={carpoolArrangementState}
+        onDeleteClick={onDeleteClick}
+    />;
 };
 
 interface SharedProps {
@@ -127,6 +132,9 @@ const Schedule: React.FC<SharedProps> = ({ state }) => {
     });
 
     return <>{carpoolsByDay.map(carpoolsForDay =>
-        <CarpoolArrangerDay key={carpoolsForDay.day?.valueOf()} carpoolsForDay={carpoolsForDay} />,
+        <CarpoolArrangerDay
+            key={carpoolsForDay.day?.valueOf()}
+            carpoolsForDay={carpoolsForDay}
+        />,
     )}</>;
 };
