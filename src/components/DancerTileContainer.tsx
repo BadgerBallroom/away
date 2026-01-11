@@ -88,11 +88,25 @@ const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
         event.stopPropagation();
     }, [onClick]);
 
+    const onFocus = useCallback(() => {
+        if (!ref.current) {
+            return;
+        }
+
+        // Get the top of the tile below the headers at the top of the viewport. `scroll-margin-top` only works when the
+        // page is being scrolled, which is not necessarily the case when moving focus.
+        const boundingClientRect = ref.current.getBoundingClientRect();
+        if (boundingClientRect.top < 112) {
+            window.scrollBy({ top: boundingClientRect.top - 120, behavior: "instant" });
+        }
+    }, []);
+
     return <DancerTileContainerBox
         ref={ref}
         className={isSelected ? `${DANCER_TILE_CONTAINER_CLASSNAME} selected` : DANCER_TILE_CONTAINER_CLASSNAME}
         onClick={onClick}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
         role="button"
         tabIndex={0}
     >{children}</DancerTileContainerBox>;
