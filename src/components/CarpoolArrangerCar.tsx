@@ -13,7 +13,7 @@ import CarpoolState from '../model/CarpoolState';
 import { useDeepState } from '../model/DeepStateHooks';
 import { ShowCarpoolDeparturePopover } from './CarpoolDeparturePopover';
 import DancerTile, { DancerTilePlaceholder } from './DancerTile';
-import DancerTileContainer from './DancerTileContainer';
+import DancerTileContainer, { DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME } from './DancerTileContainer';
 
 interface CarpoolContainerContainerProps {
     carpoolState: CarpoolState;
@@ -61,7 +61,7 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
     }, [carpoolState, suggestedDepartureTime, showCarpoolDepartureDialog]);
 
     return <CarpoolContainerContainerBox>
-        <CarpoolContainer variant="outlined">
+        <CarpoolContainer variant="outlined" className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
             <Box textAlign="center" sx={CAR_HEADING_SX}>
                 <div><DirectionsCarIcon /></div>
                 <Button

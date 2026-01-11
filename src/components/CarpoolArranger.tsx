@@ -18,7 +18,7 @@ import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from './CarpoolArrangerDay';
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile from "./DancerTile";
-import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
+import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME, DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME } from "./DancerTileContainer";
 import DeleteButton from "./DeleteButton";
 import ElementSelectionContext from "./ElementSelectionContext";
 
@@ -124,7 +124,7 @@ const Unassigned: React.FC<SharedProps> = ({ state }) => {
     const unassignedArray: ID[] = [];
     unassigned.forEach(id => unassignedArray.push(id));
     const unassignedState = DancerListState.makeAndRegister(session, unassignedArray);
-    return <UnassignedBar>
+    return <UnassignedBar className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getReferencedStates().map(dancerState =>
                 <Grid item key={dancerState.evanescentID}>
