@@ -124,4 +124,11 @@ function focusOnAdjacentTile(current: Element | undefined, horizontalOffset: num
     }
 
     adjacent.focus();
+
+    // Get the top of the tile below the headers at the top of the viewport. `scroll-margin-top` only works when the
+    // page is being scrolled, which is not necessarily the case when moving focus.
+    const boundingClientRect = adjacent.getBoundingClientRect();
+    if (boundingClientRect.top < 112) {
+        window.scrollBy({ top: boundingClientRect.top - 120, behavior: "instant" });
+    }
 }
