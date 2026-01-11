@@ -1,15 +1,10 @@
-import Fab, { FabProps } from "@mui/material/Fab";
+import Fab from "@mui/material/Fab";
 import { useTheme } from "@mui/material/styles";
 import Zoom from "@mui/material/Zoom";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useIntl } from "react-intl";
 import { useLocation } from "react-router-dom";
-import { MessageID } from "../i18n/messages";
-import { useSession } from "../model/SessionHooks";
-
-export interface FabZoomerFabProps extends FabProps {
-    titleID: MessageID;
-}
+import { FabZoomerFabProps } from "./FabZoomerProps";
 
 export interface FabZoomerProps {
     path: string;
@@ -21,7 +16,6 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
     const theme = useTheme();
     const intl = useIntl();
     const location = useLocation();
-    const session = useSession();
 
     const animatingIn = location.pathname === path;
     const timeout = useMemo(() => ({
@@ -31,8 +25,6 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
     const style = useMemo(() => ({
         transitionDelay: `${animatingIn ? theme.transitions.duration.leavingScreen : 0}ms`,
     }), [animatingIn, theme]);
-
-    const onClick = useCallback(() => session.triggerFABHandlers(), [session]);
 
     if (!fab) {
         return null;
@@ -47,7 +39,6 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
     >
         <Fab
             title={intl.formatMessage({ id: titleID })}
-            onClick={onClick}
             sx={FAB_SX}
             {...otherProps}
         >

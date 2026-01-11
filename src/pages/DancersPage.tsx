@@ -12,12 +12,12 @@ import { FormattedMessage } from 'react-intl';
 import DancerCard from '../components/DancerCard';
 import DancerSortDialog from '../components/DancerSortDialog';
 import DeleteButton from '../components/DeleteButton';
-import { FabZoomerFabProps } from '../components/FabZoomer';
+import { useFabForPage } from '../components/FabZoomerHooks';
 import WorkspaceWithToolbar from '../components/WorkspaceWithToolbar';
 import { MessageID } from '../i18n/messages';
 import { DancerListState } from '../model/DancerKLM';
 import DancerState from '../model/DancerState';
-import { useDancerListState, useSession } from '../model/SessionHooks';
+import { useDancerListState } from '../model/SessionHooks';
 import SelectionManager, { useSelectionManager } from '../utilities/SelectionManager';
 
 const DancersPage: React.FC = () => {
@@ -26,8 +26,6 @@ const DancersPage: React.FC = () => {
         const timeout = setTimeout(() => setLoading(false), 0);
         return () => clearTimeout(timeout);
     }, []);
-
-    const session = useSession();
 
     const {
         selection: { set: selectionSet },
@@ -76,8 +74,11 @@ const DancersPage: React.FC = () => {
         dancerListState.addTemporaryDancer();
     }, [dancerListState]);
 
-    useEffect(() => {
-        const handler = async () => {
+    useFabForPage(() => ({
+        color: "primary",
+        titleID: MessageID.dancersAdd,
+        children: <AddIcon />,
+        onClick: async () => {
             for (let i = 0; i < 240; ++i) {
                 const temporaryDancer = dancerListState.temporaryDancer;
                 // The temporary dancer might not be there if the `useEffect` above hasn't run yet.
@@ -93,10 +94,8 @@ const DancersPage: React.FC = () => {
                 }
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
-        };
-        session.registerFABHandler(handler);
-        return () => session.unregisterFABHandler(handler);
-    }, [session, dancerListState]);
+        },
+    }), [dancerListState]);
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
@@ -208,9 +207,3 @@ const GridItem = React.forwardRef(function GridItem(
         />
     </Grid>;
 });
-
-export const DANCERS_FAB: FabZoomerFabProps = {
-    color: "primary",
-    titleID: MessageID.dancersAdd,
-    children: <AddIcon />,
-} as const;

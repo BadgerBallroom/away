@@ -42,7 +42,9 @@ export default defineConfig(
             "prefer-rest-params": "off",
             "react/prop-types": "off",
             "react/react-in-jsx-scope": "off",
-            "react-hooks/exhaustive-deps": "error",
+            "react-hooks/exhaustive-deps": ["error", {
+                "additionalHooks": "(useFabProps)",
+            }],
             "react-refresh/only-export-components": [
                 "warn",
                 { allowConstantExport: true },

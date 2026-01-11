@@ -8,14 +8,14 @@ import { IntlProvider } from 'react-intl';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
 import DarkModeButton from './components/DarkModeButton';
-import FabZoomer, { FabZoomerProps } from './components/FabZoomer';
+import FabRenderer from './components/FabRenderer';
 import PageContent from './components/PageContent';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
 import { MessageID, MESSAGES } from './i18n/messages';
 import Session from './model/Session';
 import CarpoolsPage from './pages/CarpoolsPage';
-import DancersPage, { DANCERS_FAB } from './pages/DancersPage';
+import DancersPage from './pages/DancersPage';
 import HomePage from './pages/HomePage';
 import { useDarkModeToggle } from './utilities/DarkModeHooks';
 
@@ -25,7 +25,7 @@ const enum RoutePaths {
     carpools = "/carpools",
 }
 
-interface Page extends AppNavigationPage, FabZoomerProps {
+interface Page extends AppNavigationPage {
     element: React.ReactNode;
 }
 
@@ -39,7 +39,6 @@ const PAGES: Page[] = [
         path: RoutePaths.dancers,
         messageID: MessageID.navDancers,
         element: <DancersPage />,
-        fab: DANCERS_FAB
     },
     {
         path: RoutePaths.carpools,
@@ -107,9 +106,7 @@ const App: React.FC = () => {
                             ))}
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
-                        {PAGES.map(page => (
-                            <FabZoomer key={page.path} {...page} />
-                        ))}
+                        <FabRenderer />
                     </BrowserRouter>
                 </SessionContext.Provider>
             </IntlProvider>

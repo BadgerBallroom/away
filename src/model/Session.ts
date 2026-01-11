@@ -1,3 +1,4 @@
+import { FabDisplayer } from "../components/FabZoomerProps";
 import { CarpoolArrangementKLM, CarpoolArrangementKLMState } from "./CarpoolArrangementKLM";
 import { DancerKLM, DancerKLMState } from "./DancerKLM";
 import { DeepStateObject, DeepStatePrimitive } from "./DeepState";
@@ -36,8 +37,10 @@ export default class Session extends DeepStateObject<SessionProps, {
     private _isDirty = false;
     /** The ID of the timeout for saving the session in localStorage */
     private _saveTimeout: ReturnType<typeof setTimeout> | undefined;
-    /** Functions to call when the Floating Action Button (FAB) is clicked */
-    private _fabHandlers: (() => void)[] = [];
+    /** A callback to pass parameters to display the floating action button (FAB) */
+    private _fabDisplayer: FabDisplayer | null = null;
+    /** A buffer that stores parameters to display the floating action button while {@link _fabDisplayer} is `null` */
+    private _fabDisplayQueue: Parameters<FabDisplayer>[] = [];
 
     /**
      * Represents one trip for the ballroom dance team.
@@ -145,29 +148,29 @@ export default class Session extends DeepStateObject<SessionProps, {
     // #endregion
 
     // #region Floating Action Button
-    /** Registers a callback for when the Floating Action Button (FAB) is clicked. */
-    public registerFABHandler(handler: () => void): void {
-        const index = this._fabHandlers.indexOf(handler);
-        if (index === -1) {
-            this._fabHandlers.push(handler);
-        }
-    }
-
-    /** Unregisters a callback that was previously registered with `registerFABHandler`. */
-    public unregisterFABHandler(handler: () => void): void {
-        const index = this._fabHandlers.indexOf(handler);
-        if (index !== -1) {
-            this._fabHandlers.splice(index, 1);
+    /**
+     * Registers a callback that gets called when a page passes parameters to display the floating action button.
+     * @param displayer The callback (or `null` to unregister)
+     */
+    public registerFABDisplayer(displayer: FabDisplayer | null): void {
+        this._fabDisplayer = displayer;
+        if (this._fabDisplayer) {
+            for (const props of this._fabDisplayQueue) {
+                this._fabDisplayer(...props);
+            }
+            this._fabDisplayQueue = [];
         }
     }
 
     /**
-     * Call this when the Floating Action Button (FAB) is clicked.
-     * Calls the callbacks that were registered with `registerFABHandler`.
+     * Forwards parameters to display the floating action button to the callback that will display it.
+     * @param props Parameters for the floating action button
      */
-    public triggerFABHandlers(): void {
-        for (const handler of this._fabHandlers) {
-            handler();
+    public displayFAB(...props: Parameters<FabDisplayer>): void {
+        if (this._fabDisplayer) {
+            this._fabDisplayer(...props);
+        } else {
+            this._fabDisplayQueue.push(props);
         }
     }
     // #endregion
