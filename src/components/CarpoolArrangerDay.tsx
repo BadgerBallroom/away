@@ -17,7 +17,9 @@ interface CarpoolArrangerDayProps {
     carpoolsForDay: CarpoolArrangementState.CarpoolsForDay;
 }
 
-const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay }) => {
+const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({
+    carpoolsForDay,
+}) => {
     return <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {carpoolsForDay.day?.format("LL") ?? <FormattedMessage id={MessageID.noDate} />}
