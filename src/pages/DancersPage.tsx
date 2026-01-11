@@ -17,8 +17,8 @@ import WorkspaceWithToolbar from '../components/WorkspaceWithToolbar';
 import { MessageID } from '../i18n/messages';
 import { DancerListState } from '../model/DancerKLM';
 import DancerState from '../model/DancerState';
-import SelectionManager, { useSelectionManager } from '../model/SelectionManager';
 import { useDancerListState, useSession } from '../model/SessionHooks';
+import SelectionManager, { useSelectionManager } from '../utilities/SelectionManager';
 
 const DancersPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
