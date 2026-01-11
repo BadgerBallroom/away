@@ -4,7 +4,16 @@ import { useCallback, useRef } from "react";
 import { useSelectableElementAttributes } from "../model/ElementSelectionHooks";
 import StaticState, { useStaticState } from "../utilities/ExternalStore";
 import SelectionColors from "../utilities/SelectionColors";
+import XYNavigator from "../utilities/XYNavigator";
 
+/**
+ * All {@link DancerTileContainer}s within an ancestor with this class name will be considered to have the same vertical
+ * position, so moving from one to another is moving left or right. Moving up or down would involve moving to another
+ * element with this class name.
+ */
+export const DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME = "dancer-tile-horizontal-navigation-ancestor";
+
+/** All {@link DancerTileContainer}s will have this class name in the DOM. */
 export const DANCER_TILE_CONTAINER_CLASSNAME = "dancer-tile-container";
 
 /**
@@ -52,10 +61,40 @@ const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
         }));
     }, [onClickSerializer, setOnClickSerializer, shouldSelect, onClickSelect]);
 
+    const onKeyDown = useCallback((event: React.KeyboardEvent) => {
+        switch (event.key) {
+            case "ArrowUp":
+                focusOnAdjacentTile(ref.current, 0, -1);
+                break;
+            case "ArrowDown":
+                focusOnAdjacentTile(ref.current, 0, 1);
+                break;
+            case "ArrowLeft":
+                focusOnAdjacentTile(ref.current, -1, 0);
+                break;
+            case "ArrowRight":
+                focusOnAdjacentTile(ref.current, 1, 0);
+                break;
+            case " ":
+            case "Enter":
+                onClick(event);
+                break;
+            default:
+                // Don't prevent default and stop propagation.
+                return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+    }, [onClick]);
+
     return <DancerTileContainerBox
         ref={ref}
         className={isSelected ? `${DANCER_TILE_CONTAINER_CLASSNAME} selected` : DANCER_TILE_CONTAINER_CLASSNAME}
         onClick={onClick}
+        onKeyDown={onKeyDown}
+        role="button"
+        tabIndex={0}
     >{children}</DancerTileContainerBox>;
 };
 
@@ -80,3 +119,23 @@ const DancerTileContainerBox = styled(Box)(({ theme }) => `
  * the return value of the last `.then()` call, on which `.then()` can be called to chain another execution.
  */
 const onClickSerializerStore = new StaticState(Promise.resolve());
+
+/** Handles keyboard navigation for all {@link DancerTileContainer}s. */
+const xyNavigator = new XYNavigator<HTMLElement>(
+    DANCER_TILE_CONTAINER_CLASSNAME,
+    DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME,
+);
+
+/**
+ * Moves focus to another `DancerTileContainer`.
+ * @param current The `ref` of the currently focused `DancerTileContainer`
+ * @param horizontalOffset The number of `DancerTileContainers` to move left (negative) or right (positive)
+ * @param verticalOffset The number of `DancerTileContainers` to move up (negative) or down (positive)
+ */
+function focusOnAdjacentTile(current: HTMLElement | undefined, horizontalOffset: number, verticalOffset: number): void {
+    if (!current) {
+        return;
+    }
+
+    xyNavigator.findLocation(current, horizontalOffset, verticalOffset)?.focus();
+}
