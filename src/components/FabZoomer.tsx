@@ -1,7 +1,7 @@
 import Fab, { FabProps } from "@mui/material/Fab";
 import { useTheme } from "@mui/material/styles";
 import Zoom from "@mui/material/Zoom";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useIntl } from "react-intl";
 import { useLocation } from "react-router-dom";
 import { MessageID } from "../i18n/messages";
@@ -24,6 +24,13 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
     const session = useSession();
 
     const animatingIn = location.pathname === path;
+    const timeout = useMemo(() => ({
+        enter: theme.transitions.duration.enteringScreen,
+        exit: theme.transitions.duration.leavingScreen,
+    }), [theme]);
+    const style = useMemo(() => ({
+        transitionDelay: `${animatingIn ? theme.transitions.duration.leavingScreen : 0}ms`,
+    }), [animatingIn, theme]);
 
     const onClick = useCallback(() => session.triggerFABHandlers(), [session]);
 
@@ -34,23 +41,14 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
     const { titleID, children, ...otherProps } = fab;
     return <Zoom
         in={animatingIn}
-        timeout={{
-            enter: theme.transitions.duration.enteringScreen,
-            exit: theme.transitions.duration.leavingScreen
-        }}
-        style={{
-            transitionDelay: `${animatingIn ? theme.transitions.duration.leavingScreen : 0}ms`
-        }}
+        timeout={timeout}
+        style={style}
         unmountOnExit
     >
         <Fab
             title={intl.formatMessage({ id: titleID })}
             onClick={onClick}
-            sx={{
-                position: "fixed",
-                bottom: 16,
-                right: 16
-            }}
+            sx={FAB_SX}
             {...otherProps}
         >
             {children}
@@ -59,3 +57,9 @@ const FabZoomer: React.FC<FabZoomerProps> = ({ path, fab }) => {
 };
 
 export default FabZoomer;
+
+const FAB_SX = {
+    position: "fixed",
+    bottom: 16,
+    right: 16,
+} as const;
