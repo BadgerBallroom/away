@@ -21,6 +21,10 @@ import { useDeepState } from "../model/DeepStateHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useDancerListState, useSession } from "../model/SessionHooks";
 
+export function Component() {
+    return <CarpoolsPage />;
+}
+
 interface CarpoolsPageProps {
     hideAutoGen?: boolean;
 }

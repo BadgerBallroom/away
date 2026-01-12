@@ -20,6 +20,10 @@ import DancerState from '../model/DancerState';
 import { useDancerListState } from '../model/SessionHooks';
 import SelectionManager, { useSelectionManager } from '../utilities/SelectionManager';
 
+export function Component() {
+    return <DancersPage />;
+}
+
 const DancersPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     useEffect(() => {

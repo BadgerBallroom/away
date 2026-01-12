@@ -2,10 +2,16 @@ import { createContext, useContext } from "react";
 import { FabDisplayer } from "../components/FabZoomerProps";
 
 export class PageContextValue {
+    public toggleThemeMode: () => void;
+
     /** A callback to pass parameters to display the floating action button (FAB) */
     private _fabDisplayer: FabDisplayer | null = null;
     /** A buffer that stores parameters to display the floating action button while {@link _fabDisplayer} is `null` */
     private _fabDisplayQueue: Parameters<FabDisplayer>[] = [];
+
+    constructor(toggleThemeMode: () => void) {
+        this.toggleThemeMode = toggleThemeMode;
+    }
 
     // #region Floating Action Button
     /**
@@ -36,7 +42,7 @@ export class PageContextValue {
     // #endregion
 }
 
-const PageContext = createContext(new PageContextValue());
+const PageContext = createContext(new PageContextValue(() => { }));
 
 export default PageContext;
 

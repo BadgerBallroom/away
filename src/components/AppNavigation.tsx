@@ -15,26 +15,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageID } from '../i18n/messages';
+import routes, { getAbsolutePath } from '../routes';
 import LogoIcon from './LogoIcon';
 import SessionClearDialog from './SessionClearDialog';
 import SessionNameField from './SessionNameField';
 
-export interface AppNavigationPage {
-    /** The URL path to this page */
-    path: string;
-    /** The message ID for the page title */
-    messageID: MessageID;
-}
-
 export interface AppNavigationProps {
-    /** A link to each page will be shown in the navigation menus */
-    pages: AppNavigationPage[];
     /** Any React node to be inserted at the bottom of the menu that appears when the user clicks the menu button */
     drawerFooter?: React.ReactNode;
 }
 
 /** The main navigation UI for the app. */
-const AppNavigation: React.FC<AppNavigationProps> = ({ pages, drawerFooter }) => {
+const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
     const intl = useIntl();
     const location = useLocation();
 
@@ -54,16 +46,20 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ pages, drawerFooter }) =>
     const openDrawer = useCallback(() => setDrawerOpen(true), []);
     const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-    const tabs = pages.map(page => (
-        <Tab
-            key={page.path}
-            label={intl.formatMessage({ id: page.messageID })}
+    const tabs = routes.map(route => {
+        const path = getAbsolutePath(route);
+        if (path === undefined || route.handle === undefined) {
+            return null;
+        }
+        return <Tab
+            key={path}
+            label={intl.formatMessage({ id: route.handle.titleMessageID })}
             onClick={closeDrawer}
             component={Link}
-            value={page.path}
-            to={page.path}
+            value={path}
+            to={path}
         />
-    ));
+    });
 
     const [showSessionClearDialog, setShowSessionClearDialog] = useState(false);
     const confirmSessionClear = useCallback(() => setShowSessionClearDialog(true), []);

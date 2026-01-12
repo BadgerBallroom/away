@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { AppNavigationPage } from "./AppNavigation";
+import { RouteObject, useLocation } from "react-router-dom";
 import { FabZoomerFabProps } from "./FabZoomerProps";
 import { usePageContext } from "./PageContext";
+
+type Path = NonNullable<RouteObject["path"]>;
 
 /**
  * Gathers properties for the floating action button from all pages.
  * @returns A map from each page's path to its properties for its floating action button
  */
-export function useFabRenderInfo(): Map<AppNavigationPage["path"], FabZoomerFabProps> {
+export function useFabRenderInfo(): Map<Path, FabZoomerFabProps> {
     const pageContext = usePageContext();
     const location = useLocation();
 
-    const [result, setResult] = useState(() => new Map<AppNavigationPage["path"], FabZoomerFabProps>());
+    const [result, setResult] = useState(() => new Map<Path, FabZoomerFabProps>());
     useEffect(() => {
         pageContext.registerFABDisplayer(fab => {
             const newResult = new Map(result);

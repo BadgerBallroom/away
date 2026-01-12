@@ -9,27 +9,20 @@ import { styled } from '@mui/material/styles';
 import React, { useCallback, useMemo } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link as RouterLink } from 'react-router-dom';
-import { AppNavigationPage } from '../components/AppNavigation';
 import { MessageID } from '../i18n/messages';
 import logo from '../logo.svg';
+import { getMessageIDsToPaths } from '../routes';
 
-interface HomePageProps {
-    /** A callback that returns other pages in the app. The home page links to some of them. */
-    getPages: () => AppNavigationPage[];
+export function Component() {
+    return <HomePage />;
 }
 
 const Paragraph = styled(Typography)({ marginBottom: "1rem" });
 
-const HomePage: React.FC<HomePageProps> = ({ getPages }) => {
+const HomePage: React.FC = () => {
     const intl = useIntl();
 
-    const pages = useMemo(() => {
-        const pages = {} as Record<MessageID, string>;
-        for (const page of getPages()) {
-            pages[page.messageID] = page.path;
-        }
-        return pages;
-    }, [getPages]);
+    const pages = getMessageIDsToPaths();
 
     const NavLink: React.FC<{ to: MessageID }> = useCallback(
         ({ to }) => <Link component={RouterLink} to={pages[to]}><FormattedMessage id={to} /></Link>,
