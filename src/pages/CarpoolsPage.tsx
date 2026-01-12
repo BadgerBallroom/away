@@ -72,16 +72,19 @@ const CarpoolsPage: React.FC = () => {
         setCarpoolMakerProgress(null);
     }, [carpoolMaker, handleFinishedCarpools]);
 
-    const onConfirmMakingCarpools = useCallback(() => {
-        if (!carpoolMaker.current) {
-            return;
-        }
+    const newButtonsProps = {
+        onConfirmMakingCarpools: useCallback(() => {
+            if (!carpoolMaker.current) {
+                return;
+            }
 
-        // Immediately display the progress dialog so that the user can't switch away before the first progres update.
-        setCarpoolMakerProgress(CarpoolMakerProgress.DEFAULT);
+            // Immediately display the progress dialog so that the user can't switch away before the first progress
+            // update.
+            setCarpoolMakerProgress(CarpoolMakerProgress.DEFAULT);
 
-        carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
-    }, [carpoolMaker, session]);
+            carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
+        }, [carpoolMaker, session]),
+    };
 
     const [printingID, setPrintingID] = useState("");
     const onPrint = useCallback(() => setPrintingID(selectedCarpoolArrangement), [selectedCarpoolArrangement]);
@@ -100,7 +103,7 @@ const CarpoolsPage: React.FC = () => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
-            <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} />
+            <NewButtons {...newButtonsProps} />
             <PrintButton onClick={onPrint} />
         </>}
     >
@@ -117,7 +120,7 @@ const CarpoolsPage: React.FC = () => {
                 arrangementID={selectedCarpoolArrangement}
                 showCarpoolDeparturePopover={showCarpoolDeparturePopover}
             />
-        </> : <CarpoolZeroState onConfirmMakingCarpools={onConfirmMakingCarpools} />}
+        </> : <CarpoolZeroState {...newButtonsProps} />}
     </WorkspaceWithToolbar>;
 };
 
@@ -143,27 +146,49 @@ function makeCarpoolMaker(
     return carpoolMaker;
 }
 
-interface CarpoolZeroStateProps {
-    onConfirmMakingCarpools: () => void;
-}
+type CarpoolZeroStateProps = NewButtonsProps;
 
-const CarpoolZeroState: React.FC<CarpoolZeroStateProps> = ({ onConfirmMakingCarpools }) => {
+const CARPOOL_ZERO_STATE_BUTTON_SX = {
+    marginRight: "8px",
+} as const;
+
+const CarpoolZeroState: React.FC<CarpoolZeroStateProps> = (newButtonsProps) => {
     return <ZeroState>
         <Stack spacing={2}>
             <FormattedMessage id={MessageID.carpoolsZero} />
             <Box>
-                <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} variant="contained" />
+                <NewButtons
+                    {...newButtonsProps}
+                    sx={CARPOOL_ZERO_STATE_BUTTON_SX}
+                    variant="contained"
+                />
             </Box>
         </Stack>
     </ZeroState>;
 };
 
-interface GenerateCarpoolsButtonProps extends Pick<ButtonOwnProps, "variant"> {
+type ForwardedButtonProps = Pick<ButtonOwnProps, "sx" | "variant">;
+
+interface NewButtonsProps extends ForwardedButtonProps {
+    onConfirmMakingCarpools: () => void;
+}
+
+/** Buttons that create new carpool arrangements, automatically or manually. */
+const NewButtons: React.FC<NewButtonsProps> = ({
+    onConfirmMakingCarpools,
+    ...props
+}) => {
+    return <>
+        <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} {...props} />
+    </>;
+};
+
+interface NewArrangementButtonProps extends ForwardedButtonProps {
     onConfirm: () => void;
 }
 
 /** A button for starting the carpool maker. Displays a confirmation dialog. */
-const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfirm, ...props }) => {
+const GenerateCarpoolsButton: React.FC<NewArrangementButtonProps> = ({ onConfirm, ...props }) => {
     const dancerListState = useDancerListState();
     const [showConfirmation, setShowConfirmation] = useState(false);
 
