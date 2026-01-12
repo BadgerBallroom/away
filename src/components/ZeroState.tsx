@@ -16,6 +16,7 @@ const ZeroState: React.FC<ZeroStateProps> = ({ show, children }) => {
         display="flex"
         justifyContent="center"
         alignItems="center"
+        textAlign="center"
         minHeight="calc(100vh - 160px)"
         color="GrayText"
         fontSize="32px"
