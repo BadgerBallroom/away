@@ -1,11 +1,13 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import PrintIcon from "@mui/icons-material/Print";
-import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Button, { ButtonOwnProps } from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Stack from "@mui/material/Stack";
 import { Dayjs } from "dayjs";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
@@ -115,7 +117,7 @@ const CarpoolsPage: React.FC = () => {
                 arrangementID={selectedCarpoolArrangement}
                 showCarpoolDeparturePopover={showCarpoolDeparturePopover}
             />
-        </> : <ZeroState><FormattedMessage id={MessageID.carpoolsZero} /></ZeroState>}
+        </> : <CarpoolZeroState onConfirmMakingCarpools={onConfirmMakingCarpools} />}
     </WorkspaceWithToolbar>;
 };
 
@@ -141,12 +143,27 @@ function makeCarpoolMaker(
     return carpoolMaker;
 }
 
-interface GenerateCarpoolsButtonProps {
+interface CarpoolZeroStateProps {
+    onConfirmMakingCarpools: () => void;
+}
+
+const CarpoolZeroState: React.FC<CarpoolZeroStateProps> = ({ onConfirmMakingCarpools }) => {
+    return <ZeroState>
+        <Stack spacing={2}>
+            <FormattedMessage id={MessageID.carpoolsZero} />
+            <Box>
+                <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} variant="contained" />
+            </Box>
+        </Stack>
+    </ZeroState>;
+};
+
+interface GenerateCarpoolsButtonProps extends Pick<ButtonOwnProps, "variant"> {
     onConfirm: () => void;
 }
 
 /** A button for starting the carpool maker. Displays a confirmation dialog. */
-const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfirm }) => {
+const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfirm, ...props }) => {
     const dancerListState = useDancerListState();
     const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -168,6 +185,7 @@ const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfi
             onClick={onButtonClick}
             disabled={!dancerListState.length}
             startIcon={<AutoFixHighIcon />}
+            {...props}
         >
             <FormattedMessage id={MessageID.carpoolsGenerate} />
         </Button>
