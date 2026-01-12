@@ -32,6 +32,8 @@ export const enum MessageID {
     carpoolsGenerateConfirm = "carpoolsGenerateConfirm",
     /** Text that indicates that carpools are being made automatically */
     carpoolsGenerateProgress = "carpoolsGenerateProgress",
+    /** Text or title for any button that makes a new carpool arrangement with all dancers unassigned to cars */
+    carpoolsNew = "carpoolsNew",
     /** Text that appears when no carpool arrangements have been created */
     carpoolsZero = "carpoolsZero",
     /** Label for a dancer's housing preference field */
@@ -154,6 +156,7 @@ export const MESSAGES: Messages = {
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",
+        carpoolsNew: "New Arrangement",
         carpoolsZero: "No carpools have been arranged yet.",
         dancerAccommodation: "Housing preference",
         dancerAccommodationFreeHousingPreferred: "Free housing preferred",

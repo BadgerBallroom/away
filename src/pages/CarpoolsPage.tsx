@@ -1,4 +1,5 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import PrintIcon from "@mui/icons-material/Print";
 import Box from "@mui/material/Box";
 import Button, { ButtonOwnProps } from "@mui/material/Button";
@@ -84,6 +85,10 @@ const CarpoolsPage: React.FC = () => {
 
             carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
         }, [carpoolMaker, session]),
+        onCreateNewArrangement: useCallback(() => {
+            const newID = carpoolArrangementKLMState.add(new CarpoolArrangementState(session)).id;
+            setSelectedCarpoolArrangement(newID);
+        }, [session, carpoolArrangementKLMState]),
     };
 
     const [printingID, setPrintingID] = useState("");
@@ -171,15 +176,18 @@ type ForwardedButtonProps = Pick<ButtonOwnProps, "sx" | "variant">;
 
 interface NewButtonsProps extends ForwardedButtonProps {
     onConfirmMakingCarpools: () => void;
+    onCreateNewArrangement: () => void;
 }
 
 /** Buttons that create new carpool arrangements, automatically or manually. */
 const NewButtons: React.FC<NewButtonsProps> = ({
     onConfirmMakingCarpools,
+    onCreateNewArrangement,
     ...props
 }) => {
     return <>
         <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} {...props} />
+        <NewArrangementButton onConfirm={onCreateNewArrangement} {...props} />
     </>;
 };
 
@@ -231,6 +239,19 @@ const GenerateCarpoolsButton: React.FC<NewArrangementButtonProps> = ({ onConfirm
                 <Button onClick={onCancel}><FormattedMessage id={MessageID.cancel} /></Button>
             </DialogActions>
         </Dialog>
+    </>;
+};
+
+/** A button for creating a blank carpool arrangement (with all dancers unassigned). */
+const NewArrangementButton: React.FC<NewArrangementButtonProps> = ({ onConfirm, ...props }) => {
+    return <>
+        <Button
+            onClick={onConfirm}
+            startIcon={<CreateNewFolderIcon />}
+            {...props}
+        >
+            <FormattedMessage id={MessageID.carpoolsNew} />
+        </Button>
     </>;
 };
 
