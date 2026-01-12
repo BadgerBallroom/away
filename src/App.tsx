@@ -10,6 +10,7 @@ import AppNavigation, { AppNavigationPage } from './components/AppNavigation';
 import DarkModeButton from './components/DarkModeButton';
 import FabRenderer from './components/FabRenderer';
 import PageContent from './components/PageContent';
+import PageContext, { PageContextValue } from './components/PageContext';
 import SessionContext from './components/SessionContext';
 import { Locales } from './i18n/locales';
 import { MessageID, MESSAGES } from './i18n/messages';
@@ -74,6 +75,8 @@ const App: React.FC = () => {
         return () => window.removeEventListener("beforeunload", confirmSaveChanges);
     }, [session]);
 
+    const pageContextValue = new PageContextValue();
+
     return <ThemeProvider theme={theme}>
         <CssBaseline />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -83,31 +86,33 @@ const App: React.FC = () => {
                 defaultLocale={Locales.ENGLISH}
             >
                 <SessionContext.Provider value={session}>
-                    <BrowserRouter>
-                        <AppNavigation
-                            pages={PAGES}
-                            drawerFooter={
-                                <Box>
-                                    <DarkModeButton onClick={toggleThemeMode} />
-                                </Box>
-                            }
-                        />
-                        <Routes>
-                            {PAGES.map(({ path, messageID, element }) => (
-                                <Route
-                                    key={path}
-                                    path={path}
-                                    element={
-                                        <PageContent titleMessageID={messageID}>
-                                            {element}
-                                        </PageContent>
-                                    }
-                                />
-                            ))}
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                        <FabRenderer />
-                    </BrowserRouter>
+                    <PageContext.Provider value={pageContextValue}>
+                        <BrowserRouter>
+                            <AppNavigation
+                                pages={PAGES}
+                                drawerFooter={
+                                    <Box>
+                                        <DarkModeButton onClick={toggleThemeMode} />
+                                    </Box>
+                                }
+                            />
+                            <Routes>
+                                {PAGES.map(({ path, messageID, element }) => (
+                                    <Route
+                                        key={path}
+                                        path={path}
+                                        element={
+                                            <PageContent titleMessageID={messageID}>
+                                                {element}
+                                            </PageContent>
+                                        }
+                                    />
+                                ))}
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                            <FabRenderer />
+                        </BrowserRouter>
+                    </PageContext.Provider>
                 </SessionContext.Provider>
             </IntlProvider>
         </LocalizationProvider>
