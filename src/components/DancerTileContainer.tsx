@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
-import { useCallback, useRef } from "react";
+import { ComponentPropsWithoutRef, useCallback, useRef } from "react";
 import { useSelectableElementAttributes } from "../model/ElementSelectionHooks";
 import StaticState, { useStaticState } from "../utilities/ExternalStore";
 import SelectionColors from "../utilities/SelectionColors";
@@ -29,7 +29,7 @@ export interface ShouldSelectDancer {
     ): Promise<boolean>;
 }
 
-interface DancerTileContainerProps {
+interface DancerTileContainerProps extends ComponentPropsWithoutRef<"div"> {
     /** The `DancerTile` or `DancerTilePlaceholder` */
     children?: React.ReactNode;
     /** A callback that gets called when the dancer is clicked and that returns whether the dancer should be selected */
@@ -43,6 +43,7 @@ interface DancerTileContainerProps {
 const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
     children,
     shouldSelect,
+    ...props
 }) => {
     const [onClickSerializer, setOnClickSerializer] = useStaticState(onClickSerializerStore);
 
@@ -109,6 +110,7 @@ const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
         onFocus={onFocus}
         role="button"
         tabIndex={0}
+        {...props}
     >{children}</DancerTileContainerBox>;
 };
 
