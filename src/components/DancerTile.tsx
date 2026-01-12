@@ -2,10 +2,9 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import { SxProps } from "@mui/material";
-import Paper from "@mui/material/Paper";
+import Paper, { PaperOwnProps } from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import { styled, Theme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import Typography, { TypographyOwnProps } from "@mui/material/Typography";
 import React from "react";
 import { FormattedMessage } from "react-intl";
@@ -31,7 +30,7 @@ const StyledPaperDashed = styled(StyledPaper)({ borderStyle: "dashed" });
 interface DancerTileProps {
     dancerState: DancerState;
     elevation?: number;
-    sx?: SxProps<Theme>;
+    sx?: PaperOwnProps["sx"];
 }
 
 /** Displays one dancer's details in a compact layout. */

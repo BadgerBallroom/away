@@ -39,6 +39,17 @@ export default defineConfig(
                     "varsIgnorePattern": "^_",
                 }
             ],
+            "no-restricted-imports": [
+                "error",
+                {
+                    "paths": [
+                        {
+                            "name": "@mui/material",
+                            "message": "See https://mui.com/material-ui/guides/minimizing-bundle-size/#avoid-barrel-imports",
+                        },
+                    ],
+                }
+            ],
             "prefer-rest-params": "off",
             "react/prop-types": "off",
             "react/react-in-jsx-scope": "off",
