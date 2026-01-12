@@ -28,11 +28,7 @@ export function Component() {
     return <CarpoolsPage />;
 }
 
-interface CarpoolsPageProps {
-    hideAutoGen?: boolean;
-}
-
-const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
+const CarpoolsPage: React.FC = () => {
     const session = useSession();
 
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
@@ -102,9 +98,7 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
-            {!hideAutoGen &&
-                <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} />
-            }
+            <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} />
             <PrintButton onClick={onPrint} />
         </>}
     >
