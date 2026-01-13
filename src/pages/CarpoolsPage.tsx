@@ -16,6 +16,7 @@ import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
 import CarpoolDeparturePopover, { CarpoolDeparturePopoverProps } from "../components/CarpoolDeparturePopover";
 import CarpoolMakerProgressDialog from "../components/CarpoolMakerProgressDialog";
+import CarpoolOccupantPopper, { OccupantActionParameters } from "../components/CarpoolOccupantPopper";
 import { CarpoolPrintDialogFromID } from "../components/CarpoolPrintDialog";
 import WorkspaceWithToolbar from "../components/WorkspaceWithToolbar";
 import ZeroState from "../components/ZeroState";
@@ -106,6 +107,8 @@ const CarpoolsPage: React.FC = () => {
         setCarpoolSuggestedDeparture(suggestedDepartureTime === undefined ? null : suggestedDepartureTime);
     }, []);
 
+    const [occupantActionParameters, setOccupantActionParameters] = useState<OccupantActionParameters | null>(null);
+
     return <WorkspaceWithToolbar
         toolbarChildren={<>
             <NewButtons {...newButtonsProps} />
@@ -118,12 +121,14 @@ const CarpoolsPage: React.FC = () => {
             suggestedDepartureTime={carpoolSuggestedDeparture}
             onClose={onCarpoolDeparturePopoverClose}
         />
+        <CarpoolOccupantPopper action={occupantActionParameters} />
         <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
         {carpoolArrangementList.length ? <>
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />
             <CarpoolArrangerFromID
                 arrangementID={selectedCarpoolArrangement}
                 showCarpoolDeparturePopover={showCarpoolDeparturePopover}
+                showCarpoolOccupantPopover={setOccupantActionParameters}
             />
         </> : <CarpoolZeroState {...newButtonsProps} />}
     </WorkspaceWithToolbar>;

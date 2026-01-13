@@ -15,6 +15,16 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
     carpools: CarpoolStateArray,
 }> {
     private _session: Session;
+    private _mapFromDancerIDs = new Map<ID, CarpoolState>();
+
+    /**
+     * A map from each dancer ID to the state of the carpool that the dancer is in.
+     * If a dancer ID is not in this map, the dancer is not assigned to any carpool.
+     * The map is replaced with a new object whenever the value changes, so it can be used to trigger React rerenders.
+     */
+    public get mapFromDancerIDs(): ReadonlyMap<ID, CarpoolState> {
+        return this._mapFromDancerIDs;
+    }
 
     // #region DeepState overrides
     /**
@@ -33,7 +43,20 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
                     return new CarpoolStateArray(session, value as CarpoolArrangement["carpools"]);
             }
         }, true);
+
         this._session = session;
+
+        // This change listener never has to be removed because it should last as long as this object.
+        this.addChangeListener(() => {
+            this._mapFromDancerIDs = new Map<ID, CarpoolState>();
+            const carpoolStates = this.getChildState("carpools").getChildStates();
+            for (const carpoolState of carpoolStates) {
+                for (const id of carpoolState.getChildValue("occupants")) {
+                    this._mapFromDancerIDs.set(id, carpoolState);
+                }
+            }
+        });
+
         this.setValue(value ?? CarpoolArrangement.DEFAULT);
     }
 
