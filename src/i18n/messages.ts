@@ -26,6 +26,8 @@ export const enum MessageID {
     carpoolLeavesBeforeOccupantCan = "carpoolLeavesBeforeOccupantCan",
     /** Tooltip when the user hovers over a carpool's departure time that is before a dancer's departure time */
     carpoolLeavesBeforeOneOfOccupantsCan = "carpoolLeavesBeforeOneOfOccupantsCan",
+    /** Button that promotes a dancer to a driver of their own car */
+    carpoolPromoteDriver = "carpoolPromoteDriver",
     /** Text or title for any button that makes carpools automatically */
     carpoolsGenerate = "carpoolsGenerate",
     /** Text for the body of a confirmation dialog for making carpools automatically */
@@ -153,6 +155,7 @@ export const MESSAGES: Messages = {
         carpoolEditDepartureTime: "Edit Departure Time",
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
         carpoolLeavesBeforeOneOfOccupantsCan: "This car leaves before one of the dancers can.",
+        carpoolPromoteDriver: "Promote {name} to Driver",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",

@@ -13,10 +13,26 @@ import CarpoolState from "../model/CarpoolState";
 import { useDeepState, useDeepStateChangeListener } from "../model/DeepStateHooks";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile, { DancerTilePlaceholder } from "./DancerTile";
-import DancerTileContainer, { DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME } from "./DancerTileContainer";
+import DancerTileContainer, { DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME, ShouldSelectDancer } from "./DancerTileContainer";
+
+/**
+ * A callback that gets called when a dancer is clicked, before it is selected.
+ * @param event The event that triggered this
+ * @param ref The `DancerTileContainer`'s HTML element
+ * @param carpoolState The carpool state
+ * @returns A Promise that resolves to `false` to cancel the selection change (or `true` to allow it)
+ */
+export interface ShouldSelectDancerInCarpool {
+    (
+        event: React.KeyboardEvent | React.MouseEvent,
+        ref: HTMLElement | undefined,
+        carpoolState: CarpoolState,
+    ): Promise<boolean>;
+}
 
 interface CarpoolContainerContainerProps {
     carpoolState: CarpoolState;
+    shouldSelectDancer: ShouldSelectDancer;
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
@@ -25,12 +41,13 @@ const CARPOOL_DEPARTURE_TIME_SX = { whiteSpace: "nowrap" } as const;
 
 export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps> = ({
     carpoolState,
+    shouldSelectDancer,
     showCarpoolDeparturePopover,
 }) => {
     const intl = useIntl();
 
     const carpoolDepartureTime = useDeepState(carpoolState, ["departure"]);
-    const dancerStates = carpoolState.getChildState("occupants").getReferencedStates();
+    const dancerIDsAndStates = carpoolState.getChildState("occupants").getIDsAndReferencedStates();
 
     // If the car departs too early for at least one occupant, this is the earliest time that would accommodate all
     // occupants. Otherwise, it is null.
@@ -44,10 +61,19 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
         showCarpoolDeparturePopover({ carpoolState, suggestedDepartureTime });
     }, [carpoolState, suggestedDepartureTime, showCarpoolDeparturePopover]);
 
-    const carCapacity = dancerStates[0].getChildValue("canDriveMaxPeople");
-    const emptySeats: string[] = [];
-    for (let i = dancerStates.length; i < carCapacity; ++i) {
-        emptySeats.push(`${dancerStates[0].evanescentID} empty ${i}`);
+    if (dancerIDsAndStates.length === 0) {
+        return null;
+    }
+
+    const { id: driverDancerID, state: driverDancerState } = dancerIDsAndStates[0];
+    const carCapacity = driverDancerState.getChildValue("canDriveMaxPeople");
+    if (carCapacity === 0) {
+        return null;
+    }
+
+    const emptySeats: number[] = [];
+    for (let i = dancerIDsAndStates.length; i < carCapacity; ++i) {
+        emptySeats.push(i);
     }
 
     return <CarpoolContainerContainerBox>
@@ -73,13 +99,21 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
                     }
                 </Button>
             </Box>
-            {dancerStates.map(dancerState =>
-                <DancerTileContainer key={dancerState.evanescentID}>
+            {dancerIDsAndStates.map(({ id, state: dancerState }) =>
+                <DancerTileContainer
+                    key={dancerState.evanescentID}
+                    shouldSelect={shouldSelectDancer}
+                    data-dancer-id={id}
+                >
                     <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
                 </DancerTileContainer>,
             )}
             {emptySeats.map(key =>
-                <DancerTileContainer key={key}>
+                <DancerTileContainer
+                    key={key}
+                    shouldSelect={shouldSelectDancer}
+                    data-driver-dancer-id={driverDancerID}
+                >
                     <DancerTilePlaceholder />
                 </DancerTileContainer>,
             )}

@@ -9,6 +9,7 @@ import { useCallback, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
+import CarpoolState from "../model/CarpoolState";
 import { DancerListState } from "../model/DancerKLM";
 import { useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
 import { useElementSelectionManager } from "../model/ElementSelectionHooks";
@@ -16,8 +17,9 @@ import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
+import { ShowCarpoolOccupantPopper } from "./CarpoolOccupantPopper";
 import DancerTile from "./DancerTile";
-import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME, DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME } from "./DancerTileContainer";
+import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME, DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME, ShouldSelectDancer } from "./DancerTileContainer";
 import { isInsideDancerTileContainer } from "./DancerTileContainerUtils";
 import DeleteButton from "./DeleteButton";
 import ElementSelectionContext from "./ElementSelectionContext";
@@ -27,12 +29,15 @@ interface CarpoolArrangerFromIDProps {
     arrangementID: ID;
     /** A callback that opens the popover to edit a date and time */
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
+    /** A callback that opens the popover with actions to perform on a dancer */
+    showCarpoolOccupantPopover: ShowCarpoolOccupantPopper;
 }
 
 /** Lets the user edit the `CarpoolArrangement` with the given ID. */
 export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
     arrangementID,
     showCarpoolDeparturePopover,
+    showCarpoolOccupantPopover,
 }) => {
     const session = useSession();
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
@@ -54,6 +59,7 @@ export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
         state={carpoolArrangementState}
         onDeleteClick={onDeleteClick}
         showCarpoolDeparturePopover={showCarpoolDeparturePopover}
+        showCarpoolOccupantPopover={showCarpoolOccupantPopover}
     />;
 };
 
@@ -67,14 +73,88 @@ interface CarpoolArrangerProps extends SharedProps {
     onDeleteClick?: () => void;
     /** A callback that opens the dialog to edit a date and time */
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
+    /** A callback that opens the popover with actions to perform on a dancer */
+    showCarpoolOccupantPopover: ShowCarpoolOccupantPopper;
 }
 
 /** Lets the user edit the given `CarpoolArrangement`. */
-const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick, showCarpoolDeparturePopover }) => {
+const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
+    state,
+    onDeleteClick,
+    showCarpoolDeparturePopover,
+    showCarpoolOccupantPopover,
+}) => {
     const selectionParentRef = useRef<HTMLElement>(undefined);
     const { selection, clearSelection } = useElementSelectionManager<HTMLElement>(
         selectionParentRef.current?.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`) ?? [],
     );
+
+    const mapFromDancersToCarpools = state.mapFromDancerIDs;
+    const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+            return true;
+        }
+
+        if (!ref) {
+            return true;
+        }
+
+        // If the tile that was clicked is a dancer, it will have a dancer ID.
+        // Otherwise, it is an empty spot in a car and will have the dancer ID of the driver.
+        const activeDancerID = ref.dataset.dancerId;
+        const driverDancerID = ref.dataset.driverDancerId;
+        if (!activeDancerID && !driverDancerID) {
+            return true;
+        }
+
+        // If the tile that was clicked is a dancer, get the carpool state from the dancer ID.
+        // Otherwise, get the carpool stage from the dancer ID of the driver.
+        const activeDancer = {
+            id: activeDancerID,
+            carpoolState: mapFromDancersToCarpools.get(activeDancerID ?? driverDancerID!),
+        };
+
+        const priorSelectedDancers = new Map<ID, CarpoolState | undefined>();
+        const priorSelectedEmptySpotCarpools = new Set<CarpoolState>();
+        for (const element of selection.selected) {
+            const id = element.dataset.dancerId;
+            const driverDancerID = element.dataset.driverDancerId;
+            if (!id && !driverDancerID) {
+                continue;
+            }
+
+            const carpoolState = mapFromDancersToCarpools.get(id ?? driverDancerID!);
+            if (id) {
+                priorSelectedDancers.set(id, carpoolState);
+            } else if (carpoolState) {
+                priorSelectedEmptySpotCarpools.add(carpoolState);
+            }
+        }
+
+        // Attempt to show a menu of things that can be done to the dancer. The menu will call `onClose` with whether
+        // the dancer should be selected. Resolve the `Promise` at that point with that value.
+        return new Promise<boolean>(resolve => {
+            showCarpoolOccupantPopover({
+                anchorEl: ref,
+                carpoolArrangementState: state,
+                activeDancer,
+                priorSelectedDancers,
+                priorSelectedEmptySpotCarpools,
+                onClose: (shouldSelect, options) => {
+                    if (!options?.isImmediatelyReopening) {
+                        showCarpoolOccupantPopover(null);
+                    }
+
+                    // This function can be called multiple times, but it is safe to resolve a Promise more than once.
+                    // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise:
+                    // "You will also hear the term resolved used with promises — this means that the promise is settled
+                    // or "locked-in" to match the eventual state of another promise, and further resolving or rejecting
+                    // it has no effect."
+                    resolve(shouldSelect);
+                },
+            });
+        });
+    }, [mapFromDancersToCarpools, state, selection.selected, showCarpoolOccupantPopover]);
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
@@ -92,8 +172,12 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({ state, onDeleteClick,
         <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
         <ElementSelectionContext.Provider value={selection}>
             <Box ref={selectionParentRef} onClick={onSelectionParentClick}>
-                <Unassigned state={state} />
-                <Schedule state={state} showCarpoolDeparturePopover={showCarpoolDeparturePopover} />
+                <Unassigned state={state} shouldSelectDancer={shouldSelectDancer} />
+                <Schedule
+                    state={state}
+                    shouldSelectDancer={shouldSelectDancer}
+                    showCarpoolDeparturePopover={showCarpoolDeparturePopover}
+                />
             </Box>
         </ElementSelectionContext.Provider>
     </>;
@@ -117,8 +201,12 @@ const ArrangementNameField: React.FC<SharedProps> = ({ state }) => {
     />;
 };
 
+interface UnassignedProps extends SharedProps {
+    shouldSelectDancer: ShouldSelectDancer;
+}
+
 /** Shows dancers who are traveling with the team but not assigned to a carpool. */
-const Unassigned: React.FC<SharedProps> = ({ state }) => {
+const Unassigned: React.FC<UnassignedProps> = ({ state, shouldSelectDancer }) => {
     const session = useSession();
     const [unassigned, setUnassigned] = useState(() => state.findUnassignedDancers());
     useDeepStateChangeListener(state, () => {
@@ -134,9 +222,12 @@ const Unassigned: React.FC<SharedProps> = ({ state }) => {
     const unassignedState = DancerListState.makeAndRegister(session, unassignedArray);
     return <UnassignedBar className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
         <Grid container spacing={2} justifyContent="center">
-            {unassignedState.getReferencedStates().map(dancerState =>
+            {unassignedState.getIDsAndReferencedStates().map(({ id, state: dancerState }) =>
                 <Grid key={dancerState.evanescentID}>
-                    <DancerTileContainer>
+                    <DancerTileContainer
+                        shouldSelect={shouldSelectDancer}
+                        data-dancer-id={id}
+                    >
                         <DancerTile dancerState={dancerState} elevation={3} />
                     </DancerTileContainer>
                 </Grid>,
@@ -153,11 +244,12 @@ const UnassignedBar = styled(Box)(({ theme }) => {
 });
 
 interface ScheduleProps extends SharedProps {
+    shouldSelectDancer: ShouldSelectDancer;
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 /** A table of departure times and carpools. */
-const Schedule: React.FC<ScheduleProps> = ({ state, showCarpoolDeparturePopover }) => {
+const Schedule: React.FC<ScheduleProps> = ({ state, shouldSelectDancer, showCarpoolDeparturePopover }) => {
     const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
     useDeepStateChangeListener(state, () => {
         setCarpoolsByDay(state.groupByDepartureTime());
@@ -167,6 +259,7 @@ const Schedule: React.FC<ScheduleProps> = ({ state, showCarpoolDeparturePopover 
         <CarpoolArrangerDay
             key={carpoolsForDay.day?.valueOf()}
             carpoolsForDay={carpoolsForDay}
+            shouldSelectDancer={shouldSelectDancer}
             showCarpoolDeparturePopover={showCarpoolDeparturePopover}
         />,
     )}</>;
