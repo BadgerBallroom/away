@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 /**
  * Recursively marks all properties as read-only.
@@ -32,9 +32,12 @@ export interface DeepStateMaker<T, TState extends DeepStateBase<T> = DeepStateBa
 }
 
 /** Constructs a DeepStateArray, DeepStateObject, or DeepStateValue object from the given value. */
-export function makeDeepState<T>(value: T): DeepStateBase<T> {
+export function makeDeepState<Item>(value: Item[]): DeepStateArray<Item>;
+export function makeDeepState<T extends Exclude<object, Dayjs>>(value: T): DeepStateObject<T>;
+export function makeDeepState<T>(value: T): DeepStatePrimitive<T>;
+export function makeDeepState(value: unknown): unknown {
     if (Array.isArray(value)) {
-        return new DeepStateArray(value) as any;
+        return new DeepStateArray(value);
     }
 
     if (
@@ -42,25 +45,13 @@ export function makeDeepState<T>(value: T): DeepStateBase<T> {
         && value !== null
         && !(value instanceof dayjs)
     ) {
-        return new DeepStateObject(value as object) as any;
+        return new DeepStateObject(value);
     }
 
     return new DeepStatePrimitive(value);
 }
 
-export type DeepStateBaseOrUndefined<T> = (
-    T extends null | undefined
-    ? DeepStateBase<NonNullable<T>> | null | undefined
-    : (
-        T extends null
-        ? DeepStateBase<NonNullable<T>> | null
-        : (
-            T extends undefined
-            ? DeepStateBase<NonNullable<T>> | undefined
-            : DeepStateBase<T>
-        )
-    )
-);
+export type DeepStateBaseOrUndefined<T> = DeepStateBase<NonNullable<T>> | (T & (null | undefined));
 
 interface DeepStateChild<T, TState = DeepStateBaseOrUndefined<T>> {
     /** A child value */
@@ -103,15 +94,11 @@ export abstract class DeepStateBase<T> {
      * Given a path of keys, gets a child of this state and sets its value to the given value. For example,
      * `this.setDescendantValue([1, "a", 2, "b"], "x")` sets the value at `this.getValue()[1]["a"][2]["b"]` to `"x"`.
      * @param path A path of keys to traverse this state object
+     * @throws An error if the path was not found
      * @param newValue The new value
      */
     public setDescendantValue<V>(path: readonly (string | number)[], newValue: V): void {
-        const deepState = this.getDescendantState(path);
-        if (!deepState) {
-            throw new Error(`Cannot set non-existent path: ${JSON.stringify(path)}`);
-        }
-
-        deepState.setValue(newValue);
+        this.getDescendantState(path).setValue(newValue);
     }
     // #endregion
 
@@ -128,6 +115,7 @@ export abstract class DeepStateBase<T> {
      * Given a path of keys, retrieves a child of this state. For example, `this.getDescendantState([1, "a", 2, "b"])`
      * gets the state object that contains `this.getValue()[1]["a"][2]["b"]`.
      * @param path A path of keys to traverse this state object
+     * @throws An error if the path was not found
      * @returns The child state
      */
     public getDescendantState<K extends keyof T>(path: readonly [K]): ReturnType<DeepStateBase<T>["getChildState"]>;
@@ -209,7 +197,7 @@ export class DeepStateArray<
     constructor(initialValue?: Item[], makeChildState?: DeepStateMaker<Item, ItemState>) {
         super();
         this._items = [];
-        this._makeChildState = makeChildState ?? (makeDeepState as DeepStateMaker<Item, ItemState>);
+        this._makeChildState = makeChildState ?? (makeDeepState as unknown as DeepStateMaker<Item, ItemState>);
         this.setValue(initialValue ?? []);
     }
 
@@ -377,9 +365,17 @@ export class DeepStateArray<
         // JavaScript sort is unstable; this will make it stable.
         const indexedItems = this._items.map<[number, DeepStateChild<Item, ItemState>]>((item, i) => [i, item]);
 
+        let didChangeOrder = false;
         indexedItems.sort(([indexA, itemA], [indexB, itemB]) => {
             const result = compareFn(itemA.deepState, itemB.deepState);
             if (result !== 0) {
+                // If result > 0, then itemA will go after itemB.
+                // If indexA < indexB, then itemA was before itemB.
+                // Therefore, if result > 0 and indexA < indexB, then the order will change.
+                // Likewise, if result < 0 and indexA > indexB, then the order will change.
+                if ((result > 0) === (indexA < indexB)) {
+                    didChangeOrder = true;
+                }
                 return result;
             }
 
@@ -387,6 +383,9 @@ export class DeepStateArray<
             // Use their positions in the original array as the tiebreaker.
             return indexA - indexB;
         });
+        if (!didChangeOrder) {
+            return;
+        }
 
         const newItems: DeepStateChild<Item, ItemState>[] = [];
         const newValue: DeepReadonly<Item>[] = [];
@@ -462,7 +461,13 @@ export class DeepStateObject<
             if (!this._castAsKey(key)) {
                 continue;
             }
-            result[key] = this._entries[key].deepState?.getValue() as T[StringKeys<T>];
+
+            const childState = this._entries[key].deepState;
+            if (childState === null || childState === undefined) {
+                result[key] = childState as any;
+            } else {
+                result[key] = this._entries[key].deepState?.getValue() as T[StringKeys<T>];
+            }
         }
         return result as DeepReadonly<T>;
     }
@@ -491,7 +496,13 @@ export class DeepStateObject<
             if (!this._castAsKey(key)) {
                 continue;
             }
-            if (!this._entries[key].deepState?.isDefault()) {
+
+            const childState = this._entries[key].deepState;
+            if (!childState) {
+                continue;
+            }
+
+            if (!childState.isDefault()) {
                 return false;
             }
         }
@@ -646,10 +657,15 @@ export class DeepStatePrimitive<T> extends DeepStateBase<T> {
      * @param value `null`, `undefined`, or a non-nullable value to construct a `DeepStatePrimitive` with
      * @returns `null` or `undefined` if `value` is `null` or `undefined`, else a new `DeepStatePrimitive` with `value`
      */
-    static NewOrUndefined<T>(value: T | null): DeepStatePrimitive<T> | null;
-    static NewOrUndefined<T>(value: T | undefined): DeepStatePrimitive<T> | undefined;
-    static NewOrUndefined<T>(value: T | null | undefined): DeepStatePrimitive<T> | null | undefined;
-    static NewOrUndefined<T>(value: T | null | undefined): DeepStatePrimitive<T> | null | undefined {
+    static NewOrUndefined<T extends NonNullable<unknown>>(value: T): DeepStatePrimitive<T>;
+    static NewOrUndefined<T extends NonNullable<unknown>>(value: T | null): DeepStatePrimitive<T> | null;
+    static NewOrUndefined<T extends NonNullable<unknown>>(value: T | undefined): DeepStatePrimitive<T> | undefined;
+    static NewOrUndefined<T extends NonNullable<unknown>>(
+        value: T | null | undefined,
+    ): DeepStatePrimitive<T> | null | undefined;
+    static NewOrUndefined<T extends NonNullable<unknown>>(
+        value: T | null | undefined,
+    ): DeepStatePrimitive<T> | null | undefined {
         if (value === null) {
             return null;
         }
@@ -658,7 +674,7 @@ export class DeepStatePrimitive<T> extends DeepStateBase<T> {
             return undefined;
         }
 
-        return new DeepStatePrimitive(value as T);
+        return new DeepStatePrimitive(value);
     }
 
     /**
