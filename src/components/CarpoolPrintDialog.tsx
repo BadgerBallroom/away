@@ -56,7 +56,7 @@ const CarpoolPrintDialog: React.FC<CarpoolPrintDialogProps> = ({ arrangementStat
     return <Dialog open={!!arrangementState} fullScreen>
         <AppBar position="relative">
             <Toolbar>
-                <Typography sx={{ flex: 1 }}>
+                <Typography sx={TITLE_SX}>
                     <FormattedMessage id={MessageID.print} />
                 </Typography>
                 <Button autoFocus onClick={onPrint}>
@@ -101,6 +101,8 @@ const CarpoolPrintDialog: React.FC<CarpoolPrintDialogProps> = ({ arrangementStat
 };
 
 export default CarpoolPrintDialog;
+
+const TITLE_SX = { flex: 1 } as const;
 
 interface CarpoolArrangementPrintedProps {
     /** The carpools to print */

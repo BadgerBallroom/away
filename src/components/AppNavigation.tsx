@@ -66,7 +66,7 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
     const dismissSessionClear = useCallback(() => setShowSessionClearDialog(false), []);
 
     // The default z-index for an AppBar is 1100. Raise this one to 1110 so that it is above other AppBars.
-    return <AppBar position="fixed" color="primary" sx={{ zIndex: 1110 }}>
+    return <AppBar position="fixed" color="primary" sx={APP_BAR_SX}>
         <ThemeProvider theme={toolbarTheme}>
             <Toolbar variant="dense">
                 <IconButton
@@ -85,19 +85,14 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
                     variant="scrollable"
                     scrollButtons="auto"
                     allowScrollButtonsMobile
-                    sx={{
-                        display: {
-                            xs: "none",
-                            sm: "flex",
-                        }
-                    }}
+                    sx={TOOLBAR_TABS_SX}
                 >{tabs}</Tabs>
             </Toolbar>
         </ThemeProvider>
         <Drawer open={drawerOpen} onClose={closeDrawer}>
             <Toolbar>
-                <LogoIcon sx={{ mr: 1 }} />
-                <Typography variant="h6" sx={{ cursor: "default" }}>
+                <LogoIcon sx={LOGO_ICON_SX} />
+                <Typography variant="h6" sx={APP_NAME_SX}>
                     <FormattedMessage id={MessageID.appName} />
                 </Typography>
             </Toolbar>
@@ -108,7 +103,7 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
                 orientation="vertical"
             >{tabs}</Tabs>
             <Divider />
-            <Box sx={{ flexGrow: 1 }}>
+            <Box sx={MENU_SX}>
                 <MenuCommand onClick={confirmSessionClear}><FormattedMessage id={MessageID.fileNew} /></MenuCommand>
                 <SessionClearDialog open={showSessionClearDialog} onClose={dismissSessionClear} />
             </Box>
@@ -124,3 +119,14 @@ const MenuCommand = styled(Button)(() => `
     width: 100%;
     padding: 12px 16px;
 `);
+
+const APP_BAR_SX = { zIndex: 1110 } as const;
+const TOOLBAR_TABS_SX = {
+    display: {
+        xs: "none",
+        sm: "flex",
+    },
+} as const;
+const LOGO_ICON_SX = { mr: 1 } as const;
+const APP_NAME_SX = { cursor: "default" } as const;
+const MENU_SX = { flexGrow: 1 } as const;

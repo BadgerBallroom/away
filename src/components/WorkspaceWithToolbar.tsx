@@ -15,7 +15,7 @@ interface WorkspaceWithToolbarProps {
  */
 const WorkspaceWithToolbar: React.FC<WorkspaceWithToolbarProps> = ({ toolbarChildren, children }) => {
     return <>
-        <AppBar position="fixed" color="default" sx={{ marginTop: 6 }}>
+        <AppBar position="fixed" color="default" sx={APP_BAR_SX}>
             <Toolbar>{toolbarChildren}</Toolbar>
         </AppBar>
         <Box paddingTop={8}>{children}</Box>
@@ -23,3 +23,5 @@ const WorkspaceWithToolbar: React.FC<WorkspaceWithToolbarProps> = ({ toolbarChil
 };
 
 export default WorkspaceWithToolbar;
+
+const APP_BAR_SX = { marginTop: 6 } as const;

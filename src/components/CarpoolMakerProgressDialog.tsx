@@ -37,7 +37,7 @@ const CarpoolMakerProgressDialog: React.FC<CarpoolMakerProgressDialogProps> = ({
     return <Dialog open={!!carpoolMakerProgress} fullScreen>
         <AppBar position="relative">
             <Toolbar>
-                <Typography sx={{ flex: 1 }}>
+                <Typography sx={TITLE_SX}>
                     <FormattedMessage id={MessageID.carpoolsGenerateProgress} />
                 </Typography>
                 <Button autoFocus color="inherit" onClick={onCancel}>
@@ -46,7 +46,7 @@ const CarpoolMakerProgressDialog: React.FC<CarpoolMakerProgressDialogProps> = ({
             </Toolbar>
             <LinearProgress />
         </AppBar>
-        <Paper sx={{ m: 2 }}>
+        <Paper sx={BODY_SX}>
             <CarpoolArrangementDisplay
                 carpoolArrangementState={
                     CarpoolArrangementState.fromString(session, carpoolMakerProgress?.latestArrangementExplored)
@@ -58,6 +58,9 @@ const CarpoolMakerProgressDialog: React.FC<CarpoolMakerProgressDialogProps> = ({
 };
 
 export default CarpoolMakerProgressDialog;
+
+const TITLE_SX = { flex: 1 } as const;
+const BODY_SX = { m: 2 } as const;
 
 interface PaperSx {
     position: "absolute";
@@ -102,7 +105,7 @@ const CarpoolArrangementDisplay: React.FC<CarpoolArrangementDisplayProps> = ({
         window.addEventListener("resize", onResize);
         return () => window.removeEventListener("resize", onResize);
     }, [middleBoxRef]);
-
+    const middleBoxSx = useMemo(() => ({ overflow: "scroll", height: `${middleBoxHeight}px` }), [middleBoxHeight]);
 
     // Compute the position of each dancer.
     const { paperSxs, innerBoxSx } = useMemo(() => {
@@ -150,8 +153,8 @@ const CarpoolArrangementDisplay: React.FC<CarpoolArrangementDisplayProps> = ({
     }, [carpoolArrangementState, carpoolArrangement]);
 
     // Put each dancer in the DOM and use the position that we computed above.
-    return <Box sx={{ overflow: "hidden", position: "relative" }}>
-        <Box ref={middleBoxRef} sx={{ overflow: "scroll", height: `${middleBoxHeight}px` }}>
+    return <Box sx={OUTER_BOX_SX}>
+        <Box ref={middleBoxRef} sx={middleBoxSx}>
             <Box sx={innerBoxSx}>
                 {dancerListState.getIDsAndReferencedStates().map(({ id, state }) => <DancerTile
                     key={id}
@@ -163,3 +166,5 @@ const CarpoolArrangementDisplay: React.FC<CarpoolArrangementDisplayProps> = ({
         </Box>
     </Box>;
 };
+
+const OUTER_BOX_SX = { overflow: "hidden", position: "relative" } as const;

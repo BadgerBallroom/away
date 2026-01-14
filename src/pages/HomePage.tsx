@@ -58,25 +58,16 @@ const HomePage: React.FC = () => {
         const lines = developmentRoadmapRaw.split("\n");
         return <>
             <Paragraph>{lines.shift()}</Paragraph>
-            <List sx={{
-                p: 0,
-                pl: 2,
-                listStyleType: "disc",
-                "& .MuiListItem-root": {
-                    display: "list-item",
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                },
-            }}>{lines.map(line =>
+            <List sx={DEVELOPMENT_ROADMAP_SX}>{lines.map(line =>
                 <ListItem key={line}>{line}</ListItem>
             )}</List>
         </>;
     }, [developmentRoadmapRaw]);
 
-    return <Paper sx={{ m: 2, p: 2 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+    return <Paper sx={BODY_SX}>
+        <Stack direction={TOP_STACK_SX} spacing={2}>
             <img src={logo} width={150} height={150} role="presentation" alt="" aria-hidden="true" />
-            <Box sx={{ maxWidth: "md" }}>
+            <Box sx={TEXT_SX}>
                 <Typography variant="h1"><FormattedMessage id={MessageID.appName} /></Typography>
                 {instructions}
                 {developmentRoadmap}
@@ -86,3 +77,17 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+
+const DEVELOPMENT_ROADMAP_SX = {
+    p: 0,
+    pl: 2,
+    listStyleType: "disc",
+    "& .MuiListItem-root": {
+        display: "list-item",
+        paddingTop: 0,
+        paddingBottom: 0,
+    },
+} as const;
+const BODY_SX = { m: 2, p: 2 } as const;
+const TOP_STACK_SX = { xs: "column", sm: "row" } as const;
+const TEXT_SX = { maxWidth: "md" } as const;

@@ -12,7 +12,7 @@ const SessionNameField: React.FC = () => {
 
     const [value, onChange] = useDeepStateChangeHandler(session, ["name"]);
 
-    return <Box width={{ xs: "100%", sm: 300 }}>
+    return <Box width={BOX_SX}>
         <TextField
             label={intl.formatMessage({ id: MessageID.sessionNameFieldLabel })}
             value={value}
@@ -25,3 +25,5 @@ const SessionNameField: React.FC = () => {
 };
 
 export default SessionNameField;
+
+const BOX_SX = { xs: "100%", sm: 300 } as const;

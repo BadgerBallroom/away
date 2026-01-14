@@ -6,7 +6,7 @@ import Paper, { PaperOwnProps } from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import Typography, { TypographyOwnProps } from "@mui/material/Typography";
-import React from "react";
+import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { EnumToMessageID, MessageID } from "../i18n/messages";
 import Dancer, { CanDriveCarpool, Gender } from "../model/Dancer";
@@ -42,6 +42,8 @@ const DancerTile: React.FC<DancerTileProps> = ({ dancerState, elevation, sx }) =
     const prefersSameGender = useDeepState(dancerState, ["prefersSameGender"]);
     const gender = useDeepState(dancerState, ["gender"]);
 
+    const titleFormatArgs = useMemo(() => ({ name }), [name]);
+
     return <TooltipPropsContextProvider disableInteractive>
         <StyledPaper elevation={elevation} sx={sx}>
             <TooltipPropsContextProvider placement="top">
@@ -49,7 +51,7 @@ const DancerTile: React.FC<DancerTileProps> = ({ dancerState, elevation, sx }) =
                     variant="body1"
                     icon={<CanDriveCarpoolIcon canDriveCarpool={canDriveCarpool} />}
                     titleMessageID={MessageID.dancerNameTooltip}
-                    titleFormatArgs={{ name }}
+                    titleFormatArgs={titleFormatArgs}
                 >{name}</LineOfText>
             </TooltipPropsContextProvider>
             <TooltipPropsContextProvider placement="left">
