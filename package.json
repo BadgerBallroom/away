@@ -26,10 +26,13 @@
     "start": "vite",
     "build": "tsc && vite build",
     "build-serve": "serve -s dist",
+    "lint": "eslint src",
+    "lint-fix": "eslint src --fix",
     "test": "vitest"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.0.11",
+    "@stylistic/eslint-plugin": "^5.7.0",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

@@ -1,4 +1,5 @@
 // eslint.config.js
+import stylistic from '@stylistic/eslint-plugin';
 import react from "eslint-plugin-react";
 import hooks from "eslint-plugin-react-hooks";
 import refresh from "eslint-plugin-react-refresh";
@@ -18,6 +19,7 @@ export default defineConfig(
             react: react,
             "react-hooks": hooks,
             "react-refresh": refresh,
+            '@stylistic': stylistic,
         },
         languageOptions: {
             ...reactRecommended.languageOptions,
