@@ -19,7 +19,7 @@ const WorkspaceWithToolbar: React.FC<WorkspaceWithToolbarProps> = ({ toolbarChil
             <Toolbar>{toolbarChildren}</Toolbar>
         </AppBar>
         <Box paddingTop={8}>{children}</Box>
-    </>
+    </>;
 };
 
 export default WorkspaceWithToolbar;

@@ -25,6 +25,6 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ iconOnly, onClick }) => {
     return <Button startIcon={<DeleteIcon />} onClick={onClick}>
         <FormattedMessage id={MessageID.delete} />
     </Button>;
-}
+};
 
 export default DeleteButton;

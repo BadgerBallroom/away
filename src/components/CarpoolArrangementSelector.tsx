@@ -52,7 +52,7 @@ const CarpoolArrangementSelector: React.FC<CarpoolArrangementSelectorProps> = ({
             )}
         </Tabs>
     </Container>;
-}
+};
 
 export default CarpoolArrangementSelector;
 

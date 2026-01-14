@@ -44,7 +44,7 @@ const PageContent: React.FC = () => {
         </Box>
         <FabRenderer />
     </>;
-}
+};
 
 export default PageContent;
 

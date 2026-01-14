@@ -204,7 +204,7 @@ const EarliestPossibleDepartureControl: React.FC<DancerFieldProps> = ({ dancerSt
 
     const value = useDeepState(dancerState, PATH_TO_EARLIEST_POSSIBLE_DEPARTURE);
     const onChange = useCallback((newValue: Dayjs | null) => {
-        dancerState.setDescendantValue(PATH_TO_EARLIEST_POSSIBLE_DEPARTURE, newValue)
+        dancerState.setDescendantValue(PATH_TO_EARLIEST_POSSIBLE_DEPARTURE, newValue);
     }, [dancerState]);
 
     const slotProps = useMemo(() => ({

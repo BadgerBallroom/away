@@ -222,7 +222,7 @@ describe("DancerListState", () => {
                         "type": "FieldMismatch",
                     }
                 ]);
-            })
+            });
         });
     });
 });

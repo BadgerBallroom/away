@@ -134,7 +134,7 @@ const CarpoolArrangementDisplay: React.FC<CarpoolArrangementDisplayProps> = ({
                     left: `${left}px`,
                     top: `${top}px`,
                     display: "block",
-                }
+                };
                 top += DANCER_TILE_HEIGHT_WITH_MARGIN;
             }
 
@@ -162,4 +162,4 @@ const CarpoolArrangementDisplay: React.FC<CarpoolArrangementDisplayProps> = ({
             </Box>
         </Box>
     </Box>;
-}
+};

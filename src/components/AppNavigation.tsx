@@ -58,7 +58,7 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
             component={Link}
             value={path}
             to={path}
-        />
+        />;
     });
 
     const [showSessionClearDialog, setShowSessionClearDialog] = useState(false);
