@@ -29,6 +29,7 @@ export default defineConfig(
         },
         rules: {
             ...reactRecommended.rules,
+            "@stylistic/quotes": ["error", "double"],
             "@stylistic/semi": "error",
             "@typescript-eslint/no-namespace": "off",
             "@typescript-eslint/no-unused-vars": [

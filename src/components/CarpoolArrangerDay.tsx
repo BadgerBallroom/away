@@ -1,14 +1,14 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 import { FormattedMessage } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
-import { CarpoolContainerContainer } from './CarpoolArrangerCar';
+import { CarpoolContainerContainer } from "./CarpoolArrangerCar";
 
 const EVEN_ROW_SX = {} as const;
 const ODD_ROW_SX = { bgcolor: "rgba(128, 128, 128, 0.2)" } as const;

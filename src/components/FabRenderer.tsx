@@ -1,5 +1,5 @@
-import FabZoomer from './FabZoomer';
-import { useFabRenderInfo } from './FabZoomerHooks';
+import FabZoomer from "./FabZoomer";
+import { useFabRenderInfo } from "./FabZoomerHooks";
 
 /** Renders the floating action button (FAB) for all pages. */
 const FabRenderer: React.FC = () => {

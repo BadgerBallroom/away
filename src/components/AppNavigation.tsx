@@ -1,24 +1,24 @@
-import MenuIcon from '@mui/icons-material/Menu';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+import MenuIcon from "@mui/icons-material/Menu";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import { styled } from "@mui/system";
-import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useLocation } from 'react-router-dom';
-import { MessageID } from '../i18n/messages';
-import routes, { getAbsolutePath } from '../routes';
-import LogoIcon from './LogoIcon';
-import SessionClearDialog from './SessionClearDialog';
-import SessionNameField from './SessionNameField';
+import React, { useCallback, useMemo, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { Link, useLocation } from "react-router-dom";
+import { MessageID } from "../i18n/messages";
+import routes, { getAbsolutePath } from "../routes";
+import LogoIcon from "./LogoIcon";
+import SessionClearDialog from "./SessionClearDialog";
+import SessionNameField from "./SessionNameField";
 
 export interface AppNavigationProps {
     /** Any React node to be inserted at the bottom of the menu that appears when the user clicks the menu button */
@@ -34,10 +34,10 @@ const AppNavigation: React.FC<AppNavigationProps> = ({ drawerFooter }) => {
         palette: {
             mode: "dark",
             primary: {
-                main: '#fff',
+                main: "#fff",
             },
             secondary: {
-                main: '#fff',
+                main: "#fff",
             },
         },
     }), []);

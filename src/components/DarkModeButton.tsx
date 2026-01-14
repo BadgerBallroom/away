@@ -1,4 +1,4 @@
-import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
 import IconButton from "@mui/material/IconButton";
 import { useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";

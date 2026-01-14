@@ -1,12 +1,12 @@
 import Box from "@mui/material/Box";
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import { Suspense, useEffect } from "react";
 import { useIntl } from "react-intl";
 import { Outlet, UIMatch, useMatches } from "react-router-dom";
 import { MessageID } from "../i18n/messages";
 import { Handle } from "../routes";
-import AppNavigation from './AppNavigation';
-import DarkModeButton from './DarkModeButton';
+import AppNavigation from "./AppNavigation";
+import DarkModeButton from "./DarkModeButton";
 import FabRenderer from "./FabRenderer";
 import { usePageContext } from "./PageContext";
 

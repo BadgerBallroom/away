@@ -1,18 +1,18 @@
-import CssBaseline from '@mui/material/CssBaseline';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import React, { useEffect, useMemo } from 'react';
-import { IntlProvider } from 'react-intl';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import PageContent from './components/PageContent';
-import PageContext, { PageContextValue } from './components/PageContext';
-import SessionContext from './components/SessionContext';
-import { Locales } from './i18n/locales';
-import { MESSAGES } from './i18n/messages';
-import Session from './model/Session';
-import routes from './routes';
-import { useDarkModeToggle } from './utilities/DarkModeHooks';
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import React, { useEffect, useMemo } from "react";
+import { IntlProvider } from "react-intl";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import PageContent from "./components/PageContent";
+import PageContext, { PageContextValue } from "./components/PageContext";
+import SessionContext from "./components/SessionContext";
+import { Locales } from "./i18n/locales";
+import { MESSAGES } from "./i18n/messages";
+import Session from "./model/Session";
+import routes from "./routes";
+import { useDarkModeToggle } from "./utilities/DarkModeHooks";
 
 const router = createBrowserRouter([{
     element: <PageContent />,

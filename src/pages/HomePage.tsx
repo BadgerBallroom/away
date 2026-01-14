@@ -1,17 +1,17 @@
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Paper from '@mui/material/Paper';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
+import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
 import React, { useCallback, useMemo } from "react";
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Link as RouterLink } from 'react-router-dom';
-import { MessageID } from '../i18n/messages';
-import logo from '../logo.svg';
-import { getMessageIDsToPaths } from '../routes';
+import { FormattedMessage, useIntl } from "react-intl";
+import { Link as RouterLink } from "react-router-dom";
+import { MessageID } from "../i18n/messages";
+import logo from "../logo.svg";
+import { getMessageIDsToPaths } from "../routes";
 
 export function Component() {
     return <HomePage />;

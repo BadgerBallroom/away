@@ -201,9 +201,9 @@ describe("DancerListState", () => {
                 expect(fn).toHaveBeenCalledTimes(2);
                 expect(fn).toHaveBeenCalledWith([
                     {
-                        type: 'FieldMismatch',
-                        code: 'TooManyFields',
-                        message: 'Too many fields: expected 2 fields but parsed 3',
+                        type: "FieldMismatch",
+                        code: "TooManyFields",
+                        message: "Too many fields: expected 2 fields but parsed 3",
                         row: 0
                     }
                 ]);

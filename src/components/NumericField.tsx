@@ -1,9 +1,9 @@
-import { NumberField } from '@base-ui/react/number-field';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { MessageID } from '../i18n/messages';
+import { NumberField } from "@base-ui/react/number-field";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import * as React from "react";
+import { useIntl } from "react-intl";
+import { MessageID } from "../i18n/messages";
 
 interface NumericFieldProps extends React.ComponentProps<typeof NumberField.Root> {
     id: string;
@@ -18,7 +18,7 @@ const NumericField = React.forwardRef<HTMLDivElement, NumericFieldProps>(functio
     const label = intl.formatMessage({ id: labelMessageID });
 
     return (
-        <div className={`relative mt-2 ${className || ''}`}>
+        <div className={`relative mt-2 ${className || ""}`}>
             <label
                 htmlFor={id}
                 className="absolute -top-2 left-2 z-10 px-1 text-xs text-gray-500 transition-colors group-focus-within:text-blue-500 dark:text-gray-400"

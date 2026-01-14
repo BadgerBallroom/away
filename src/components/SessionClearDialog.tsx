@@ -1,13 +1,13 @@
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import { useCallback } from 'react';
-import { FormattedMessage } from 'react-intl';
-import { MessageID } from '../i18n/messages';
-import { useSession } from '../model/SessionHooks';
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import { useCallback } from "react";
+import { FormattedMessage } from "react-intl";
+import { MessageID } from "../i18n/messages";
+import { useSession } from "../model/SessionHooks";
 
 interface SessionClearDialogProps {
     /** Whether the dialog should be showing */
