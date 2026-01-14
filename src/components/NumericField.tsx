@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/max-len */
 import { NumberField } from "@base-ui/react/number-field";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";

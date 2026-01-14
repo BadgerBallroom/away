@@ -31,6 +31,11 @@ export default defineConfig(
         },
         rules: {
             ...reactRecommended.rules,
+            "@stylistic/max-len": ["warn", {
+                "code": 120,
+                "ignoreComments": false,
+                "ignorePattern": "^import ",
+            }],
             "@stylistic/quotes": ["error", "double"],
             "@stylistic/semi": "error",
             "@typescript-eslint/no-namespace": "off",

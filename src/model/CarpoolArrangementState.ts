@@ -101,7 +101,11 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
                 lastDayjs = carpoolsByDay[carpoolsByDay.length - 1].day,
                 shouldAddAnother("day", lastDayjs, departure)
             )) {
-                carpoolsByDay.push(new CarpoolArrangementState.CarpoolsForDay(departure === null ? null : lastDayjs.add(1, "day")));
+                carpoolsByDay.push(new CarpoolArrangementState.CarpoolsForDay(
+                    departure === null
+                        ? null
+                        : lastDayjs.add(1, "day")
+                ));
             }
 
             // Add hours until the last hour in `carpoolsByHour` is the same hour as this departure.

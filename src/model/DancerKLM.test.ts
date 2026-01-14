@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/max-len */
 import dayjs from "dayjs";
 import saveToDownload from "../utilities/saveToDownload";
 import areMultilineStringsEqual, { MultilineString } from "../utilities/testing/areMultilineStringsEqual";

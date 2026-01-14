@@ -79,7 +79,10 @@ class DijkstraState {
      * @param people The people who are being put in carpools
      * @param numUnassigned The maximum number of unassigned people
      */
-    public discardNodesWithNumUnassignedPeople(people: DeepReadonly<ValueWithID<Dancer>[]>, numUnassigned: number): void {
+    public discardNodesWithNumUnassignedPeople(
+        people: DeepReadonly<ValueWithID<Dancer>[]>,
+        numUnassigned: number,
+    ): void {
         if (this.visited.size) {
             const newVisitedSet = DijkstraState._newVisitedSet();
             this.visited.forEach(nodeID => {
@@ -124,8 +127,8 @@ class DijkstraState {
 /**
  * Uses Dijkstra's algorithm to put people into carpools.
  * @param people The people to put in carpools
- * @param rootNodeId 
- * @returns 
+ * @param rootNodeId
+ * @returns
  */
 function dijkstra(people: DeepReadonly<DancerWithID[]>): CarpoolArrangement[] {
     const rootNodeId = new Node(people).toString();
@@ -178,7 +181,8 @@ function dijkstra(people: DeepReadonly<DancerWithID[]>): CarpoolArrangement[] {
                 // We're probably never going to get to it anyway.
                 state.truncateQueue(settings.maxQueueSize);
 
-                // Ideally, we'd update the node in the queue with the new length, but this queue library doesn't support that.
+                // Ideally, we'd update the node in the queue with the new length, but this queue library doesn't
+                // support that.
                 if (!state.visited.has(nextNodeId)) {
                     state.toVisit.queue([costToNodeViaCurrent, nextNodeId]);
                 }
@@ -243,8 +247,16 @@ class Node {
      * @param people The people who are being put in carpools
      */
     constructor(people: DeepReadonly<DancerWithID[]>);
-    constructor(people: DeepReadonly<DancerWithID[]>, cars: readonly (readonly number[])[], firstUnassignedPerson: number);
-    constructor(people: DeepReadonly<DancerWithID[]>, cars?: readonly (readonly number[])[], firstUnassignedPerson?: number) {
+    constructor(
+        people: DeepReadonly<DancerWithID[]>,
+        cars: readonly (readonly number[])[],
+        firstUnassignedPerson: number,
+    );
+    constructor(
+        people: DeepReadonly<DancerWithID[]>,
+        cars?: readonly (readonly number[])[],
+        firstUnassignedPerson?: number,
+    ) {
         this._people = people;
         this._cars = cars ?? [];
         this._firstUnassignedPerson = firstUnassignedPerson ?? 0;
@@ -447,7 +459,11 @@ class Node {
 
         // If both people prefer different types of housing, add some distance.
         // If one or both have no preference, don't add distance.
-        if (personA.accommodation !== Accommodation.NoPreference && personB.accommodation !== Accommodation.NoPreference && personA.accommodation !== personB.accommodation) {
+        if (
+            personA.accommodation !== Accommodation.NoPreference
+            && personB.accommodation !== Accommodation.NoPreference
+            && personA.accommodation !== personB.accommodation
+        ) {
             distance += settings.costEquivalents.preferDifferentAccomodation;
         }
 

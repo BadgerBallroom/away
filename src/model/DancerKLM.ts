@@ -12,7 +12,8 @@ import Session from "./Session";
 export type DancerKLM = KeyListAndMap<Dancer>;
 
 /** Holds a map of ID-dancer pairs and an array to store the order of IDs. */
-export class DancerKLMState extends KeyListAndMapState<Dancer, DancerState, DancerListState, KeyMapState<Dancer, DancerState>> {
+export class DancerKLMState
+    extends KeyListAndMapState<Dancer, DancerState, DancerListState, KeyMapState<Dancer, DancerState>> {
     constructor(initialValue?: DancerKLM) {
         super(
             initialValue,
