@@ -2,6 +2,7 @@
 import stylistic from '@stylistic/eslint-plugin';
 import react from "eslint-plugin-react";
 import hooks from "eslint-plugin-react-hooks";
+import perf from "eslint-plugin-react-perf";
 import refresh from "eslint-plugin-react-refresh";
 import reactRecommended from "eslint-plugin-react/configs/recommended.js";
 import { defineConfig } from "eslint/config";
@@ -18,6 +19,7 @@ export default defineConfig(
         plugins: {
             react: react,
             "react-hooks": hooks,
+            "react-perf": perf,
             "react-refresh": refresh,
             '@stylistic': stylistic,
         },
