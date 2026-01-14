@@ -105,7 +105,7 @@ const Unassigned: React.FC<SharedProps> = ({ state }) => {
             {unassignedState.getReferencedStates().map(dancerState =>
                 <Grid item key={dancerState.evanescentID}>
                     <DancerTile dancerState={dancerState} elevation={3} />
-                </Grid>
+                </Grid>,
             )}
         </Grid>
     </UnassignedBar>;
@@ -124,7 +124,7 @@ const Schedule: React.FC<SharedProps> = ({ state }) => {
     const carpoolsByDay = useMemo(() => groupByDepartureTime(state, value), [state, value]);
 
     return <>{carpoolsByDay.map(carpoolsForDay =>
-        <CarpoolArrangerDay key={carpoolsForDay.day?.valueOf()} carpoolsForDay={carpoolsForDay} />
+        <CarpoolArrangerDay key={carpoolsForDay.day?.valueOf()} carpoolsForDay={carpoolsForDay} />,
     )}</>;
 };
 
@@ -136,7 +136,7 @@ const Schedule: React.FC<SharedProps> = ({ state }) => {
  */
 function groupByDepartureTime(
     carpoolArrangementState: CarpoolArrangementState,
-    _: CarpoolArrangement
+    _: CarpoolArrangement,
 ): CarpoolArrangementState.CarpoolsForDay[] {
     return carpoolArrangementState.groupByDepartureTime();
 }

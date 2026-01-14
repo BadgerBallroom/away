@@ -91,9 +91,9 @@ describe("DancerListState", () => {
                         "id,name,canDriveCarpool,canDriveMaxPeople,earliestPossibleDeparture,accommodation,prefersSameGender,gender\n" +
                         defaultDancerWithID.id + ",Dorothy,YIN,6,2024-09-30T15:00:00.000Z,HOTEL,FALSE,F\n" +
                         "2,Alice,Y,4,2024-09-30T17:00:00.000Z,FREE,TRUE,F\n" +
-                        "3,Bob,NA,1,,NA,FALSE,M"
+                        "3,Bob,NA,1,,NA,FALSE,M",
                     ], { type: "text/csv" })],
-                    "dancers.csv"
+                    "dancers.csv",
                 );
             });
 
@@ -147,9 +147,9 @@ describe("DancerListState", () => {
                     [new Blob([
                         "name,canDriveCarpool,canDriveMaxPeople,earliestPossibleDeparture,accommodation,prefersSameGender,gender\n" +
                         "Alice,Y,4,2024-09-30T17:00:00.000Z,FREE,TRUE,F\n" +
-                        "Bob,NA,1,,NA,FALSE,M"
+                        "Bob,NA,1,,NA,FALSE,M",
                     ], { type: "text/csv" })],
-                    "dancers.csv"
+                    "dancers.csv",
                 );
             });
 
@@ -188,9 +188,9 @@ describe("DancerListState", () => {
                     [new Blob([
                         "name,gender\n" +
                         "Alice,F,beep beep!!\n" +
-                        "\"Bob"
+                        "\"Bob",
                     ], { type: "text/csv" })],
-                    "dancers.csv"
+                    "dancers.csv",
                 );
             });
 
@@ -205,8 +205,8 @@ describe("DancerListState", () => {
                         type: "FieldMismatch",
                         code: "TooManyFields",
                         message: "Too many fields: expected 2 fields but parsed 3",
-                        row: 0
-                    }
+                        row: 0,
+                    },
                 ]);
                 expect(fn).toHaveBeenCalledWith([
                     {
@@ -221,7 +221,7 @@ describe("DancerListState", () => {
                         "message": "Too few fields: expected 2 fields but parsed 1",
                         "row": 1,
                         "type": "FieldMismatch",
-                    }
+                    },
                 ]);
             });
         });

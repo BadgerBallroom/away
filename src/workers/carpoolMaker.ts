@@ -159,7 +159,7 @@ function dijkstra(people: DeepReadonly<DancerWithID[]>): CarpoolArrangement[] {
                 // To reduce our memory footprint, we can discard nodes that have too many unassigned people.
                 state.discardNodesWithNumUnassignedPeople(
                     people,
-                    minUnassignedPeople + settings.numPeopleToUnassignInSearchOfBetterResult
+                    minUnassignedPeople + settings.numPeopleToUnassignInSearchOfBetterResult,
                 );
             }
 
@@ -293,7 +293,7 @@ class Node {
     public toCarpoolArrangement(name: string): CarpoolArrangement {
         const carpools = this._cars.map(car => ({
             departure: this._getLastEarliestDeparture(car),
-            occupants: car.map(i => this._people[i].id)
+            occupants: car.map(i => this._people[i].id),
         }));
         carpools.sort(Carpool.comparator);
 
@@ -357,7 +357,7 @@ class Node {
                         ? settings.costEquivalents.makeWillingDriverDrive
                         : settings.costEquivalents.makeIfNeededDriverDrive
                 ),
-                node: new Node(this._people, cars, nextUnassignedPassenger)
+                node: new Node(this._people, cars, nextUnassignedPassenger),
             });
         }
 
@@ -387,7 +387,7 @@ class Node {
 
             egdes.push({
                 cost: this._computeCostOfAddingFirstUnassignedPersonToCar(car),
-                node: new Node(this._people, cars, nextUnassignedPassenger)
+                node: new Node(this._people, cars, nextUnassignedPassenger),
             });
         });
 

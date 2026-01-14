@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
 
     const NavLink: React.FC<{ to: MessageID }> = useCallback(
         ({ to }) => <Link component={RouterLink} to={pages[to]}><FormattedMessage id={to} /></Link>,
-        [pages]
+        [pages],
     );
 
     // Format the instructions:
@@ -45,9 +45,9 @@ const HomePage: React.FC = () => {
                         default:
                             return textOrPlaceholder;
                     }
-                }
+                },
             )
-        }</Paragraph>
+        }</Paragraph>,
     ), [instructionsRaw, NavLink]);
 
     // Format the development roadmap:
@@ -58,9 +58,9 @@ const HomePage: React.FC = () => {
         const lines = developmentRoadmapRaw.split("\n");
         return <>
             <Paragraph>{lines.shift()}</Paragraph>
-            <List sx={DEVELOPMENT_ROADMAP_SX}>{lines.map(line =>
-                <ListItem key={line}>{line}</ListItem>
-            )}</List>
+            <List sx={DEVELOPMENT_ROADMAP_SX}>
+                {lines.map(line => <ListItem key={line}>{line}</ListItem>)}
+            </List>
         </>;
     }, [developmentRoadmapRaw]);
 

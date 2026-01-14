@@ -35,7 +35,7 @@ const DancersPage: React.FC = () => {
         selection: { set: selectionSet },
         clearSelection,
         addRangeToSelection,
-        onSelectableElementClick
+        onSelectableElementClick,
     } = useSelectionManager();
 
     const dancerListState = useDancerListState();
@@ -151,7 +151,7 @@ const DancersPage: React.FC = () => {
                             onSelectableElementClick,
                         }}
                         selected={selectionSet.has(index)}
-                    />
+                    />,
                 )
             }
         </Grid>
@@ -162,7 +162,7 @@ export default DancersPage;
 
 const GridItemSkeleton = React.forwardRef(function GridItemSkeleton(
     _props: object,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: React.ForwardedRef<HTMLDivElement>,
 ) {
     return <Grid item ref={ref}>
         <Skeleton variant="rounded" animation="wave" width={292} height={515} />
@@ -190,7 +190,7 @@ const GridItem = React.forwardRef(function GridItem(
         onSelectableElementClick,
         selected,
     }: GridItemProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: React.ForwardedRef<HTMLDivElement>,
 ) {
     const isTemporaryDancer = dancerListState.isTemporaryDancer(dancerState);
     const onDelete = useCallback(() => {

@@ -13,7 +13,7 @@ interface NumericFieldProps extends React.ComponentProps<typeof NumberField.Root
 
 const NumericField = React.forwardRef<HTMLDivElement, NumericFieldProps>(function NumericField(
     { id, labelMessageID, className, ...props },
-    ref
+    ref,
 ) {
     const intl = useIntl();
     const label = intl.formatMessage({ id: labelMessageID });

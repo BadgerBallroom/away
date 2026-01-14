@@ -121,7 +121,7 @@ export abstract class DeepStateBase<T> {
     public getDescendantState<K extends keyof T>(path: readonly [K]): ReturnType<DeepStateBase<T>["getChildState"]>;
     public getDescendantState<
         K1 extends keyof T,
-        K2 extends keyof T[K1]
+        K2 extends keyof T[K1],
     >(path: readonly [K1, K2]): ReturnType<NonNullable<ReturnType<DeepStateBase<T>["getChildState"]>>["getChildState"]>;
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any>;
     public getDescendantState(path: readonly (string | number)[]): DeepStateBase<any> {
@@ -178,7 +178,7 @@ export abstract class DeepStateBase<T> {
  */
 export class DeepStateArray<
     Item,
-    ItemState extends DeepStateBase<Item> = DeepStateBase<Item>
+    ItemState extends DeepStateBase<Item> = DeepStateBase<Item>,
 > extends DeepStateBase<Item[]> {
     private _items: DeepStateChild<Item, ItemState>[];
     /** Makes an `ItemState` from an `Item` */
@@ -408,7 +408,7 @@ export type StringKeys<T> = Extract<keyof T, string>;
 export class DeepStateObject<
     T extends object,
     TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
-    = { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
+    = { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> },
 > extends DeepStateBase<T> {
     private _entries: DeepStateObject.Entries<T, TChildrenStates>;
     /**
@@ -438,7 +438,7 @@ export class DeepStateObject<
     constructor(
         initialValue: T,
         makeChildState: DeepStateObject.ChildStateMaker<T, TChildrenStates> | undefined,
-        delayedSet = false
+        delayedSet = false,
     ) {
         super();
         this._entries = {} as DeepStateObject.Entries<T, TChildrenStates>;
@@ -559,7 +559,7 @@ export class DeepStateObject<
      */
     protected makeChild<K extends StringKeys<T>>(
         key: K,
-        deepState: TChildrenStates[K]
+        deepState: TChildrenStates[K],
     ): DeepStateChild<T[K], TChildrenStates[K]> {
         const changeCallback = (childValue: DeepReadonly<T[K]>) => {
             // Create a new value with the updated child value; dispatchValueChange should get the new value, while
@@ -633,12 +633,12 @@ export class DeepStateObject<
 export namespace DeepStateObject {
     export type Entries<
         T extends object,
-        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
+        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> },
     > = { [K in StringKeys<T>]: DeepStateChild<T[K], TChildrenStates[K]> };
 
     export interface ChildStateMaker<
         T extends object,
-        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> }
+        TChildrenStates extends { [K in StringKeys<T>]: DeepStateBaseOrUndefined<T[K]> },
     > {
         <K extends StringKeys<T>>(key: K, value: T[K]): TChildrenStates[StringKeys<T>];
     }

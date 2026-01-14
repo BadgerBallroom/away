@@ -104,7 +104,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
                 carpoolsByDay.push(new CarpoolArrangementState.CarpoolsForDay(
                     departure === null
                         ? null
-                        : lastDayjs.add(1, "day")
+                        : lastDayjs.add(1, "day"),
                 ));
             }
 
@@ -127,7 +127,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         function shouldAddAnother(
             unit: dayjs.OpUnitType,
             lastDayjs: dayjs.Dayjs | null,
-            departure: dayjs.Dayjs | null
+            departure: dayjs.Dayjs | null,
         ): lastDayjs is dayjs.Dayjs {
             if (departure === null) {
                 return lastDayjs !== null;

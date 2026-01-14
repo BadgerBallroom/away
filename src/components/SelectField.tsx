@@ -20,7 +20,7 @@ interface SelectFieldProps<T> {
 /** Displays a drop-down menu and lets the user choose one option. */
 const SelectField = React.forwardRef(function SelectField<T extends string>(
     { id, value, onChange, labelMessageID, options }: SelectFieldProps<T>,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: React.ForwardedRef<HTMLDivElement>,
 ) {
     const intl = useIntl();
 

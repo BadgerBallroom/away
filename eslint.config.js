@@ -31,6 +31,7 @@ export default defineConfig(
         },
         rules: {
             ...reactRecommended.rules,
+            "@stylistic/comma-dangle": ["error", "always-multiline"],
             "@stylistic/max-len": ["warn", {
                 "code": 120,
                 "ignoreComments": false,

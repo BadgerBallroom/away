@@ -38,7 +38,7 @@ interface DancerCardProps extends DancerFieldProps {
 /** Allows the user to edit the details of one dancer. */
 const DancerCard = React.forwardRef(function DancerCard(
     { id, dancerState, onDelete, onSelect, selected }: DancerCardProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: React.ForwardedRef<HTMLDivElement>,
 ) {
     const onClick = useCallback((event: React.MouseEvent) => {
         if (
@@ -83,7 +83,7 @@ const DancerCardPaper = styled(Paper)(({ theme }) => {
     const boxShadow = [
         "0 2px 1px -1px rgba(0, 0, 0, 0.2)",
         "0 1px 1px 0px rgba(0, 0, 0, 0.14)",
-        "0 1px 3px 0px rgba(0, 0, 0, 0.12)"
+        "0 1px 3px 0px rgba(0, 0, 0, 0.12)",
     ].join(",");
 
     return `
@@ -177,9 +177,9 @@ const CanDriveMaxPeopleControl: React.FC<DancerFieldProps> = ({ id, dancerState 
     const onValueChange = useCallback(
         (
             value: number | null,
-            _event: NumberFieldRootChangeEventDetails
+            _event: NumberFieldRootChangeEventDetails,
         ) => dancerState.setDescendantValue(PATH_TO_CAN_DRIVE_MAX_PEOPLE, value ?? 0),
-        [dancerState]
+        [dancerState],
     );
 
     const shouldShow = DancerState.CanDriveMaxPeople.useShouldShow(dancerState);
@@ -209,8 +209,8 @@ const EarliestPossibleDepartureControl: React.FC<DancerFieldProps> = ({ dancerSt
 
     const slotProps = useMemo(() => ({
         textField: {
-            label: intl.formatMessage({ id: MessageID.dancerEarliestPossibleDeparture })
-        }
+            label: intl.formatMessage({ id: MessageID.dancerEarliestPossibleDeparture }),
+        },
     }), [intl]);
 
     const shouldShow = DancerState.EarliestPossibleDeparture.useShouldShow(dancerState);

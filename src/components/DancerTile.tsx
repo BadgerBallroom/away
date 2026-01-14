@@ -104,7 +104,7 @@ interface TextFromEnumProps<E extends string, ValueMap extends EnumToMessageID<E
 }
 
 function TextFromEnum<E extends string, ValueMap extends EnumToMessageID<E> | undefined>(
-    { label, valueMap, value }: TextFromEnumProps<E, ValueMap>
+    { label, valueMap, value }: TextFromEnumProps<E, ValueMap>,
 ) {
     if (!value) {
         return null;

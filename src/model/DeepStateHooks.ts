@@ -13,7 +13,7 @@ import { DeepStateBase, DeepStateObject } from "./DeepState";
 export function useDeepState<T>(
     deepState: DeepStateBase<T>,
     path: readonly [],
-    ignoreDescendants?: boolean
+    ignoreDescendants?: boolean,
 ): T;
 /**
  * Returns an element of the given `DeepStateArray`. If the element itself is an array or an object, it is
@@ -26,7 +26,7 @@ export function useDeepState<T>(
 export function useDeepState<Item>(
     deepState: DeepStateBase<Item[]>,
     path: readonly [number],
-    ignoreDescendants?: boolean
+    ignoreDescendants?: boolean,
 ): Item;
 /**
  * Returns the value for the given key in the `DeepStateObject`. If the value itself is an array or an object, it is
@@ -39,7 +39,7 @@ export function useDeepState<Item>(
 export function useDeepState<T extends object, K extends keyof T>(
     deepState: DeepStateObject<T, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
     path: readonly [K],
-    ignoreDescendants?: boolean
+    ignoreDescendants?: boolean,
 ): T[K];
 /**
  * Given a path of keys and/or indices, returns a nested value from the given `DeepStateBase`. For example, a path of
@@ -53,12 +53,12 @@ export function useDeepState<T extends object, K extends keyof T>(
 export function useDeepState<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
-    ignoreDescendants?: boolean
+    ignoreDescendants?: boolean,
 ): unknown;
 export function useDeepState<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
-    ignoreDescendants?: boolean
+    ignoreDescendants?: boolean,
 ): unknown {
     ignoreDescendants = !!ignoreDescendants;
 

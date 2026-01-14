@@ -76,7 +76,7 @@ const DancerSortDialog: React.FC<DancerSortDialogProps> = ({ open, onClose, toSo
                                     value={value}
                                     control={<Radio />}
                                     label={intl.formatMessage({ id: labelMessageID })}
-                                />
+                                />,
                             )}
                         </RadioGroup>
                     </FormControl>

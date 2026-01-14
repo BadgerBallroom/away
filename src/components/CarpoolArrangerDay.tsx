@@ -36,10 +36,10 @@ const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay 
                                 <CarpoolContainerContainer
                                     key={carpoolState.evanescentID}
                                     carpoolState={carpoolState}
-                                />
+                                />,
                             )}
                         </ScheduleCell>
-                    </ScheduleRow>
+                    </ScheduleRow>,
                 )}
             </ScheduleTable>
         </AccordionDetailsNoPadding>

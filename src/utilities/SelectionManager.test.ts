@@ -7,7 +7,7 @@ function makeClickEvent(overrides?: Partial<SelectionManager.ClickEvent>): Selec
         altKey: false,
         ctrlKey: false,
         shiftKey: false,
-        ...overrides
+        ...overrides,
     };
 }
 

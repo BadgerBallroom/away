@@ -48,7 +48,7 @@ const CarpoolArrangementSelector: React.FC<CarpoolArrangementSelectorProps> = ({
                     key={carpoolArrangement.id}
                     label={carpoolArrangement.name || intl.formatMessage({ id: MessageID.untitled })}
                     value={carpoolArrangement.id}
-                />
+                />,
             )}
         </Tabs>
     </Container>;

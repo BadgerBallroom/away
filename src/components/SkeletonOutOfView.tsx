@@ -27,11 +27,11 @@ export default interface SkeletonOutOfView {
 export function useSkeletonOutOfView(
     measurementKey: string,
     skeletonProps?: SkeletonProps,
-    inViewOptions?: IntersectionOptions
+    inViewOptions?: IntersectionOptions,
 ): SkeletonOutOfView {
     const { ref: refInView, inView } = useInView({
         rootMargin: "100% 0%",
-        ...inViewOptions
+        ...inViewOptions,
     });
 
     // Check whether the size has already been measured. If it hasn't, we have no choice but to render the child.
