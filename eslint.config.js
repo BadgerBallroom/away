@@ -62,6 +62,7 @@ export default defineConfig(
             "react-hooks/exhaustive-deps": ["error", {
                 "additionalHooks": "(useFabProps)",
             }],
+            "react-perf/jsx-no-new-array-as-prop": "error",
             "react-perf/jsx-no-new-object-as-prop": "error",
             "react-refresh/only-export-components": [
                 "warn",
