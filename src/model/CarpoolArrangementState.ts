@@ -16,6 +16,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
 }> {
     private _session: Session;
 
+    // #region DeepState overrides
     /**
      * Holds one possible arrangement of dancers in carpools.
      * @param session The `Session` object that will contain this object
@@ -73,7 +74,9 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
 
         return result;
     }
+    // #endregion
 
+    // #region Organizing carpools
     /** Returns the carpools in this carpool arrangement sorted by departure time. */
     public getCarpoolStatesOrderedByDeparture(): CarpoolState[] {
         const carpoolStates = this.getChildState("carpools").getChildStates();
@@ -162,6 +165,7 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         // The set now contains the IDs of dancers who are traveling with the team but are not assigned to a carpool.
         return idsOfUnassignedDancers;
     }
+    // #endregion
 }
 
 export namespace CarpoolArrangementState {
