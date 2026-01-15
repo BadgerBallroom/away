@@ -298,6 +298,14 @@ export class DeepStateArray<
         return this._items.length;
     }
 
+    /** Returns the first index that equals `item`. */
+    public indexOf(item: Item | ItemState): number {
+        if (item instanceof DeepStateBase) {
+            return this._items.findIndex(({ deepState }) => deepState === item);
+        }
+        return this._items.findIndex(({ deepState }) => deepState.getValue() === item);
+    }
+
     /** Appends an existing `ItemState` to the array. */
     public pushState(deepState: ItemState): void {
         const value = this.getValue() as Item[];
@@ -350,6 +358,18 @@ export class DeepStateArray<
         });
         this.dispatchValueChange(newValue, false);
         this._items = newItems;
+    }
+
+    /**
+     * Removes an item from the array.
+     * @returns The removed item's state (or `undefined` if the item was not in the array)
+     */
+    public remove(item: Item | ItemState): ItemState | undefined {
+        const index = this.indexOf(item);
+        if (index < 0) {
+            return;
+        }
+        return this.pop(index);
     }
 
     /**

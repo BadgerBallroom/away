@@ -124,6 +124,24 @@ describe("DeepStateArray", () => {
             expect(changeListener).toHaveBeenCalledExactlyOnceWith([...initialValue, ...extension], false);
         });
 
+        test("indexOf finds index of item", () => {
+            if (initialValue.length) {
+                expect(state.indexOf(initialValue[0])).toBe(0);
+                expect(state.indexOf(initialValue[initialValue.length - 1])).toBe(initialValue.length - 1);
+            }
+            expect(state.indexOf(12345)).toBe(-1);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("indexOf finds index of item state", () => {
+            if (initialValue.length) {
+                expect(state.indexOf(state.getChildState(0)!)).toBe(0);
+                expect(state.indexOf(state.getChildState(initialValue.length - 1)!)).toBe(initialValue.length - 1);
+            }
+            expect(state.indexOf(new DeepStatePrimitive(12345))).toBe(-1);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
         test("pushState and pop do not copy the child state", () => {
             const childState = new DeepStatePrimitive(4);
             state.pushState(childState);
@@ -164,6 +182,35 @@ describe("DeepStateArray", () => {
             const value = [...initialValue.slice(1, 2), ...initialValue.slice(3)];
             expect(state.getValue()).toEqual(value);
             expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+        });
+
+        test("remove removes element if found", () => {
+            state.remove(12345);
+            expect(state.getValue()).toEqual(initialValue);
+            expect(changeListener).not.toHaveBeenCalled();
+
+            if (initialValue.length) {
+                const itemState = state.getChildState(0)!;
+                expect(state.remove(initialValue[0])).toBe(itemState);
+
+                const value = initialValue.slice(1);
+                expect(state.getValue()).toEqual(value);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+            }
+        });
+
+        test("remove removes element state if found", () => {
+            state.remove(new DeepStatePrimitive(12345));
+            expect(state.getValue()).toEqual(initialValue);
+            expect(changeListener).not.toHaveBeenCalled();
+
+            if (initialValue.length) {
+                const itemState = state.getChildState(0)!;
+                expect(state.remove(itemState)).toBe(itemState);
+
+                expect(state.getValue()).toEqual(initialValue.slice(1));
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(expect.anything(), false);
+            }
         });
 
         test("sort sorts elements", () => {
