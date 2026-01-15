@@ -30,9 +30,9 @@ export function useFabRenderInfo(): Map<Path, FabZoomerFabProps> {
  * Displays the current page's floating action button.
  * @param props The current page's properties for its floating action button
  */
-export function useFabForPage(factory: () => FabZoomerFabProps, deps: React.DependencyList): void {
+export function useFabForPage(factory: () => FabZoomerFabProps): void {
     const pageContext = usePageContext();
-    const props = useMemo(factory, deps); // eslint-disable-line react-hooks/exhaustive-deps
+    const props = useMemo(() => factory(), [factory]);
     useEffect(() => {
         pageContext.displayFAB(props);
     }, [pageContext, props]);

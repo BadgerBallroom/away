@@ -1,6 +1,7 @@
 // eslint.config.js
 import stylistic from '@stylistic/eslint-plugin';
 import react from "eslint-plugin-react";
+import reactCompiler from 'eslint-plugin-react-compiler';
 import hooks from "eslint-plugin-react-hooks";
 import perf from "eslint-plugin-react-perf";
 import refresh from "eslint-plugin-react-refresh";
@@ -18,6 +19,7 @@ export default defineConfig(
         files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
         plugins: {
             react: react,
+            "react-compiler": reactCompiler,
             "react-hooks": hooks,
             "react-perf": perf,
             "react-refresh": refresh,
@@ -65,6 +67,7 @@ export default defineConfig(
             "prefer-rest-params": "off",
             "react/prop-types": "off",
             "react/react-in-jsx-scope": "off",
+            "react-compiler/react-compiler": "error",
             "react-hooks/exhaustive-deps": ["error", {
                 "additionalHooks": "(useFabProps)",
             }],

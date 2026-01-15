@@ -7,7 +7,13 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     plugins: [
-        react(),
+        react({
+            babel: {
+                plugins: [
+                    ["babel-plugin-react-compiler", { target: "19" }],
+                ],
+            },
+        }),
         eslint(),
         svgr(), // Needed because we use SVGs as components
         tailwindcss(),

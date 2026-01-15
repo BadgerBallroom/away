@@ -99,7 +99,7 @@ const DancersPage: React.FC = () => {
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
         },
-    }), [dancerListState]);
+    }));
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>

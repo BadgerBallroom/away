@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { useArray } from "../utilities/ArrayHooks";
 import { DeepStateBase, DeepStateObject } from "./DeepState";
 
 /**
@@ -60,8 +59,6 @@ export function useDeepState<T>(
     path: readonly (string | number)[],
     ignoreDescendants?: boolean,
 ): unknown {
-    ignoreDescendants = !!ignoreDescendants;
-
     const descendantState = deepState.getDescendantState(path);
     const [value, setValue] = useState(() => descendantState.getValue());
     const [initialized, setInitialized] = useState(false);
@@ -117,7 +114,6 @@ export function useDeepStateChangeHandler<T>(
     deepState: DeepStateBase<T>,
     path: readonly (string | number)[],
 ): DeepStateChangeHandler<unknown> {
-    path = useArray(path);
     const value = useDeepState(deepState, path);
     const onChange = useCallback((event: ChangeEvent) => {
         deepState.setDescendantValue(path, event.target.value);

@@ -1,4 +1,4 @@
-import { IframeHTMLAttributes, useState } from "react";
+import { IframeHTMLAttributes, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface IFrameProps extends Omit<IframeHTMLAttributes<HTMLIFrameElement>, "src"> {
@@ -14,20 +14,25 @@ interface IFrameProps extends Omit<IframeHTMLAttributes<HTMLIFrameElement>, "src
 
 /** Renders the children inside an <iframe> element. */
 const IFrame: React.FC<IFrameProps> = ({ title, setContentWindow, head, children, ...props }) => {
+    "use no memo";
+
     const [iframe, setIFrame] = useState<HTMLIFrameElement | null>(null);
-
     const iframeWindow = iframe?.contentWindow ?? null;
-    let iframeHead: HTMLHeadElement | undefined = undefined;
-    let iframeBody: HTMLElement | undefined = undefined;
-    if (iframeWindow) {
-        iframeWindow.document.title = title;
-        iframeHead = iframeWindow.document.head;
-        iframeBody = iframeWindow.document.body;
-    }
 
-    if (setContentWindow) {
-        setContentWindow(iframeWindow);
-    }
+    useEffect(() => {
+        if (iframeWindow) {
+            iframeWindow.document.title = title; // eslint-disable-line react-compiler/react-compiler
+        }
+    }, [iframeWindow, title]);
+
+    useEffect(() => {
+        if (setContentWindow) {
+            setContentWindow(iframeWindow);
+        }
+    }, [iframeWindow, setContentWindow]);
+
+    const iframeHead = iframeWindow?.document.head;
+    const iframeBody = iframeWindow?.document.body;
 
     return <iframe {...props} title={title} ref={setIFrame}>
         {iframeHead && head && createPortal(head, iframeHead)}

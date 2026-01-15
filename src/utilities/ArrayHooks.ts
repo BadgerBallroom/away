@@ -16,25 +16,6 @@ export function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
 }
 
 /**
- * Memoizes an array so that if an equal array is passed in, the old one is returned instead.
- * Normally, if you make two arrays, they will be different arrays:
- *
- *     ["foo", "bar", "baz"] !== ["foo", "bar", "baz"]
- *
- * With `useArray`, they will be the same array:
- *
- *     useArray(["foo", "bar", "baz"]) === useArray(["foo", "bar", "baz"])
- */
-export function useArray<T>(a: readonly T[]): readonly T[] {
-    const ref = useRef(a);
-    if (arraysEqual(a, ref.current)) {
-        return ref.current;
-    }
-    ref.current = a;
-    return a;
-}
-
-/**
  * Tracks the index of `value` in `array`. If `value` is removed from the array, `setValue` is called with a valid value
  * from the array. This will usually be the value that was before `value` in the array. `setValue` is called from a
  * timer so that it is not called during a React component's render.
