@@ -164,7 +164,7 @@ const GridItemSkeleton = React.forwardRef(function GridItemSkeleton(
     _props: object,
     ref: React.ForwardedRef<HTMLDivElement>,
 ) {
-    return <Grid item ref={ref}>
+    return <Grid ref={ref}>
         <Skeleton variant="rounded" animation="wave" width={292} height={515} />
     </Grid>;
 });
@@ -201,7 +201,7 @@ const GridItem = React.forwardRef(function GridItem(
         onSelectableElementClick(event, index);
     }, [onSelectableElementClick, index]);
 
-    return <Grid item ref={ref}>
+    return <Grid ref={ref}>
         <DancerCard
             id={`dancer-${dancerState.evanescentID}`}
             dancerState={dancerState}

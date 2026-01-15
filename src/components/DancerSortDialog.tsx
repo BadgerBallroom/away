@@ -59,7 +59,7 @@ const DancerSortDialog: React.FC<DancerSortDialogProps> = ({ open, onClose, toSo
         </DialogTitle>
         <DialogContent>
             <Grid container>
-                <Grid item>
+                <Grid>
                     <FormControl>
                         <FormLabel id={ID_LABEL_SORT_BY}>
                             <FormattedMessage id={MessageID.sortBy} />
@@ -81,7 +81,7 @@ const DancerSortDialog: React.FC<DancerSortDialogProps> = ({ open, onClose, toSo
                         </RadioGroup>
                     </FormControl>
                 </Grid>
-                <Grid item>
+                <Grid>
                     <FormControl>
                         <FormLabel id={ID_LABEL_SORT_ORDER}>
                             <FormattedMessage id={MessageID.sortOrder} />

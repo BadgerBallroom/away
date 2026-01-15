@@ -58,7 +58,7 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         window.scrollTo(0, 0);
     }, [session, carpoolArrangementKLMState]);
 
-    const carpoolMaker = useRef<Worker>();
+    const carpoolMaker = useRef<Worker | null>(null);
     useEffect(() => {
         carpoolMaker.current = makeCarpoolMaker(setCarpoolMakerProgress, handleFinishedCarpools);
         return () => carpoolMaker.current?.terminate();
