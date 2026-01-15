@@ -5,13 +5,12 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/material/styles";
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
-import CarpoolArrangement from "../model/CarpoolArrangement";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { DancerListState } from "../model/DancerKLM";
-import { useDeepState, useDeepStateChangeHandler } from "../model/DeepStateHooks";
+import { useDeepState, useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
@@ -120,23 +119,12 @@ const UnassignedBar = styled(Box)(({ theme }) => {
 
 /** A table of departure times and carpools. */
 const Schedule: React.FC<SharedProps> = ({ state }) => {
-    const value = useDeepState(state, []);
-    const carpoolsByDay = useMemo(() => groupByDepartureTime(state, value), [state, value]);
+    const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
+    useDeepStateChangeListener(state, () => {
+        setCarpoolsByDay(state.groupByDepartureTime());
+    });
 
     return <>{carpoolsByDay.map(carpoolsForDay =>
         <CarpoolArrangerDay key={carpoolsForDay.day?.valueOf()} carpoolsForDay={carpoolsForDay} />,
     )}</>;
 };
-
-/**
- * Classifies carpools by day and hour of departure.
- * @param carpoolArrangementState The carpools to classify
- * @param _ Ignored (used to satisfy `react-hooks/exhaustive-deps` for the dependency on `value` in the `useMemo`)
- * @returns The classified carpools
- */
-function groupByDepartureTime(
-    carpoolArrangementState: CarpoolArrangementState,
-    _: CarpoolArrangement,
-): CarpoolArrangementState.CarpoolsForDay[] {
-    return carpoolArrangementState.groupByDepartureTime();
-}
