@@ -10,7 +10,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { DancerListState } from "../model/DancerKLM";
-import { useDeepState, useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
+import { useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useSession } from "../model/SessionHooks";
 import CarpoolArrangerDay from "./CarpoolArrangerDay";
@@ -89,9 +89,11 @@ const ArrangementNameField: React.FC<SharedProps> = ({ state }) => {
 /** Shows dancers who are traveling with the team but not assigned to a carpool. */
 const Unassigned: React.FC<SharedProps> = ({ state }) => {
     const session = useSession();
-    useDeepState(state, []);
+    const [unassigned, setUnassigned] = useState(() => state.findUnassignedDancers());
+    useDeepStateChangeListener(state, () => {
+        setUnassigned(state.findUnassignedDancers());
+    });
 
-    const unassigned = state.findUnassignedDancers();
     if (!unassigned.size) {
         return null;
     }
