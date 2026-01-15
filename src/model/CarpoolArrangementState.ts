@@ -189,6 +189,59 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         return idsOfUnassignedDancers;
     }
     // #endregion
+
+    // #region Moving dancers around the arrangement
+    /**
+     * Computes whether the dancer can become (and is not already) the driver of their own car.
+     * @param dancerID The ID of the dancer
+     * @returns Whether the dancer can a driver
+     */
+    public canPromoteToDriver(dancerID: ID): boolean {
+        const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+        if (!dancerState) {
+            return false;
+        }
+
+        // The dancer must be able to drive.
+        const canDriveCarpool = dancerState.getChildValue("canDriveCarpool");
+        if (canDriveCarpool !== CanDriveCarpool.Yes && canDriveCarpool !== CanDriveCarpool.YesIfNeeded) {
+            return false;
+        }
+
+        // The dancer must not already be a driver. One way not to be a driver is not to be in a carpool.
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return true;
+        }
+
+        // The dancer is in a carpool, but as long as they are not the first occupant, they are not a driver.
+        return carpoolState.driverDancerID !== dancerID;
+    }
+
+    /**
+     * Creates a new carpool within this carpool arrangement. Makes the specified dancer the driver of that carpool.
+     * @param dancerID The dancer to turn into a driver
+     */
+    public promoteToDriver(dancerID: ID): void {
+        if (!this.canPromoteToDriver(dancerID)) {
+            return;
+        }
+
+        // If the dancer is currently in a carpool, remove them from that carpool.
+        this.mapFromDancerIDs.get(dancerID)?.getChildState("occupants").remove(dancerID);
+
+        const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+        if (!dancerState) {
+            return;
+        }
+
+        // Create a new carpool. Adding it to this carpool arrangement should trigger an update to `mapFromDancerIDs`.
+        this.getChildState("carpools").pushState(new CarpoolState(this._session, {
+            departure: dancerState.getChildValue("earliestPossibleDeparture"),
+            occupants: [dancerID],
+        }));
+    }
+    // #endregion
 }
 
 export namespace CarpoolArrangementState {

@@ -3,6 +3,7 @@ import { validateDayjsValue } from "../utilities/validation";
 import Carpool from "./Carpool";
 import { DancerListState } from "./DancerKLM";
 import { DeepStateObject, DeepStatePrimitive } from "./DeepState";
+import { ID } from "./KeyListAndMap";
 import Session from "./Session";
 
 export default class CarpoolState extends DeepStateObject<Carpool, {
@@ -19,6 +20,12 @@ export default class CarpoolState extends DeepStateObject<Carpool, {
      */
     public get evanescentID(): number {
         return this._evanescentID;
+    }
+
+    /** The dancer ID of the driver */
+    public get driverDancerID(): ID {
+        // The first occupant is the driver.
+        return this.getChildState("occupants").getChildValue(0);
     }
 
     /**

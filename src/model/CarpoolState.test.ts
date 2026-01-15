@@ -56,6 +56,12 @@ describe("CarpoolState", () => {
             .getChildState(0)!;
     });
 
+    describe("driverDancerID", () => {
+        test("returns the dancer ID of the first occupant", () => {
+            expect(carpoolState.driverDancerID).toBe("1");
+        });
+    });
+
     describe("getSuggestedDepartureTime", () => {
         test("returns null if the carpool has no occupants", () => {
             // Other code is supposed to make sure that no carpool is ever empty, so this test is probably the only way
