@@ -334,7 +334,7 @@ export class DeepStateArray<
      * Invalid indices will be ignored.
      * @param indices The set of indices of elements to remove
      */
-    public removeMulti(indices: ReadonlySet<number>): void {
+    public popMulti(indices: ReadonlySet<number>): void {
         if (!indices.size) {
             return;
         }

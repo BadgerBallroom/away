@@ -64,7 +64,7 @@ const DancersPage: React.FC = () => {
         }
         // The selection manager stores the indices of the dancer cards that are selected.
         // Remove the dancer IDs that are at those indices.
-        dancerListState.removeMulti(selectionSet);
+        dancerListState.popMulti(selectionSet);
         clearSelection();
     }, [dancerListState, selectionSet, clearSelection]);
     useHotkeys("Delete", onDeleteSelectionClick);

@@ -159,8 +159,8 @@ describe("DeepStateArray", () => {
             expect(changeListener).not.toHaveBeenCalled();
         });
 
-        test("removeMulti removes elements", () => {
-            state.removeMulti(new Set([-1, 0, 2, initialValue.length]));
+        test("popMulti removes elements", () => {
+            state.popMulti(new Set([-1, 0, 2, initialValue.length]));
             const value = [...initialValue.slice(1, 2), ...initialValue.slice(3)];
             expect(state.getValue()).toEqual(value);
             expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
