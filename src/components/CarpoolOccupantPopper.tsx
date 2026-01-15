@@ -1,12 +1,17 @@
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import Button from "@mui/material/Button";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Popper, { PopperProps } from "@mui/material/Popper";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { FormattedMessage } from "react-intl";
+import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import CarpoolState from "../model/CarpoolState";
 import { ID } from "../model/KeyListAndMap";
+import { useDancerMapState } from "../model/SessionHooks";
 
 /** Parameters that define the actions that are possible to take on the dancer that the user just clicked on */
 export interface OccupantActionParameters {
@@ -57,12 +62,21 @@ export interface ShowCarpoolOccupantPopper {
 
 /** Displays a menu of actions to take on a dancer, even if the dancer is not in a car */
 const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action }) => {
-    const open = !!action;
+    const dancerMapState = useDancerMapState();
+    const activeDancerState = isDancerNotEmptySeat(action)
+        ? dancerMapState.getChildState(action.activeDancer.id)
+        : undefined;
+
+    const showPromoteToDriver = canPromoteToDriver(action);
+
+    const open = showPromoteToDriver;
 
     const onClickAway = useCallback(() => {
         action?.onClose(true);
     }, [action]);
     useHotkeys("Escape", onClickAway);
+
+    const activeDancerName = useMemo(() => activeDancerState?.getChildValue("name") ?? "", [activeDancerState]);
 
     const previousAction = useRef<OccupantActionParameters | null>(null);
     useEffect(() => {
@@ -70,6 +84,11 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action })
         if (previousAction.current !== action) {
             previousAction.current?.onClose(true, { isImmediatelyReopening: open });
             previousAction.current = action;
+        }
+
+        // If we're not going to open but `action` is not null for some reason, call `action.onClose` immediately.
+        if (!open && action) {
+            action.onClose(true);
         }
     }, [open, action]);
 
@@ -81,6 +100,14 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action })
         <ClickAwayListener onClickAway={onClickAway}>
             <Paper elevation={4} sx={POPPER_PAPER_SX}>
                 <Grid container spacing={2} direction="column">
+                    {showPromoteToDriver &&
+                        <Grid>
+                            <PromoteToDriverButton
+                                action={action}
+                                dancerName={activeDancerName}
+                            />
+                        </Grid>
+                    }
                 </Grid>
             </Paper>
         </ClickAwayListener>
@@ -90,3 +117,56 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action })
 export default CarpoolOccupantPopper;
 
 const POPPER_PAPER_SX = { padding: 2 } as const;
+
+// #region Special cases of `OccupantActionParameters`
+/** An extension of {@link OccupantActionParameters} where the active dancer is a real dancer an not an empty seat */
+interface NotEmptySeatParameters extends OccupantActionParameters {
+    activeDancer: OccupantActionParameters["activeDancer"] & {
+        id: ID;
+    };
+}
+
+/**
+ * Checks that, given the parameters, it is possible to perform actions that require the active dancer to be an actual
+ * dancer and not an empty seat in a car.
+ * @param action The parameters that showed the popper
+ * @returns Whether it is possible to perform actions that assume that the active dancer is not an empty seat
+ */
+function isDancerNotEmptySeat(action: OccupantActionParameters | null): action is NotEmptySeatParameters {
+    return !!action?.activeDancer.id;
+}
+// #endregion
+
+// #region Promote to driver
+/** An extension of {@link OccupantActionParameters} that meets the prerequisites to promote someone to a driver */
+type PromoteToDriverParameters = NotEmptySeatParameters;
+
+/**
+ * Checks that, given the parameters, it is possible to promote the active dancer to be the driver of their own car.
+ * @param action The parameters that showed the popper
+ * @returns Whether the active dancer can become a driver
+ */
+function canPromoteToDriver(action: OccupantActionParameters | null): action is PromoteToDriverParameters {
+    return isDancerNotEmptySeat(action)
+        && action.carpoolArrangementState.canPromoteToDriver(action.activeDancer.id);
+}
+
+interface PromoteToDriverButtonProps {
+    action: PromoteToDriverParameters;
+    dancerName: string;
+}
+
+/** A button that promotes the active dancer to the driver of their own car. */
+const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, dancerName }) => {
+    const onClick = useCallback(() => {
+        action.carpoolArrangementState.promoteToDriver(action.activeDancer.id);
+        action.onClose(false);
+    }, [action]);
+
+    const values = useMemo(() => ({ name: dancerName }), [dancerName]);
+
+    return <Button onClick={onClick} variant="outlined" startIcon={<DirectionsCarIcon />}>
+        <FormattedMessage id={MessageID.carpoolPromoteDriver} values={values} />
+    </Button>;
+};
+// #endregion
