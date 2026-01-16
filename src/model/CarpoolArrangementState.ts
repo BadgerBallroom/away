@@ -166,27 +166,21 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         }
     }
 
-    /** Returns a `DancerListState` of dancers who are traveling with the team but are not assigned to a carpool. */
-    public findUnassignedDancers(): Set<ID> {
+    /** Returns the IDs of the dancers who are traveling with the team but are not assigned to a carpool. */
+    public findUnassignedDancers(): ID[] {
         const dancerKLMState = this._session.getChildState("dancers");
-        const idsOfUnassignedDancers = new Set<ID>();
+        const result: ID[] = [];
 
-        // Add the IDs of the dancers who are traveling with the team.
         for (const { id, state } of dancerKLMState.list.getIDsAndReferencedStates()) {
-            if (state.getChildValue("canDriveCarpool") !== CanDriveCarpool.TravelingOnOwn) {
-                idsOfUnassignedDancers.add(id);
+            if (
+                state.getChildValue("canDriveCarpool") !== CanDriveCarpool.TravelingOnOwn
+                && !this.mapFromDancerIDs.has(id)
+            ) {
+                result.push(id);
             }
         }
 
-        // Remove the IDs of dancers who are assigned to a carpool.
-        for (const carpoolState of this.getChildState("carpools").getChildStates()) {
-            for (const id of carpoolState.getChildValue("occupants")) {
-                idsOfUnassignedDancers.delete(id);
-            }
-        }
-
-        // The set now contains the IDs of dancers who are traveling with the team but are not assigned to a carpool.
-        return idsOfUnassignedDancers;
+        return result;
     }
     // #endregion
 
