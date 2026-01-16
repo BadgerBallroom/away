@@ -6,7 +6,7 @@ import ElementSelectionManager from "../model/ElementSelectionManager";
  * to those elements that can be selected.
  */
 export const ElementSelectionContext = createContext(
-    new ElementSelectionManager.Selection<Element>([], new Set(), () => { }),
+    new ElementSelectionManager.Selection<Element>(new Set(), () => [], () => { }),
 );
 
 export default ElementSelectionContext;

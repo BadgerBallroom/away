@@ -1,9 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { default as makeClickEvent } from "../utilities/testing/makeSelectionManagerClickEvent";
 import { useElementSelectionManager } from "./ElementSelectionHooks";
+import ElementSelectionManager from "./ElementSelectionManager";
 
-function renderElementSelectionManager(elements: HTMLCollectionOf<Element> | readonly Element[]) {
-    return renderHook(() => useElementSelectionManager(elements));
+function renderElementSelectionManager(getElements: ElementSelectionManager.GetElements<Element>) {
+    return renderHook(() => useElementSelectionManager(getElements));
 }
 
 describe("ElementSelectionManager", () => {
@@ -19,42 +20,24 @@ describe("ElementSelectionManager", () => {
         document.createElement("textarea"),
         document.createElement("video"),
     ];
+    const getElements = () => elements;
+
+    let renderHookResult: ReturnType<typeof renderElementSelectionManager>;
+    let result: typeof renderHookResult.result;
 
     describe("Selection", () => {
-        describe("selectable", () => {
-            test("is a map from elements to their indices in the array", () => {
-                const { result: { current: { selection } } } = renderElementSelectionManager(elements);
-
-                expect(selection.selectable.size).toEqual(elements.length);
-                for (let i = 0; i < elements.length; ++i) {
-                    expect(selection.selectable.get(elements[i])).toEqual(i);
-                }
-            });
-
-            test("does not change when the selection does", () => {
-                const { result } = renderElementSelectionManager(elements);
-                const oldSelection = result.current.selection;
-
-                act(() => {
-                    result.current.selection.onSelectableElementClick(makeClickEvent(), 0);
-                });
-
-                const newSelection = result.current.selection;
-                expect(newSelection.selectable).toEqual(oldSelection.selectable);
-            });
+        beforeEach(() => {
+            renderHookResult = renderElementSelectionManager(getElements);
+            result = renderHookResult.result;
         });
 
         describe("selected", () => {
             test("starts empty", () => {
-                const { result: { current: { selection } } } = renderElementSelectionManager(elements);
-
-                expect(selection.selected.size).toEqual(0);
+                expect(result.current.selection.selected.size).toEqual(0);
             });
 
             test("tracks the selection", () => {
                 // More complex selection cases are covered by SelectionManager.test.ts.
-                const { result } = renderElementSelectionManager(elements);
-
                 act(() => {
                     // Select the <div>.
                     result.current.selection.onSelectableElementClick(makeClickEvent(), 3);
@@ -62,8 +45,33 @@ describe("ElementSelectionManager", () => {
                     result.current.selection.onSelectableElementClick(makeClickEvent({ shiftKey: true }), 6);
                 });
 
-                const { selection } = result.current;
-                expect(selection.selected).toEqual(new Set(elements.slice(3, 7)));
+                expect(result.current.selection.selected).toEqual(new Set(elements.slice(3, 7)));
+            });
+        });
+
+        describe("indexOf", () => {
+            test("returns -1 if the element is not returned by getElements", () => {
+                expect(result.current.selection.indexOf(document.createElement("div"))).toEqual(-1);
+            });
+
+            test("returns the index of the element", () => {
+                expect(result.current.selection.indexOf(elements[3])).toEqual(3);
+            });
+        });
+
+        describe("isSelected", () => {
+            beforeEach(() => {
+                act(() => {
+                    result.current.selection.onSelectableElementClick(makeClickEvent(), 3);
+                });
+            });
+
+            test("returns false if the element is not selected", () => {
+                expect(result.current.selection.isSelected(elements[0])).toBe(false);
+            });
+
+            test("returns true if the element is selected", () => {
+                expect(result.current.selection.isSelected(elements[3])).toBe(true);
             });
         });
     });

@@ -6,40 +6,40 @@ export interface ElementSelectionManager<E extends Element>
 }
 
 export namespace ElementSelectionManager {
+    export interface GetElements<E extends Element> {
+        (): readonly E[];
+    }
+
     export class Selection<E extends Element> {
+        public readonly selectionSet: ReadonlySet<number>;
+        public readonly getElements: GetElements<E>;
         public readonly onSelectableElementClick: SelectionManager["onSelectableElementClick"];
 
-        private _selectable = new Map<E, number>();
-        private _selected = new Set<E>();
-
-        get selectable(): ReadonlyMap<E, number> {
-            return this._selectable;
-        }
-
-        public get selected(): ReadonlySet<E> {
-            return this._selected;
+        public get selected(): Set<E> {
+            const elements = this.getElements();
+            const result = new Set<E>();
+            for (const index of this.selectionSet) {
+                result.add(elements[index]);
+            }
+            return result;
         }
 
         constructor(
-            elements: NodeListOf<E> | HTMLCollectionOf<E> | readonly E[],
             selectionSet: ReadonlySet<number>,
+            getElements: GetElements<E>,
             onSelectableElementClick: SelectionManager["onSelectableElementClick"],
         ) {
-            for (let i = 0; i < elements.length; ++i) {
-                this._selectable.set(elements[i], i);
-                if (selectionSet.has(i)) {
-                    this._selected.add(elements[i]);
-                }
-            }
+            this.selectionSet = selectionSet;
+            this.getElements = getElements;
             this.onSelectableElementClick = onSelectableElementClick;
         }
 
-        public indexOf(element: E): number | undefined {
-            return this.selectable.get(element);
+        public indexOf(element: E): number {
+            return this.getElements().indexOf(element);
         }
 
         public isSelected(element: E): boolean {
-            return this.selected.has(element);
+            return this.selectionSet.has(this.indexOf(element));
         }
     }
 }
