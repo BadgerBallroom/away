@@ -197,7 +197,7 @@ describe("CarpoolArrangementState", () => {
 
     describe("findUnassignedDancers", () => {
         test("returns dancers who are not in a carpool", () => {
-            expect(carpoolArrangementState.findUnassignedDancers()).toEqual(new Set(["4"]));
+            expect(carpoolArrangementState.findUnassignedDancers()).toEqual(["4"]);
             expect(changeListener).not.toHaveBeenCalled();
         });
     });

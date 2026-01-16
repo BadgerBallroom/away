@@ -213,13 +213,11 @@ const Unassigned: React.FC<UnassignedProps> = ({ state, shouldSelectDancer }) =>
         setUnassigned(state.findUnassignedDancers());
     });
 
-    if (!unassigned.size) {
+    if (!unassigned.length) {
         return null;
     }
 
-    const unassignedArray: ID[] = [];
-    unassigned.forEach(id => unassignedArray.push(id));
-    const unassignedState = DancerListState.makeAndRegister(session, unassignedArray);
+    const unassignedState = DancerListState.makeAndRegister(session, unassigned);
     return <UnassignedBar className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getIDsAndReferencedStates().map(({ id, state: dancerState }) =>
