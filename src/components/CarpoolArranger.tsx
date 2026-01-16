@@ -84,6 +84,13 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
     showCarpoolDeparturePopover,
     showCarpoolOccupantPopover,
 }) => {
+    const [unassignedDancers, setUnassignedDancers] = useState(() => state.findUnassignedDancers());
+    const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
+    useDeepStateChangeListener(state.getChildState("carpools"), () => {
+        setUnassignedDancers(state.findUnassignedDancers());
+        setCarpoolsByDay(state.groupByDepartureTime());
+    });
+
     const selectionParentRef = useRef<HTMLElement>(undefined);
     const { selection, clearSelection } = useElementSelectionManager(
         selectionParentRef.current?.getElementsByClassName(DANCER_TILE_CONTAINER_CLASSNAME) ?? [],
@@ -176,9 +183,9 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
         <ElementSelectionContext.Provider value={selection}>
             <Box ref={selectionParentRef} onClick={onSelectionParentClick}>
-                <Unassigned state={state} shouldSelectDancer={shouldSelectDancer} />
+                <Unassigned unassignedDancers={unassignedDancers} shouldSelectDancer={shouldSelectDancer} />
                 <Schedule
-                    state={state}
+                    carpoolsByDay={carpoolsByDay}
                     shouldSelectDancer={shouldSelectDancer}
                     showCarpoolDeparturePopover={showCarpoolDeparturePopover}
                 />
@@ -205,23 +212,20 @@ const ArrangementNameField: React.FC<SharedProps> = ({ state }) => {
     />;
 };
 
-interface UnassignedProps extends SharedProps {
+interface UnassignedProps {
+    unassignedDancers: ID[];
     shouldSelectDancer: ShouldSelectDancer;
 }
 
 /** Shows dancers who are traveling with the team but not assigned to a carpool. */
-const Unassigned: React.FC<UnassignedProps> = ({ state, shouldSelectDancer }) => {
+const Unassigned: React.FC<UnassignedProps> = ({ unassignedDancers, shouldSelectDancer }) => {
     const session = useSession();
-    const [unassigned, setUnassigned] = useState(() => state.findUnassignedDancers());
-    useDeepStateChangeListener(state, () => {
-        setUnassigned(state.findUnassignedDancers());
-    });
 
-    if (!unassigned.length) {
+    if (!unassignedDancers.length) {
         return null;
     }
 
-    const unassignedState = DancerListState.makeAndRegister(session, unassigned);
+    const unassignedState = DancerListState.makeAndRegister(session, unassignedDancers);
     return <UnassignedBar className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getIDsAndReferencedStates().map(({ id, state: dancerState }) =>
@@ -245,18 +249,14 @@ const UnassignedBar = styled(Box)(({ theme }) => {
     `;
 });
 
-interface ScheduleProps extends SharedProps {
+interface ScheduleProps {
+    carpoolsByDay: CarpoolArrangementState.CarpoolsForDay[];
     shouldSelectDancer: ShouldSelectDancer;
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
 /** A table of departure times and carpools. */
-const Schedule: React.FC<ScheduleProps> = ({ state, shouldSelectDancer, showCarpoolDeparturePopover }) => {
-    const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
-    useDeepStateChangeListener(state, () => {
-        setCarpoolsByDay(state.groupByDepartureTime());
-    });
-
+const Schedule: React.FC<ScheduleProps> = ({ carpoolsByDay, shouldSelectDancer, showCarpoolDeparturePopover }) => {
     return <>{carpoolsByDay.map(carpoolsForDay =>
         <CarpoolArrangerDay
             key={carpoolsForDay.day?.valueOf()}
