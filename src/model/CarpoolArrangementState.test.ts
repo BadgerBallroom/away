@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import CarpoolArrangement from "./CarpoolArrangement";
 import CarpoolArrangementState from "./CarpoolArrangementState";
 import CarpoolStateArray from "./CarpoolStateArray";
 import { Accommodation, CanDriveCarpool, Gender } from "./Dancer";
@@ -31,7 +30,7 @@ describe("CarpoolArrangementState", () => {
     let session: Session;
     let carpoolArrangementState: CarpoolArrangementState;
     let carpoolStates: CarpoolStateArray;
-    let changeListener: DeepStateChangeCallback<CarpoolArrangement>;
+    let changeListener: DeepStateChangeCallback;
 
     beforeEach(() => {
         vi.stubEnv("TZ", "UTC");

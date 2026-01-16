@@ -22,8 +22,8 @@ export type DeepReadonly<T> =
     T;
 
 /** A function that is called when a `DeepState` object is changed */
-export interface DeepStateChangeCallback<T> {
-    (newValue: DeepReadonly<T>, fromDescendant: boolean): void
+export interface DeepStateChangeCallback {
+    (fromDescendant: boolean): void
 }
 
 /** A function that makes a `TState` from a `T`. */
@@ -57,7 +57,7 @@ interface DeepStateChild<T, TState = DeepStateBaseOrUndefined<T>> {
     /** A child value */
     deepState: TState;
     /** A function that calls the parent's change callbacks when the child's value changes */
-    changeCallback: DeepStateChangeCallback<T>;
+    changeCallback: DeepStateChangeCallback;
 }
 
 /**
@@ -66,7 +66,7 @@ interface DeepStateChild<T, TState = DeepStateBaseOrUndefined<T>> {
  */
 export abstract class DeepStateBase<T> {
     /** Functions to call when the value changes */
-    private _changeCallbacks: DeepStateChangeCallback<T>[] = [];
+    private _changeCallbacks: DeepStateChangeCallback[] = [];
 
     // #region Mutation
     /** Returns a plain representation of the data in this object. */
@@ -139,12 +139,12 @@ export abstract class DeepStateBase<T> {
 
     // #region Change listeners
     /** Registers a function to call when the value changes. */
-    public addChangeListener(callback: DeepStateChangeCallback<T>): void {
+    public addChangeListener(callback: DeepStateChangeCallback): void {
         this._changeCallbacks.push(callback);
     }
 
     /** Unregisters a function to call when the value changes. */
-    public removeChangeListener(callback: DeepStateChangeCallback<T>): void {
+    public removeChangeListener(callback: DeepStateChangeCallback): void {
         const index = this._changeCallbacks.indexOf(callback);
         if (index < 0) {
             return;
@@ -154,12 +154,11 @@ export abstract class DeepStateBase<T> {
 
     /**
      * Calls all the change listeners.
-     * @param newValue The value of this `DeepState` object after the change
      * @param fromDescendant Whether this change was initiated on a descendant of this `DeepState` object
      */
-    protected dispatchValueChange(newValue: DeepReadonly<T>, fromDescendant: boolean): void {
+    protected dispatchValueChange(fromDescendant: boolean): void {
         for (const callback of this._changeCallbacks) {
-            callback.call(this, newValue, fromDescendant);
+            callback.call(this, fromDescendant);
         }
     }
     // #endregion
@@ -224,14 +223,8 @@ export class DeepStateArray<
      * @param deepState The `DeepStateBase` that will become a child of this object
      * @returns `deepState` and the listener, which must be removed from `deepState` when it is no longer a child
      */
-    protected makeChild(index: number, deepState: ItemState): DeepStateChild<Item, ItemState> {
-        const changeCallback = (childValue: DeepReadonly<Item>) => {
-            // Create a new value with the updated child value; dispatchValueChange should get the new value, while
-            // getValue() should still return the old value.
-            const value = this.getValue();
-            (value as DeepReadonly<Item>[])[index] = childValue;
-            this.dispatchValueChange(value, true);
-        };
+    protected makeChild(_index: number, deepState: ItemState): DeepStateChild<Item, ItemState> {
+        const changeCallback = () => this.dispatchValueChange(true);
         deepState.addChangeListener(changeCallback);
         return { deepState, changeCallback };
     }
@@ -265,8 +258,8 @@ export class DeepStateArray<
     // #region Common array methods
     /** Removes all elements from the array. */
     public clear(): void {
-        this.dispatchValueChange([], false);
         this._clear();
+        this.dispatchValueChange(false);
     }
 
     /** Removes all elements from the array without dispatching a value change. */
@@ -288,13 +281,11 @@ export class DeepStateArray<
             return this._items.length;
         }
 
-        const value = this.getValue() as Item[];
-        value.push(...items);
-        this.dispatchValueChange(value as DeepReadonly<Item[]>, false);
-
         for (const item of items) {
             this._items.push(this.makeChild(this._items.length, this._makeChildState(item)));
         }
+
+        this.dispatchValueChange(false);
         return this._items.length;
     }
 
@@ -308,10 +299,8 @@ export class DeepStateArray<
 
     /** Appends an existing `ItemState` to the array. */
     public pushState(deepState: ItemState): void {
-        const value = this.getValue() as Item[];
-        value.push(deepState.getValue() as Item);
-        this.dispatchValueChange(value as DeepReadonly<Item[]>, false);
         this._items.push(this.makeChild(this._items.length, deepState));
+        this.dispatchValueChange(false);
     }
 
     /**
@@ -328,12 +317,9 @@ export class DeepStateArray<
             return undefined;
         }
 
-        const value = this.getValue() as Item[];
-        value.splice(index, 1);
-        this.dispatchValueChange(value as DeepReadonly<Item[]>, false);
-
         const [{ deepState, changeCallback }] = this._items.splice(index, 1)!;
         deepState.removeChangeListener(changeCallback);
+        this.dispatchValueChange(false);
         return deepState;
     }
 
@@ -349,15 +335,13 @@ export class DeepStateArray<
 
         // Build a new array of items whose indices in the current array are NOT in the set.
         const newItems: DeepStateChild<Item, ItemState>[] = [];
-        const newValue: DeepReadonly<Item>[] = [];
         this._items.forEach((item, index) => {
             if (!indices.has(index)) {
                 newItems.push(item);
-                newValue.push(item.deepState.getValue());
             }
         });
-        this.dispatchValueChange(newValue, false);
         this._items = newItems;
+        this.dispatchValueChange(false);
     }
 
     /**
@@ -408,13 +392,11 @@ export class DeepStateArray<
         }
 
         const newItems: DeepStateChild<Item, ItemState>[] = [];
-        const newValue: DeepReadonly<Item>[] = [];
         for (const [, item] of indexedItems) {
             newItems.push(item);
-            newValue.push(item.deepState.getValue());
         }
-        this.dispatchValueChange(newValue, false);
         this._items = newItems;
+        this.dispatchValueChange(false);
     }
     // #endregion
 }
@@ -494,7 +476,6 @@ export class DeepStateObject<
 
     public override setValue(newValue: T): void {
         newValue = this.validateNewValue(newValue);
-        this.dispatchValueChange(newValue as DeepReadonly<T>, false);
 
         for (const key in this._entries) {
             if (!this._castAsKey(key)) {
@@ -508,6 +489,7 @@ export class DeepStateObject<
         for (const key in newValue) {
             this._entries[key] = this.makeChild(key, this._makeChildState(key, newValue[key]));
         }
+        this.dispatchValueChange(false);
     }
 
     public override isDefault(): boolean {
@@ -540,14 +522,13 @@ export class DeepStateObject<
 
     /** Adds an existing `DeepStateBase` to the object. */
     public setChildState<K extends StringKeys<T>>(key: K, deepState: TChildrenStates[K]): void {
-        this.dispatchValueChange({ ...this.getValue(), [key]: deepState?.getValue() }, false);
-
         if (this._entries[key]) {
             const { deepState, changeCallback } = this._entries[key];
             deepState?.removeChangeListener(changeCallback as any);
         }
 
         this._entries[key] = this.makeChild(key, deepState);
+        this.dispatchValueChange(false);
     }
 
     /**
@@ -561,13 +542,11 @@ export class DeepStateObject<
             return;
         }
 
-        const value = this.getValue() as T;
-        delete value[key];
-        this.dispatchValueChange(value as DeepReadonly<T>, false);
-
         const { deepState, changeCallback } = this._entries[key];
         deepState?.removeChangeListener(changeCallback as any);
         delete this._entries[key];
+
+        this.dispatchValueChange(false);
     }
 
     /**
@@ -578,15 +557,11 @@ export class DeepStateObject<
      * @returns `deepState` and the listener, which must be removed from `deepState` when it is no longer a child
      */
     protected makeChild<K extends StringKeys<T>>(
-        key: K,
+        _key: K,
         deepState: TChildrenStates[K],
     ): DeepStateChild<T[K], TChildrenStates[K]> {
-        const changeCallback = (childValue: DeepReadonly<T[K]>) => {
-            // Create a new value with the updated child value; dispatchValueChange should get the new value, while
-            // getValue() should still return the old value.
-            this.dispatchValueChange({ ...this.getValue(), [key]: childValue }, true);
-        };
-        deepState?.addChangeListener(changeCallback as any);
+        const changeCallback = () => this.dispatchValueChange(true);
+        deepState?.addChangeListener(changeCallback);
         return { deepState, changeCallback };
     }
 
@@ -713,8 +688,8 @@ export class DeepStatePrimitive<T> extends DeepStateBase<T> {
 
     public override setValue(newValue: T): void {
         newValue = this.validateNewValue(newValue);
-        this.dispatchValueChange(newValue as DeepReadonly<T>, false);
         this._value = newValue;
+        this.dispatchValueChange(false);
     }
 
     public override isDefault(): boolean {

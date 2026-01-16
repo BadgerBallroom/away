@@ -75,14 +75,16 @@ export function useDeepState<T>(
     // Update `value` when the value of `descendantState` changes.
     useEffect(() => {
         const changeListener = ignoreDescendants
-            ? (newValue: unknown, fromDescendant: boolean) => {
+            ? (fromDescendant: boolean) => {
                 if (fromDescendant && ignoreDescendants) {
                     return;
                 }
 
-                setValue(newValue);
+                setValue(descendantState.getValue());
             }
-            : setValue;
+            : () => {
+                setValue(descendantState.getValue());
+            };
 
         descendantState.addChangeListener(changeListener);
         return () => descendantState.removeChangeListener(changeListener);

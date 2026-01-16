@@ -3,7 +3,6 @@ import dayjsComparator from "../utilities/dayjsComparator";
 import saveToDownload from "../utilities/saveToDownload";
 import Dancer, { AccommodationCollator, CanDriveCarpoolCollator, GenderCollator, PrefersSameGenderCollator } from "./Dancer";
 import DancerState from "./DancerState";
-import { DeepReadonly } from "./DeepState";
 import KeyListAndMap, { ID, ValueWithID } from "./KeyListAndMap";
 import KeyListAndMapState, { KeyListState, KeyMapState } from "./KeyListAndMapState";
 import Session from "./Session";
@@ -135,13 +134,13 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
         if (!this._temporaryDancer) {
             this._temporaryDancer = new DancerState();
             this._temporaryDancer.addChangeListener(this._temporaryDancerChangeListener);
-            this.dispatchValueChange(this.getValue(), false);
+            this.dispatchValueChange(false);
         }
     }
 
     /** A change listener for `this._temporaryDancer`. Handles making the dancer not temporary anymore. */
-    private _temporaryDancerChangeListener = (newValue: DeepReadonly<Dancer>) => {
-        if (!Dancer.isEmpty(newValue)) {
+    private _temporaryDancerChangeListener = () => {
+        if (!Dancer.isEmpty(this._temporaryDancer!.getValue())) {
             // The temporary dancer is no longer empty. Make a new temporary dancer.
             this._temporaryDancer!.removeChangeListener(this._temporaryDancerChangeListener);
             this.parent.add(this._temporaryDancer!);
@@ -163,7 +162,7 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
 
         this._temporaryDancer.removeChangeListener(this._temporaryDancerChangeListener);
         this._temporaryDancer = null;
-        this.dispatchValueChange(this.getValue(), false);
+        this.dispatchValueChange(false);
     }
     // #endregion
 

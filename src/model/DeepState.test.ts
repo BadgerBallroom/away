@@ -22,7 +22,7 @@ describe("makeDeepState", () => {
 
 describe("DeepStateArray", () => {
     let state: DeepStateArray<number>;
-    let changeListener: Mock<DeepStateChangeCallback<number[]>>;
+    let changeListener: Mock<DeepStateChangeCallback>;
 
     function initChangeListener() {
         changeListener = vi.fn();
@@ -49,7 +49,7 @@ describe("DeepStateArray", () => {
             state.setValue(newValue);
             expect(state.getValue()).toEqual(newValue);
             expect(state.isDefault()).toBe(false);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(newValue, false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("setValue throws error when passed something other than an array", () => {
@@ -60,9 +60,8 @@ describe("DeepStateArray", () => {
         test("setDescendantValue sets one element", () => {
             if (initialValue.length) {
                 state.setDescendantValue([0], 12345);
-                const value = [12345, ...initialValue.slice(1)];
-                expect(state.getValue()).toEqual(value);
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, true);
+                expect(state.getValue()).toEqual([12345, ...initialValue.slice(1)]);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(true);
             } else {
                 expect(() => state.setDescendantValue([0], 12345))
                     .toThrowError(new Error("Non-existent state path: [0]"));
@@ -108,20 +107,20 @@ describe("DeepStateArray", () => {
             state.clear();
             expect(state.length).toBe(0);
             expect(state.getValue()).toEqual([]);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith([], false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("push adds element", () => {
             state.push(4);
             expect(state.getValue()).toEqual([...initialValue, 4]);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith([...initialValue, 4], false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("extend adds elements", () => {
             const extension = [4, 5, 6, 7];
             state.extend(extension);
             expect(state.getValue()).toEqual([...initialValue, ...extension]);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith([...initialValue, ...extension], false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("indexOf finds index of item", () => {
@@ -147,11 +146,12 @@ describe("DeepStateArray", () => {
             state.pushState(childState);
             expect(state.getValue()).toEqual([...initialValue, 4]);
             expect(state.getChildState(initialValue.length)).toBe(childState);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith([...initialValue, 4], false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
             changeListener.mockReset();
 
             expect(state.pop()).toBe(childState);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(initialValue, false);
+            expect(state.getValue()).toEqual(initialValue);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("pop removes child state", () => {
@@ -167,7 +167,7 @@ describe("DeepStateArray", () => {
                 expect(childState?.getValue()).toBe(v);
                 value.shift();
                 expect(state.getValue()).toEqual(value);
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
                 changeListener.mockReset();
             }
 
@@ -179,9 +179,8 @@ describe("DeepStateArray", () => {
 
         test("popMulti removes elements", () => {
             state.popMulti(new Set([-1, 0, 2, initialValue.length]));
-            const value = [...initialValue.slice(1, 2), ...initialValue.slice(3)];
-            expect(state.getValue()).toEqual(value);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+            expect(state.getValue()).toEqual([...initialValue.slice(1, 2), ...initialValue.slice(3)]);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("remove removes element if found", () => {
@@ -195,7 +194,7 @@ describe("DeepStateArray", () => {
 
                 const value = initialValue.slice(1);
                 expect(state.getValue()).toEqual(value);
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
             }
         });
 
@@ -209,18 +208,17 @@ describe("DeepStateArray", () => {
                 expect(state.remove(itemState)).toBe(itemState);
 
                 expect(state.getValue()).toEqual(initialValue.slice(1));
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(expect.anything(), false);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
             }
         });
 
         test("sort sorts elements", () => {
             state.sort((a, b) => a.getValue() - b.getValue());
-            const value = [...initialValue].sort((a, b) => a - b);
-            expect(state.getValue()).toEqual(value);
+            expect(state.getValue()).toEqual([...initialValue].sort((a, b) => a - b));
             if (initialValue.length < 2) {
                 expect(changeListener).not.toHaveBeenCalled();
             } else {
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
             }
         });
 
@@ -238,9 +236,8 @@ describe("DeepStateArray", () => {
             }
 
             childState.setValue(12345);
-            const value = [12345, ...initialValue.slice(1)];
-            expect(state.getValue()).toEqual(value);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, true);
+            expect(state.getValue()).toEqual([12345, ...initialValue.slice(1)]);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(true);
         });
     }
 
@@ -309,7 +306,7 @@ describe("DeepStateArray", () => {
 
 describe("DeepStateObject", () => {
     let state: DeepStateObject<Record<string, number | null | undefined>>;
-    let changeListener: Mock<DeepStateChangeCallback<Record<string, number | null | undefined>>>;
+    let changeListener: Mock<DeepStateChangeCallback>;
 
     function initChangeListener() {
         changeListener = vi.fn();
@@ -327,7 +324,7 @@ describe("DeepStateObject", () => {
             state.setValue(newValue);
             expect(state.getValue()).toEqual(newValue);
             expect(state.isDefault()).toBe(false);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(newValue, false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("setValue throws error when passed something other than an object", () => {
@@ -338,9 +335,8 @@ describe("DeepStateObject", () => {
         test("setDescendantValue sets one element", () => {
             if (Object.keys(initialValue).indexOf("a") >= 0) {
                 state.setDescendantValue(["a"], 12345);
-                const value = { ...initialValue, a: 12345 };
-                expect(state.getValue()).toEqual(value);
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, true);
+                expect(state.getValue()).toEqual({ ...initialValue, a: 12345 });
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(true);
             } else {
                 expect(() => state.setDescendantValue(["a"], 12345))
                     .toThrowError(new Error("Non-existent state path: [\"a\"]"));
@@ -368,10 +364,9 @@ describe("DeepStateObject", () => {
         test("setChildState adds existing child state", () => {
             const childState = new DeepStatePrimitive(12345);
             state.setChildState("new key", childState);
-            const value = { ...initialValue, "new key": 12345 };
-            expect(state.getValue()).toEqual(value);
+            expect(state.getValue()).toEqual({ ...initialValue, "new key": 12345 });
             expect(state.getChildState("new key")).toBe(childState);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
         });
 
         test("removeChildState removes child state", () => {
@@ -380,7 +375,7 @@ describe("DeepStateObject", () => {
                 const value = { ...initialValue };
                 delete value.a;
                 expect(state.getValue()).toEqual(value);
-                expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, false);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
             } else {
                 expect(changeListener).not.toHaveBeenCalled();
             }
@@ -421,9 +416,8 @@ describe("DeepStateObject", () => {
             }
 
             childState.setValue(12345);
-            const value = { ...initialValue, a: 12345 };
-            expect(state.getValue()).toEqual(value);
-            expect(changeListener).toHaveBeenCalledExactlyOnceWith(value, true);
+            expect(state.getValue()).toEqual({ ...initialValue, a: 12345 });
+            expect(changeListener).toHaveBeenCalledExactlyOnceWith(true);
         });
     }
 
@@ -509,7 +503,7 @@ describe("DeepStateObject", () => {
 
 describe("DeepStatePrimitive", () => {
     let state: DeepStatePrimitive<number>;
-    let changeListener: Mock<DeepStateChangeCallback<number>>;
+    let changeListener: Mock<DeepStateChangeCallback>;
 
     describe("NewOrUndefined", () => {
         test("value is undefined", () => {
@@ -541,6 +535,6 @@ describe("DeepStatePrimitive", () => {
     test("setValue overwrites value", () => {
         state.setValue(12345);
         expect(state.getValue()).toBe(12345);
-        expect(changeListener).toHaveBeenCalledExactlyOnceWith(12345, false);
+        expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
     });
 });
