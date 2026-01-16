@@ -5,40 +5,40 @@ export interface ElementSelectionManager extends Omit<SelectionManager, "selecti
 }
 
 export namespace ElementSelectionManager {
+    export interface GetElements {
+        (): HTMLCollectionOf<Element> | readonly Element[];
+    }
+
     export class Selection {
+        public readonly selectionSet: ReadonlySet<number>;
+        public readonly getElements: GetElements;
         public readonly onSelectableElementClick: SelectionManager["onSelectableElementClick"];
 
-        private _selectable = new Map<Element, number>();
-        private _selected = new Set<Element>();
-
-        get selectable(): ReadonlyMap<Element, number> {
-            return this._selectable;
-        }
-
-        public get selected(): ReadonlySet<Element> {
-            return this._selected;
+        public get selected(): Set<Element> {
+            const elements = this.getElements();
+            const result = new Set<Element>();
+            for (const index of this.selectionSet) {
+                result.add(elements[index]);
+            }
+            return result;
         }
 
         constructor(
-            elements: HTMLCollectionOf<Element> | readonly Element[],
             selectionSet: ReadonlySet<number>,
+            getElements: GetElements,
             onSelectableElementClick: SelectionManager["onSelectableElementClick"],
         ) {
-            for (let i = 0; i < elements.length; ++i) {
-                this._selectable.set(elements[i], i);
-                if (selectionSet.has(i)) {
-                    this._selected.add(elements[i]);
-                }
-            }
+            this.selectionSet = selectionSet;
+            this.getElements = getElements;
             this.onSelectableElementClick = onSelectableElementClick;
         }
 
-        public indexOf(element: Element): number | undefined {
-            return this.selectable.get(element);
+        public indexOf(element: Element): number {
+            return Array.from(this.getElements()).indexOf(element);
         }
 
         public isSelected(element: Element): boolean {
-            return this.selected.has(element);
+            return this.selectionSet.has(this.indexOf(element));
         }
     }
 }

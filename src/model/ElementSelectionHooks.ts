@@ -6,20 +6,21 @@ import { ElementSelectionManager } from "./ElementSelectionManager";
 /**
  * Stores which indices in `elements` are selected. Call this from an element that contains elements that can be
  * selected and pass `elementSelection` to an `ElementSelectionContext.Provider`.
- * @param elements An array (or `HTMLCollectionOf`) of elements that can be selected
+ * @param getElements A function that returns an array (or `HTMLCollectionOf`) of elements that can be selected
  * @returns An `ElementSelectionManager`
  */
 export function useElementSelectionManager(
-    elements: HTMLCollectionOf<Element> | readonly Element[],
+    getElements: ElementSelectionManager.GetElements,
 ): ElementSelectionManager {
     const { selection, onSelectableElementClick, ...others } = useSelectionManager();
 
     const [elementSelection, setElementSelection] = useState(() => {
-        return new ElementSelectionManager.Selection(elements, selection.set, onSelectableElementClick);
+        return new ElementSelectionManager.Selection(selection.set, getElements, onSelectableElementClick);
     });
     useEffect(() => {
-        setElementSelection(new ElementSelectionManager.Selection(elements, selection.set, onSelectableElementClick));
-    }, [elements, selection, onSelectableElementClick]);
+        const s = new ElementSelectionManager.Selection(selection.set, getElements, onSelectableElementClick);
+        setElementSelection(s);
+    }, [getElements, selection, onSelectableElementClick]);
 
     return { selection: elementSelection, ...others };
 }
@@ -50,7 +51,7 @@ export function useSelectableElementAttributes(
         }
 
         const index = selectableElements.indexOf(ref.current);
-        if (index === undefined) {
+        if (index < 0) {
             return;
         }
 

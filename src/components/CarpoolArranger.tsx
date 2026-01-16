@@ -93,7 +93,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 
     const selectionParentRef = useRef<HTMLElement>(undefined);
     const { selection, clearSelection } = useElementSelectionManager(
-        selectionParentRef.current?.getElementsByClassName(DANCER_TILE_CONTAINER_CLASSNAME) ?? [],
+        () => selectionParentRef.current?.getElementsByClassName(DANCER_TILE_CONTAINER_CLASSNAME) ?? [],
     );
 
     const mapFromDancersToCarpools = state.mapFromDancerIDs;
@@ -165,7 +165,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                 },
             });
         });
-    }, [mapFromDancersToCarpools, state, selection.selected, showCarpoolOccupantPopover]);
+    }, [mapFromDancersToCarpools, state, selection, showCarpoolOccupantPopover]);
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
