@@ -13,6 +13,13 @@ import XYNavigator from "../utilities/XYNavigator";
  */
 export const DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME = "dancer-tile-horizontal-navigation-ancestor";
 
+/**
+ * If a DOM element has both {@link DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME} and this class name, then if
+ * the {@link DancerTileContainer}s within wrap onto multiple lines, then each line will be treated as a separate group
+ * of tiles that share the same vertical position. The user will be able to move up and down within said DOM element.
+ */
+export const DANCER_TILE_LINE_WRAPPER_CLASSNAME = "dancer-tile-line-wrapper";
+
 /** All {@link DancerTileContainer}s will have this class name in the DOM. */
 export const DANCER_TILE_CONTAINER_CLASSNAME = "dancer-tile-container";
 
@@ -140,6 +147,7 @@ const onClickSerializerStore = new StaticState(Promise.resolve());
 const xyNavigator = new XYNavigator<HTMLElement>(
     DANCER_TILE_CONTAINER_CLASSNAME,
     DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME,
+    DANCER_TILE_LINE_WRAPPER_CLASSNAME,
 );
 
 /**

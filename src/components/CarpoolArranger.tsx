@@ -19,7 +19,7 @@ import CarpoolArrangerDay from "./CarpoolArrangerDay";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import { ShowCarpoolOccupantPopper } from "./CarpoolOccupantPopper";
 import DancerTile from "./DancerTile";
-import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME, DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME, ShouldSelectDancer } from "./DancerTileContainer";
+import DancerTileContainer, { DANCER_TILE_CONTAINER_CLASSNAME, DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME, DANCER_TILE_LINE_WRAPPER_CLASSNAME, ShouldSelectDancer } from "./DancerTileContainer";
 import { isInsideDancerTileContainer } from "./DancerTileContainerUtils";
 import DeleteButton from "./DeleteButton";
 import ElementSelectionContext from "./ElementSelectionContext";
@@ -221,8 +221,12 @@ const Unassigned: React.FC<UnassignedProps> = ({ unassignedDancers, shouldSelect
         return null;
     }
 
+    const unassignedBarClassName = [
+        DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME,
+        DANCER_TILE_LINE_WRAPPER_CLASSNAME,
+    ].join(" ");
     const unassignedState = DancerListState.makeAndRegister(session, unassignedDancers);
-    return <UnassignedBar className={DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}>
+    return <UnassignedBar className={unassignedBarClassName}>
         <Grid container spacing={2} justifyContent="center">
             {unassignedState.getIDsAndReferencedStates().map(({ id, state: dancerState }) =>
                 <Grid key={dancerState.evanescentID}>
