@@ -227,7 +227,10 @@ const Unassigned: React.FC<UnassignedProps> = ({ unassignedDancers, shouldSelect
     ].join(" ");
     const unassignedState = DancerListState.makeAndRegister(session, unassignedDancers);
     return <UnassignedBar className={unassignedBarClassName}>
-        <Grid container spacing={2} justifyContent="center">
+        <Alert severity="warning">
+            <FormattedMessage id={MessageID.carpoolUnassigned} />
+        </Alert>
+        <Grid container marginTop={2} spacing={2} justifyContent="center">
             {unassignedState.getIDsAndReferencedStates().map(({ id, state: dancerState }) =>
                 <Grid key={dancerState.evanescentID}>
                     <DancerTileContainer
@@ -244,8 +247,9 @@ const Unassigned: React.FC<UnassignedProps> = ({ unassignedDancers, shouldSelect
 
 const UnassignedBar = styled(Box)(({ theme }) => {
     return `
-        padding: 12px 24px;
-        background: ${theme.palette.warning.main};
+        margin: 12px 12px 0;
+        padding: 12px;
+        border: 2px solid ${theme.palette.warning.main};
     `;
 });
 
