@@ -28,6 +28,8 @@ export const enum MessageID {
     carpoolLeavesBeforeOneOfOccupantsCan = "carpoolLeavesBeforeOneOfOccupantsCan",
     /** Button that promotes a dancer to a driver of their own car */
     carpoolPromoteDriver = "carpoolPromoteDriver",
+    /** Text for a banner above the grid of dancers who have not been assigned to any carpool */
+    carpoolUnassigned = "carpoolUnassigned",
     /** Text or title for any button that makes carpools automatically */
     carpoolsGenerate = "carpoolsGenerate",
     /** Text for the body of a confirmation dialog for making carpools automatically */
@@ -156,6 +158,7 @@ export const MESSAGES: Messages = {
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
         carpoolLeavesBeforeOneOfOccupantsCan: "This car leaves before one of the dancers can.",
         carpoolPromoteDriver: "Promote {name} to Driver",
+        carpoolUnassigned: "These dancers are not in a carpool!",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",
