@@ -1,4 +1,5 @@
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import Button from "@mui/material/Button";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Grid from "@mui/material/Grid";
@@ -76,8 +77,9 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
         : undefined;
 
     const showPromoteToDriver = canPromoteToDriver(action);
+    const showUnassignOccupant = canUnassignOccupant(action);
 
-    const open = showPromoteToDriver;
+    const open = showPromoteToDriver || showUnassignOccupant;
 
     const onClickAway = useCallback(() => {
         action?.onClose(true);
@@ -117,6 +119,14 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
                             />
                         </Grid>
                     }
+                    {showUnassignOccupant &&
+                        <Grid>
+                            <UnassignOccupantButton
+                                action={action}
+                                occupantName={activeDancerName}
+                            />
+                        </Grid>
+                    }
                 </Grid>
             </Paper>
         </ClickAwayListener>
@@ -143,6 +153,29 @@ interface NotEmptySeatParameters extends OccupantActionParameters {
  */
 function isDancerNotEmptySeat(action: OccupantActionParameters | null): action is NotEmptySeatParameters {
     return !!action?.activeDancer.id;
+}
+
+/** An extension of {@link NotEmptySeatParameters} where the active dancer currently in a carpool */
+interface DancerInACarpoolParameters extends NotEmptySeatParameters {
+    activeDancer: NotEmptySeatParameters["activeDancer"] & {
+        carpoolState: CarpoolState;
+    };
+}
+
+/**
+ * Checks that, given the parameters, it is possible to perform actions that require the active dancer to be an actual
+ * dancer in a car.
+ * @param action The parameters that showed the popper
+ * @returns Whether it is possible to perform actions that assume that the active dancer is in a car and not an empty
+ *          seat
+ */
+function isDancerInACarpool(action: OccupantActionParameters | null): action is DancerInACarpoolParameters {
+    const activeDancer = action?.activeDancer;
+    if (!activeDancer) {
+        return false;
+    }
+
+    return !!(activeDancer.id && activeDancer.carpoolState);
 }
 // #endregion
 
@@ -199,6 +232,43 @@ const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, d
 
     return <Button onClick={onClick} variant="outlined" startIcon={<DirectionsCarIcon />}>
         <FormattedMessage id={MessageID.carpoolPromoteDriver} values={values} />
+    </Button>;
+};
+// #endregion
+
+// #region Unassign occupant
+/**
+ * An extension of {@link OccupantActionParameters} that meets the prerequisites to unassign an occupant from the
+ * carpool that they are currently in
+ */
+type UnassignOccupantParameters = DancerInACarpoolParameters;
+
+/**
+ * Checks that, given the parameters, it is possible to unassign the active dancer from the carpool that they are in.
+ * @param action The parameters that showed the popper
+ * @returns Whether the active dancer can be unassigned from the carpool that they are in
+ */
+function canUnassignOccupant(action: OccupantActionParameters | null): action is UnassignOccupantParameters {
+    // The active dancer must not be an empty seat, must be in a carpool, and must not be the driver of that carpool.
+    return isDancerInACarpool(action)
+        && action.carpoolArrangementState.isPassenger(action.activeDancer.id) === true;
+}
+
+interface UnassignOccupantButtonProps {
+    action: UnassignOccupantParameters;
+    occupantName: string;
+}
+
+const UnassignOccupantButton: React.FC<UnassignOccupantButtonProps> = ({ action, occupantName }) => {
+    const values = useMemo(() => ({ name: occupantName }), [occupantName]);
+
+    const onClick = useCallback(() => {
+        action.carpoolArrangementState.unassignOccupant(action.activeDancer.id);
+        action.onClose(false);
+    }, [action]);
+
+    return <Button onClick={onClick} variant="outlined" startIcon={<RemoveCircleIcon />}>
+        <FormattedMessage id={MessageID.carpoolUnassignOccupant} values={values} />
     </Button>;
 };
 // #endregion

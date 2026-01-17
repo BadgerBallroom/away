@@ -241,6 +241,42 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
 
         return carpoolState;
     }
+
+    /**
+     * @returns `true` if the specified dancer is a passenger, `false` if they are a driver, and `undefined` if they are
+     *          not assigned to any carpool
+     */
+    public isPassenger(dancerID: ID): boolean | undefined {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return undefined;
+        }
+        return carpoolState.getChildValue("occupants").indexOf(dancerID) > 0;
+    }
+
+    /**
+     * Removes a dancer from whatever carpool that they are in.
+     * Does not put the dancer in any other carpool.
+     * If the dancer is the only one in their carpool, the whole carpool is deleted.
+     * Note that if the driver is deleted, then the first passenger becomes the driver, even if they can't drive!
+     */
+    public unassignOccupant(dancerID: ID): void {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return;
+        }
+
+        const carpoolOccupantsState = carpoolState.getChildState("occupants");
+        if (!carpoolOccupantsState) {
+            return;
+        }
+
+        if (carpoolOccupantsState.length < 2) {
+            this.getChildState("carpools").remove(carpoolState);
+        } else {
+            carpoolOccupantsState.remove(dancerID);
+        }
+    }
     // #endregion
 }
 
