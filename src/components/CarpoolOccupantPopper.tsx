@@ -1,3 +1,4 @@
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import Button from "@mui/material/Button";
@@ -78,8 +79,9 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
 
     const showPromoteToDriver = canPromoteToDriver(action);
     const showUnassignOccupant = canUnassignOccupant(action);
+    const showDeleteCarpool = canDeleteCarpool(action);
 
-    const open = showPromoteToDriver || showUnassignOccupant;
+    const open = showPromoteToDriver || showUnassignOccupant || showDeleteCarpool;
 
     const onClickAway = useCallback(() => {
         action?.onClose(true);
@@ -124,6 +126,13 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
                             <UnassignOccupantButton
                                 action={action}
                                 occupantName={activeDancerName}
+                            />
+                        </Grid>
+                    }
+                    {showDeleteCarpool &&
+                        <Grid>
+                            <DeleteCarpoolButton
+                                action={action}
                             />
                         </Grid>
                     }
@@ -269,6 +278,39 @@ const UnassignOccupantButton: React.FC<UnassignOccupantButtonProps> = ({ action,
 
     return <Button onClick={onClick} variant="outlined" startIcon={<RemoveCircleIcon />}>
         <FormattedMessage id={MessageID.carpoolUnassignOccupant} values={values} />
+    </Button>;
+};
+// #endregion
+
+// #region Delete carpool
+/**
+ * An extension of {@link OccupantActionParameters} that meets the prerequisites to delete a whole carpool
+ */
+type DeleteCarpoolParameters = DancerInACarpoolParameters;
+
+/**
+ * Checks that, given the parameters, it is possible to delete the carpool that the active dancer is in.
+ * @param action The parameters that showed the popper
+ * @returns Whether the carpool that the active dancer is in can be deleted
+ */
+function canDeleteCarpool(action: OccupantActionParameters | null): action is UnassignOccupantParameters {
+    // The active dancer must not be an empty seat, must be in a carpool, and must be the driver of that carpool.
+    return isDancerInACarpool(action)
+        && action.carpoolArrangementState.isPassenger(action.activeDancer.id) === false;
+}
+
+interface DeleteCarpoolButtonProps {
+    action: DeleteCarpoolParameters;
+}
+
+const DeleteCarpoolButton: React.FC<DeleteCarpoolButtonProps> = ({ action }) => {
+    const onClick = useCallback(() => {
+        action.carpoolArrangementState.deleteCarpoolWithDancer(action.activeDancer.id);
+        action.onClose(false);
+    }, [action]);
+
+    return <Button onClick={onClick} variant="outlined" startIcon={<DeleteForeverIcon />}>
+        <FormattedMessage id={MessageID.carpoolDelete} />
     </Button>;
 };
 // #endregion

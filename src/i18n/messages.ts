@@ -20,6 +20,8 @@ export const enum MessageID {
     carpoolArrangementPrintedFrameTitle = "carpoolArrangementPrintedFrameTitle",
     /** Heading for the "Passengers" heading in a printout of a carpool arrangement */
     carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
+    /** Button that deletes a carpool */
+    carpoolDelete = "carpoolDelete",
     /** Tooltip for a button to edit a car's departure time */
     carpoolEditDepartureTime = "carpoolEditDepartureTime",
     /** Tooltip for an empty seat in a car */
@@ -160,6 +162,7 @@ export const MESSAGES: Messages = {
         carpoolArrangementPrintedDriverHeading: "Driver",
         carpoolArrangementPrintedFrameTitle: "Carpools Printed",
         carpoolArrangementPrintedPassengersHeading: "Passengers",
+        carpoolDelete: "Delete Carpool",
         carpoolEditDepartureTime: "Edit Departure Time",
         carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",

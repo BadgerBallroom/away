@@ -360,6 +360,34 @@ describe("CarpoolArrangementState", () => {
         });
     });
 
+    describe("deleteCarpoolWithDancer", () => {
+        test("removes the carpool that contains the specified dancer", () => {
+            expect(carpoolArrangementState.deleteCarpoolWithDancer("1")).toEqual(["1", "2", "3"]);
+
+            // Only Elsa, Frank, and Gabby are still in carpools.
+            expect(carpoolArrangementState.getChildValue("carpools")).toEqual([
+                {
+                    departure: dayjs("2026-01-15 19:00"),
+                    occupants: ["5"],
+                },
+                {
+                    departure: dayjs("2026-01-14 20:00"),
+                    occupants: ["6"],
+                },
+                {
+                    departure: dayjs("2026-01-15 15:30"),
+                    occupants: ["7"],
+                },
+            ]);
+            expect(changeListener).toHaveBeenCalledWith(true);
+        });
+
+        test("does nothing if the specified dancer is not in any carpool", () => {
+            expect(carpoolArrangementState.deleteCarpoolWithDancer("4")).toEqual([]);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
     afterEach(() => {
         vi.unstubAllEnvs();
     });

@@ -277,6 +277,21 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
             carpoolOccupantsState.remove(dancerID);
         }
     }
+
+    /**
+     * Deletes the carpool that contains the specified dancer. Does not put the dancers in any other carpool.
+     * @param dancerID The dancer whose carpool to delete
+     * @returns All the former occupants of the carpool
+     */
+    public deleteCarpoolWithDancer(dancerID: ID): ID[] {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return [];
+        }
+        const occupants = carpoolState.getChildValue("occupants");
+        this.getChildState("carpools").remove(carpoolState);
+        return occupants;
+    }
     // #endregion
 }
 
