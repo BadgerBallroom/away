@@ -108,9 +108,14 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
                     <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
                 </DancerTileContainer>,
             )}
-            {emptySeats.map(key =>
+            {emptySeats.map((key, index) =>
                 <DancerTileContainer
                     key={key}
+                    title={intl.formatMessage({ id: MessageID.carpoolEmptySeatTitle }, {
+                        index: index + 1,
+                        count: emptySeats.length,
+                        name: dancerIDsAndStates[0].state.getChildValue("name"),
+                    })}
                     shouldSelect={shouldSelectDancer}
                     data-driver-dancer-id={driverDancerID}
                 >

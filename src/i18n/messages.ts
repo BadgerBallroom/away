@@ -22,6 +22,8 @@ export const enum MessageID {
     carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
     /** Tooltip for a button to edit a car's departure time */
     carpoolEditDepartureTime = "carpoolEditDepartureTime",
+    /** Tooltip for an empty seat in a car */
+    carpoolEmptySeatTitle = "carpoolEmptySeatTitle",
     /** Tooltip when the user hovers over a dancer's departure time that is after the carpool's departure time */
     carpoolLeavesBeforeOccupantCan = "carpoolLeavesBeforeOccupantCan",
     /** Tooltip when the user hovers over a carpool's departure time that is before a dancer's departure time */
@@ -157,6 +159,7 @@ export const MESSAGES: Messages = {
         carpoolArrangementPrintedFrameTitle: "Carpools Printed",
         carpoolArrangementPrintedPassengersHeading: "Passengers",
         carpoolEditDepartureTime: "Edit Departure Time",
+        carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
         carpoolLeavesBeforeOneOfOccupantsCan: "This car leaves before one of the dancers can.",
         carpoolPromoteDriver: "Promote {name} to Driver",
