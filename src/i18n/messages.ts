@@ -135,8 +135,6 @@ export const enum MessageID {
     yes = "yes",
     /** "Yes, if needed" */
     yesIfNeeded = "yesIfNeeded",
-    /** A banner that explains future changes to the Carpools page */
-    zCarpoolsFuture = "zCarpoolsFuture",
     /** A banner that explains future changes to the Dancers page */
     zDancersFuture = "zDancersFuture",
 }
@@ -214,7 +212,6 @@ export const MESSAGES: Messages = {
         untitled: "Untitled",
         yes: "Yes",
         yesIfNeeded: "Yes, if needed",
-        zCarpoolsFuture: "In the future, you will be able to edit carpools manually.",
         zDancersFuture: "In the future, you will be able to edit multiple dancers at once, to change more fields via keyboard, and to undo deleting a dancer.",
     },
 };

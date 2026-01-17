@@ -180,7 +180,6 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                 {onDeleteClick && <DeleteButton onClick={onDeleteClick} />}
             </Toolbar>
         </Heading>
-        <Alert severity="info"><FormattedMessage id={MessageID.zCarpoolsFuture} /></Alert>
         <ElementSelectionContext.Provider value={selection}>
             <Box ref={selectionParentRef} onClick={onSelectionParentClick}>
                 <Unassigned unassignedDancers={unassignedDancers} shouldSelectDancer={shouldSelectDancer} />
