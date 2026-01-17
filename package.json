@@ -1,6 +1,6 @@
 {
   "name": "away",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "This tool helps a ballroom dance team organize travel to other teams\u2019 competitions.",
   "type": "module",
   "private": true,

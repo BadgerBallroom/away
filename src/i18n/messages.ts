@@ -135,8 +135,6 @@ export const enum MessageID {
     yes = "yes",
     /** "Yes, if needed" */
     yesIfNeeded = "yesIfNeeded",
-    /** A banner that explains future changes to the Carpools page */
-    zCarpoolsFuture = "zCarpoolsFuture",
     /** A banner that explains future changes to the Dancers page */
     zDancersFuture = "zDancersFuture",
 }
@@ -189,7 +187,7 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
-        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file",
+        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you save all data for one competition to a single file",
         exportCSV: "Export CSV",
         fileNew: "New Session",
         fileNewConfirm: "Are you sure that you want to start a new session? This will discard all data!",
@@ -214,7 +212,6 @@ export const MESSAGES: Messages = {
         untitled: "Untitled",
         yes: "Yes",
         yesIfNeeded: "Yes, if needed",
-        zCarpoolsFuture: "In the future, you will be able to edit carpools manually.",
         zDancersFuture: "In the future, you will be able to edit multiple dancers at once, to change more fields via keyboard, and to undo deleting a dancer.",
     },
 };
