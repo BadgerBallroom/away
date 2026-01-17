@@ -8,6 +8,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Snackbar, { SnackbarProps } from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import { Dayjs } from "dayjs";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -109,6 +110,8 @@ const CarpoolsPage: React.FC = () => {
 
     const [occupantActionParameters, setOccupantActionParameters] = useState<OccupantActionParameters | null>(null);
 
+    const [snackbarProps, setSnackbarProps] = useState<Omit<SnackbarProps, "open"> | null>(null);
+
     return <WorkspaceWithToolbar
         toolbarChildren={<>
             <NewButtons {...newButtonsProps} />
@@ -121,7 +124,8 @@ const CarpoolsPage: React.FC = () => {
             suggestedDepartureTime={carpoolSuggestedDeparture}
             onClose={onCarpoolDeparturePopoverClose}
         />
-        <CarpoolOccupantPopper action={occupantActionParameters} />
+        <CarpoolOccupantPopper action={occupantActionParameters} setSnackbarProps={setSnackbarProps} />
+        <Snackbar open={snackbarProps !== null} {...snackbarProps} />
         <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
         {carpoolArrangementList.length ? <>
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />

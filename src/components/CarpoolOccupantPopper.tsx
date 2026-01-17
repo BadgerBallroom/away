@@ -4,14 +4,17 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Popper, { PopperProps } from "@mui/material/Popper";
+import { SnackbarProps } from "@mui/material/Snackbar";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import CarpoolState from "../model/CarpoolState";
 import { ID } from "../model/KeyListAndMap";
 import { useDancerMapState } from "../model/SessionHooks";
+import { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
+import SnackbarCloseButton from "./SnackbarCloseButton";
 
 /** Parameters that define the actions that are possible to take on the dancer that the user just clicked on */
 export interface OccupantActionParameters {
@@ -50,8 +53,13 @@ export interface OccupantActionParameters {
     onClose: (shouldSelect: boolean, isImmediatelyReopening?: boolean) => void;
 }
 
+interface SetSnackbarProps {
+    (snackbarProps: Omit<SnackbarProps, "open"> | null): void;
+}
+
 interface CarpoolOccupantPopperProps {
     action: OccupantActionParameters | null;
+    setSnackbarProps: SetSnackbarProps;
 }
 
 export interface ShowCarpoolOccupantPopper {
@@ -59,7 +67,7 @@ export interface ShowCarpoolOccupantPopper {
 }
 
 /** Displays a menu of actions to take on a dancer, even if the dancer is not in a car */
-const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action }) => {
+const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, setSnackbarProps }) => {
     const dancerMapState = useDancerMapState();
     const activeDancerState = isDancerNotEmptySeat(action)
         ? dancerMapState.getChildState(action.activeDancer.id)
@@ -103,6 +111,7 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action })
                             <PromoteToDriverButton
                                 action={action}
                                 dancerName={activeDancerName}
+                                setSnackbarProps={setSnackbarProps}
                             />
                         </Grid>
                     }
@@ -152,14 +161,42 @@ function canPromoteToDriver(action: OccupantActionParameters | null): action is 
 interface PromoteToDriverButtonProps {
     action: PromoteToDriverParameters;
     dancerName: string;
+    setSnackbarProps: SetSnackbarProps;
 }
 
 /** A button that promotes the active dancer to the driver of their own car. */
-const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, dancerName }) => {
+const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, dancerName, setSnackbarProps }) => {
+    const intl = useIntl();
+
+    const onSnackbarClose = useCallback(() => setSnackbarProps(null), [setSnackbarProps]);
+    const onSnackbarGoToCar = useCallback(() => {
+        focusOnDancerID(action.activeDancer.id);
+        onSnackbarClose();
+    }, [action.activeDancer.id, onSnackbarClose]);
+    const snackbarAction = useMemo(() => <>
+        <Button onClick={onSnackbarGoToCar}>
+            <FormattedMessage id={MessageID.carpoolPromoteDriverSnackGoToCar} />
+        </Button>
+        <SnackbarCloseButton onClick={onSnackbarClose} />
+    </>, [onSnackbarGoToCar, onSnackbarClose]);
+
     const onClick = useCallback(() => {
         action.carpoolArrangementState.promoteToDriver(action.activeDancer.id);
+
+        // Don't select the driver. Instead, show a snackbar that gives the user the option to focus on it.
         action.onClose(false);
-    }, [action]);
+
+        const onSnackbarClose = () => setSnackbarProps(null);
+        setSnackbarProps({
+            autoHideDuration: 6000,
+            message: intl.formatMessage(
+                { id: MessageID.carpoolPromoteDriverSnack },
+                { name: dancerName },
+            ),
+            action: snackbarAction,
+            onClose: onSnackbarClose,
+        });
+    }, [action, dancerName, intl, snackbarAction, setSnackbarProps]);
 
     const values = useMemo(() => ({ name: dancerName }), [dancerName]);
 
@@ -168,3 +205,11 @@ const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, d
     </Button>;
 };
 // #endregion
+
+/** Focuses on the dancer with the given ID. */
+function focusOnDancerID(id: ID): void {
+    const element = document.querySelector(`.${DANCER_TILE_CONTAINER_CLASSNAME}[data-dancer-id="${id}"]`);
+    if (element instanceof HTMLElement) {
+        element.focus();
+    }
+}
