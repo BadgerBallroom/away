@@ -20,6 +20,10 @@ export const enum MessageID {
     carpoolArrangementPrintedFrameTitle = "carpoolArrangementPrintedFrameTitle",
     /** Heading for the "Passengers" heading in a printout of a carpool arrangement */
     carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
+    /** Button that adds a dancer to a carpool */
+    carpoolAssignOccupant = "carpoolAssignOccupant",
+    /** Button that adds more than one dancer to a carpool */
+    carpoolAssignOccupantMore = "carpoolAssignOccupantMore",
     /** Button that deletes a carpool */
     carpoolDelete = "carpoolDelete",
     /** Tooltip for a button to edit a car's departure time */
@@ -36,6 +40,10 @@ export const enum MessageID {
     carpoolPromoteDriverSnack = "carpoolPromoteDriverSnack",
     /** Button that puts focus on the dancer who was just promoted to a driver of their own car */
     carpoolPromoteDriverSnackGoToCar = "carpoolPromoteDriverSnackGoToCar",
+    /** Button that swaps two occupants among carpools */
+    carpoolSwapOccupants = "carpoolSwapOccupants",
+    /** Button that swaps more than two occupants among carpools */
+    carpoolSwapOccupantsMore = "carpoolSwapOccupantsMore",
     /** Button that removes an occupant from the carpool that they are in */
     carpoolUnassignOccupant = "carpoolUnassignOccupant",
     /** Text for a banner above the grid of dancers who have not been assigned to any carpool */
@@ -162,6 +170,8 @@ export const MESSAGES: Messages = {
         carpoolArrangementPrintedDriverHeading: "Driver",
         carpoolArrangementPrintedFrameTitle: "Carpools Printed",
         carpoolArrangementPrintedPassengersHeading: "Passengers",
+        carpoolAssignOccupant: "Assign {name} to carpool",
+        carpoolAssignOccupantMore: "Assign {count} dancers to carpool",
         carpoolDelete: "Delete Carpool",
         carpoolEditDepartureTime: "Edit Departure Time",
         carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
@@ -170,6 +180,8 @@ export const MESSAGES: Messages = {
         carpoolPromoteDriver: "Promote {name} to Driver",
         carpoolPromoteDriverSnack: "Promoted {name} to driver",
         carpoolPromoteDriverSnackGoToCar: "Go to car",
+        carpoolSwapOccupants: "Swap {name1} with {name2}",
+        carpoolSwapOccupantsMore: "Swap {name} with {count} dancers",
         carpoolUnassignOccupant: "Unassign {name} from carpool",
         carpoolUnassigned: "These dancers are not in a carpool!",
         carpoolsGenerate: "Generate Carpools",

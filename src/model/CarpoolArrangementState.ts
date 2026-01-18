@@ -292,6 +292,57 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         this.getChildState("carpools").remove(carpoolState);
         return occupants;
     }
+
+    /**
+     * Moves a dancer into a carpool. Removes them from the carpool that they are currently in (if any).
+     * Does nothing if the specified driver is not actually the driver of a carpool.
+     * Note that if the dancer was a driver, whoever is left to drive that car might not be able to drive!
+     * @param dancerID The ID of the dancer to move
+     * @param carpoolStateOrDriverDancerID Either the state of the carpool or the dancer ID of the driver of the carpool
+     *                                     into which to move the dancer
+     * @param position The index of the pre-existing dancer within carpool before which the new dancer should be
+     *                 inserted (default: insert after the last pre-existing dancer)
+     */
+    public moveDancerToCarpool(
+        dancerID: ID,
+        carpoolStateOrDriverDancerID: CarpoolState | ID,
+        position?: number,
+    ): void {
+        // Verify that the specified driver is actually the driver of an existing carpool.
+        let newCarpoolState: CarpoolState | undefined;
+        let driverDancerID: ID;
+        if (carpoolStateOrDriverDancerID instanceof CarpoolState) {
+            newCarpoolState = carpoolStateOrDriverDancerID;
+            driverDancerID = newCarpoolState.driverDancerID;
+        } else {
+            newCarpoolState = this.mapFromDancerIDs.get(carpoolStateOrDriverDancerID);
+            driverDancerID = carpoolStateOrDriverDancerID;
+            if (!newCarpoolState || newCarpoolState.driverDancerID !== driverDancerID) {
+                return;
+            }
+        }
+
+        const newCarpoolOccupantsState = newCarpoolState.getChildState("occupants");
+        if (position === undefined) {
+            position = newCarpoolOccupantsState.length;
+        }
+
+        if (
+            newCarpoolOccupantsState.getChildValue(position) === dancerID ||
+            newCarpoolOccupantsState.getChildValue(position - 1) === dancerID
+        ) {
+            // The dancer is already in the requested position.
+            return;
+        }
+
+        // Remove the dancer from the carpool that they are currently in. This returns the state of the ID.
+        // If the dancer was not in a carpool previously, just put their ID in a new state.
+        const idState = this.mapFromDancerIDs.get(dancerID)?.getChildState("occupants").remove(dancerID)
+            ?? new DeepStatePrimitive(dancerID);
+
+        // Add the dancer to the new carpool.
+        newCarpoolOccupantsState.spliceStates(position, 0, idState);
+    }
     // #endregion
 }
 

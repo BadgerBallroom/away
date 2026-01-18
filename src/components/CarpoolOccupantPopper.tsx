@@ -1,17 +1,22 @@
+import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SwapVertIcon from "@mui/icons-material/SwapVert";
 import Button from "@mui/material/Button";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Popper, { PopperProps } from "@mui/material/Popper";
 import { SnackbarProps } from "@mui/material/Snackbar";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { JSX, useCallback, useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
+import CarpoolState from "../model/CarpoolState";
+import { DancerMapState } from "../model/DancerKLM";
 import { ID } from "../model/KeyListAndMap";
 import { useDancerMapState } from "../model/SessionHooks";
 import { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
@@ -69,9 +74,10 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
 
     const showPromoteToDriver = canPromoteToDriver(action);
     const showUnassignOccupant = canUnassignOccupant(action);
+    const showSwapDancers = canSwapDancers(action);
     const showDeleteCarpool = canDeleteCarpool(action);
 
-    const open = showPromoteToDriver || showUnassignOccupant || showDeleteCarpool;
+    const open = showPromoteToDriver || showUnassignOccupant || showSwapDancers || showDeleteCarpool;
 
     const onClickAway = useCallback(() => {
         action?.onClose(true);
@@ -116,6 +122,15 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
                             <UnassignOccupantButton
                                 action={action}
                                 occupantName={activeDancerName}
+                            />
+                        </Grid>
+                    }
+                    {showSwapDancers &&
+                        <Grid>
+                            <SwapDancersButton
+                                action={action}
+                                activeDancerName={activeDancerName}
+                                dancerMapState={dancerMapState}
                             />
                         </Grid>
                     }
@@ -165,6 +180,34 @@ type DancerInACarpoolParameters = NotEmptySeatParameters;
 function isDancerInACarpool(action: OccupantActionParameters | null): action is DancerInACarpoolParameters {
     return isDancerNotEmptySeat(action)
         && action.carpoolArrangementState.mapFromDancerIDs.has(action.activeDancerID);
+}
+
+/** An extension of {@link OccupantActionParameters} where the active "dancer" is an unoccupied seat in a carpool */
+interface EmptySeatInACarpoolParameters extends OccupantActionParameters {
+    driverDancerID: NonNullable<OccupantActionParameters["driverDancerID"]>;
+}
+
+/**
+ * Checks that, given the parameters, it is possible to perform actions that require that the user clicked on an
+ * unoccupied seat in a car.
+ * @param action The parameters that showed the popper
+ * @returns Whether it is possible to perform actions that assume that the active "dancer" is an occupied seat in a car
+ */
+function isEmptySeatInCarpool(action: OccupantActionParameters | null): action is EmptySeatInACarpoolParameters {
+    return !!action?.driverDancerID;
+}
+
+/** An extension of {@link OccupantActionParameters} where the active dancer (or unoccupied seat) is in a carpool */
+type InACarpoolParameters = DancerInACarpoolParameters | EmptySeatInACarpoolParameters;
+
+/**
+ * Checks that, given the parameters, it is possible to perform actions that require that the user clicked on either an
+ * occupant of a car or an unoccupied seat inside a car.
+ * @param action The parameters that showed the popper
+ * @returns Whether it is possible to perform actions that assume that the user clicked inside a carpool
+ */
+function isInCarpool(action: OccupantActionParameters | null): action is InACarpoolParameters {
+    return isDancerInACarpool(action) || isEmptySeatInCarpool(action);
 }
 // #endregion
 
@@ -295,10 +338,255 @@ const DeleteCarpoolButton: React.FC<DeleteCarpoolButtonProps> = ({ action }) => 
 };
 // #endregion
 
+// #region Swap dancers
+type SwapDancersParameters = NotEmptySeatParameters | EmptySeatInACarpoolParameters;
+
+/**
+ * Checks that, given the parameters, it is possible either:
+ * 1. to move the selected dancer or
+ * 2. to swap the selected dancer with the active one
+ * @param action The parameters that showed the popper
+ * @returns Whether one of the two conditions above applies
+ */
+function canSwapDancers(action: OccupantActionParameters | null): action is SwapDancersParameters {
+    // Intentions:
+    // 1. If the user clicked on a real dancer in a car...
+    //    a. If other dancers were already selected, offer to swap them.
+    //    b. If no other dancers were already selected, do not offer to move or to swap.
+    // 2. If the user clicked on a real dancer not in a car...
+    //    a. If dancers in cars were already selected, offer to swap them.
+    //    b. If no dancers in cars were already selected, do not offer to move or to swap.
+    // 3. If the user clicked on an unoccupied seat...
+    //    a. If dancers were already selected, offer to move them here.
+    //    b. If no dancers were already selected, do not offer to move or to swap.
+    // This is regardless of whether any unoccupied seats were already selected.
+    if (!action) {
+        return false;
+    }
+
+    // If no dancers were already selected, do not offer to move or to swap.
+    const priorSelectedDancers = priorSelectedDancersWithoutActive(action);
+    if (!priorSelectedDancers.size) {
+        return false;
+    }
+
+    // If the active dancer is in a carpool or the active "dancer" is an unoccupied spot in a car, offer to move or to
+    // swap.
+    if (isInCarpool(action)) {
+        return true;
+    }
+
+    // If any prior selected dancer is in a carpool, offer to move or to swap.
+    for (const id of priorSelectedDancers) {
+        if (action.carpoolArrangementState.mapFromDancerIDs.has(id)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Returns `true` iff:
+ * 1. There were prior selected dancers or unoccupied spots.
+ * 2. Those prior selected dancers and/or unoccupied spots were all in carpools.
+ * 3. Those prior selected dancers and/or unoccupied spots were all in the same carpool.
+ * 4. The active dancer or unoccupied spot spot is also in the same carpool.
+ * @param action The parameters that showed the popper
+ * @returns
+ */
+function priorAndActiveAreInSameCarpool(action: SwapDancersParameters): boolean {
+    const priorSelectedCarpoolStates = new Set<CarpoolState>();
+    for (const id of action.priorSelectedDancers.union(action.priorSelectedEmptySpotCarpools)) {
+        const carpoolState = action.carpoolArrangementState.mapFromDancerIDs.get(id);
+        if (!carpoolState) {
+            // This prior selected dancer or unoccupied spot is not in a carpool.
+            return false;
+        }
+        priorSelectedCarpoolStates.add(carpoolState);
+    }
+
+    if (priorSelectedCarpoolStates.size !== 1) {
+        // The prior selected dancers and unoccupied spots were not all in the same carpool.
+        return false;
+    }
+
+    // The prior selected dancers and unoccupied spots were all in the same carpool.
+    // Check whether the carpool that the user clicked in is the same carpool.
+    const activeCarpoolState = action.carpoolArrangementState.mapFromDancerIDs.get(
+        isDancerNotEmptySeat(action) ? action.activeDancerID : action.driverDancerID,
+    );
+    return priorSelectedCarpoolStates.values().next().value === activeCarpoolState;
+}
+
+interface SwapDancersButtonProps {
+    action: SwapDancersParameters;
+    activeDancerName: string;
+    dancerMapState: DancerMapState;
+}
+
+const SwapDancersButton: React.FC<SwapDancersButtonProps> = ({ action, activeDancerName, dancerMapState }) => {
+    const intl = useIntl();
+
+    // Create a copy of the set of prior selected dancers without the active dancer.
+    const priorSelectedDancers = useMemo(() => priorSelectedDancersWithoutActive(action), [action]);
+
+    const [priorSelectedCarpoolState, positionInPriorSelectedCarpool] = useMemo(() => {
+        // Find the carpool and the position within it to which to move the active dancer.
+        // If any prior selected dancers (not an unoccupied spot) were in carpools, choose any one of those carpools.
+        let carpoolStates = carpoolStatesOfDancers(priorSelectedDancers, action.carpoolArrangementState);
+        if (carpoolStates.size) {
+            return carpoolStates.entries().next().value!;
+        }
+
+        // Choose any carpool that had prior selected unoccupied spots.
+        carpoolStates = carpoolStatesOfDancers(action.priorSelectedEmptySpotCarpools, action.carpoolArrangementState);
+        if (carpoolStates.size) {
+            return carpoolStates.entries().next().value!;
+        }
+
+        // None of the prior selected dancers or unoccupied spots were in carpools.
+        return [undefined, undefined];
+    }, [priorSelectedDancers, action]);
+    const [activeCarpoolState, positionInActiveCarpool] = useMemo(() => {
+        const activeDancerOrDriverID = action.activeDancerID ?? action.driverDancerID;
+        if (!activeDancerOrDriverID) {
+            return [undefined, undefined];
+        }
+
+        const carpoolState = action.carpoolArrangementState.mapFromDancerIDs.get(activeDancerOrDriverID);
+        if (!carpoolState) {
+            return [undefined, undefined];
+        }
+
+        if (action.activeDancerID) {
+            return [carpoolState, carpoolState.getChildState("occupants").indexOf(action.activeDancerID)];
+        }
+        return [carpoolState, undefined];
+    }, [action]);
+
+    const { icon, text } = useMemo(() => {
+        const numPriorSelectedDancers = priorSelectedDancers.size;
+        const priorSelectedDancerName = numPriorSelectedDancers === 1
+            ? dancerMapState.getChildState(priorSelectedDancers.values().next().value!)?.getChildValue("name")
+            : undefined;
+
+        let icon: JSX.Element;
+        let text: string; // a string and not a <FormattedMessage /> to avoid react-perf/jsx-no-new-object-as-prop
+        if (isDancerNotEmptySeat(action)) {
+            icon = priorAndActiveAreInSameCarpool(action) ? <SwapHorizIcon /> : <SwapVertIcon />;
+            if (priorSelectedDancerName) {
+                text = intl.formatMessage(
+                    { id: MessageID.carpoolSwapOccupants },
+                    { name1: activeDancerName, name2: priorSelectedDancerName },
+                );
+            } else {
+                text = intl.formatMessage(
+                    { id: MessageID.carpoolSwapOccupantsMore },
+                    { name: activeDancerName, count: numPriorSelectedDancers },
+                );
+            }
+        } else {
+            // This is a move.
+            icon = <AddIcon />;
+            if (priorSelectedDancerName) {
+                text = intl.formatMessage(
+                    { id: MessageID.carpoolAssignOccupant },
+                    { name: priorSelectedDancerName },
+                );
+            } else {
+                text = intl.formatMessage(
+                    { id: MessageID.carpoolAssignOccupantMore },
+                    { count: numPriorSelectedDancers },
+                );
+            }
+        }
+        return { icon, text };
+    }, [priorSelectedDancers, action, dancerMapState, activeDancerName, intl]);
+
+    const onClick = useCallback(() => {
+        // Move the active dancer.
+        if (action.activeDancerID) {
+            if (priorSelectedCarpoolState) {
+                action.carpoolArrangementState.moveDancerToCarpool(
+                    action.activeDancerID,
+                    priorSelectedCarpoolState,
+                    positionInPriorSelectedCarpool,
+                );
+            } else {
+                action.carpoolArrangementState.unassignOccupant(action.activeDancerID);
+            }
+        }
+
+        // Move the prior selected dancers.
+        if (activeCarpoolState) {
+            for (const id of priorSelectedDancers) {
+                action.carpoolArrangementState.moveDancerToCarpool(
+                    id,
+                    activeCarpoolState,
+                    positionInActiveCarpool,
+                );
+            }
+        } else {
+            for (const id of priorSelectedDancers) {
+                action.carpoolArrangementState.unassignOccupant(id);
+            }
+        }
+        action.onClose(false);
+    }, [
+        action,
+        priorSelectedCarpoolState,
+        positionInPriorSelectedCarpool,
+        priorSelectedDancers,
+        activeCarpoolState,
+        positionInActiveCarpool,
+    ]);
+
+    return <Button onClick={onClick} variant="outlined" startIcon={icon}>{text}</Button>;
+};
+// #endregion
+
 /**
  * Focuses on the dancer with the given ID.
  * Don't call this from a function that moves dancers around; it won't wait for React to rerender first.
  */
 function focusOnDancerID(id: ID): void {
     document.querySelector<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}[data-dancer-id="${id}"]`)?.focus();
+}
+
+/**
+ * Returns a map from each carpool that had at least one of the specified dancers to the maximum position of the
+ * specified dancers in that carpool. Dancers who are not in carpools are ignored.
+ * @param dancerIDs An iterable of dancer IDs
+ * @returns The map
+ */
+function carpoolStatesOfDancers(
+    dancerIDs: Iterable<ID>,
+    carpoolArrangementState: CarpoolArrangementState,
+): Map<CarpoolState, number> {
+    const carpoolStates = new Map<CarpoolState, number>();
+    for (const id of dancerIDs) {
+        const carpoolState = carpoolArrangementState.mapFromDancerIDs.get(id);
+        if (carpoolState) {
+            const currentPosition = carpoolState.getChildState("occupants").indexOf(id);
+            const existingPosition = carpoolStates.get(carpoolState);
+            if (existingPosition === undefined || currentPosition > existingPosition) {
+                carpoolStates.set(carpoolState, currentPosition);
+            }
+        }
+    }
+    return carpoolStates;
+}
+
+/**
+ * Gets the select of dancers who were selected before the user clicked on the active one, minus the active one.
+ * @param action The parameters that showed the popper
+ * @returns The set of dancers who were prior selected except for the one that the user clicked on
+ */
+function priorSelectedDancersWithoutActive(action: OccupantActionParameters) {
+    if (action.activeDancerID) {
+        const priorSelectedDancers = new Set(action.priorSelectedDancers);
+        priorSelectedDancers.delete(action.activeDancerID);
+        return priorSelectedDancers;
+    }
+    return action.priorSelectedDancers;
 }
