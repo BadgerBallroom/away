@@ -398,6 +398,27 @@ export class DeepStateArray<
         this._items = newItems;
         this.dispatchValueChange(false);
     }
+
+    /**
+     * Changes the contents of the array by removing a range of child states, by inserting new child states, or both.
+     * @param start The index at which to start removing and/or inserting
+     * @param deleteCount The number of child states to remove (0 to insert only)
+     * @param itemStates The child states to insert (omit to remove only)
+     * @returns The child states that were removed
+     */
+    public spliceStates(start: number, deleteCount: number, ...itemStates: ItemState[]): ItemState[] {
+        if (!deleteCount && !itemStates.length) {
+            return [];
+        }
+
+        const removed = this._items.splice(
+            start,
+            deleteCount,
+            ...itemStates.map((itemState, index) => this.makeChild(start + index, itemState)),
+        );
+        this.dispatchValueChange(false);
+        return removed.map(({ deepState }) => deepState);
+    }
     // #endregion
 }
 
