@@ -222,6 +222,32 @@ describe("DeepStateArray", () => {
             }
         });
 
+        describe("spliceStates", () => {
+            test("does nothing when `deleteCount` is 0 and `itemStates` is empty", () => {
+                expect(state.spliceStates(0, 0)).toEqual([]);
+                expect(state.getValue()).toEqual(initialValue);
+                expect(changeListener).not.toHaveBeenCalled();
+            });
+
+            test("returns removed states", () => {
+                const spliced = [...initialValue];
+                const removed = spliced.splice(2, 2);
+                expect(state.spliceStates(2, 2).map(state => state.getValue())).toEqual(removed);
+                expect(state.getValue()).toEqual(spliced);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
+            });
+
+            test("inserts the given states", () => {
+                const spliced = [...initialValue];
+                spliced.splice(2, 0, 12345, 67890);
+                expect(
+                    state.spliceStates(2, 0, new DeepStatePrimitive(12345), new DeepStatePrimitive(67890)),
+                ).toEqual([]);
+                expect(state.getValue()).toEqual(spliced);
+                expect(changeListener).toHaveBeenCalledExactlyOnceWith(false);
+            });
+        });
+
         test("toString returns JSON representation", () => {
             expect(state.toString()).toEqual(JSON.stringify(initialValue));
             expect(changeListener).not.toHaveBeenCalled();
