@@ -12,7 +12,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
-import CarpoolState from "../model/CarpoolState";
 import { ID } from "../model/KeyListAndMap";
 import { useDancerMapState } from "../model/SessionHooks";
 import { DANCER_TILE_CONTAINER_CLASSNAME } from "./DancerTileContainer";
@@ -22,31 +21,22 @@ import SnackbarCloseButton from "./SnackbarCloseButton";
 export interface OccupantActionParameters {
     /** The HTML element of the dancer that the user just clicked on */
     anchorEl: PopperProps["anchorEl"];
-    /**
-     * The state of the arrangement of carpools that is currently being edited (must contain all carpools that are
-     * inside all other properties of this `OccupantActionParameters`)
-     */
+    /** The state of the arrangement of carpools that is currently being edited */
     carpoolArrangementState: CarpoolArrangementState;
-    /** The dancer that the user just clicked on */
-    activeDancer: {
-        /** The ID in `SessionProps.dancers` (`undefined` if this is actually an unoccupied seat in a car) */
-        id: ID | undefined,
-        /** The state of the carpool that the dancer is in (`undefined` if the dancer is not in a carpool) */
-        carpoolState: CarpoolState | undefined;
-    };
+    /** The ID of the dancer that the user clicked on (`undefined` if the user clicked an unoccupied seat in a car) */
+    activeDancerID: ID | undefined,
     /**
-     * A map where:
-     * - The keys are the IDs, in `SessionProps.dancers`, of dancers who were selected already prior to the user
-     *   clicking on the active dancer
-     * - Each value is the state of the carpool that the dancer is currently in (`undefined` if the dancer is not in any
-     *   carpool)
+     * The ID of the driver of the carpool in which the user clicked on an unoccupied spot (`undefined` if the user
+     * clicked on a dancer)
      */
-    priorSelectedDancers: Map<ID, CarpoolState | undefined>;
+    driverDancerID: ID | undefined;
+    /** The IDs of the dancers who were already selected prior to the user clicking on the active dancer */
+    priorSelectedDancers: ReadonlySet<ID>;
     /**
-     * The states of the set of carpools that had empty spots that were already selected prior to the user clicking on
-     * the active dancer
+     * The dancer IDs of the drivers of the carpools in which unoccupied seats were already selected prior to the user
+     * clicking on the active dancer
      */
-    priorSelectedEmptySpotCarpools: Set<CarpoolState>;
+    priorSelectedEmptySpotCarpools: ReadonlySet<ID>;
     /**
      * A callback that should cause the popper to close.
      * @param shouldSelect Whether the active dancer should become selected
@@ -74,7 +64,7 @@ export interface ShowCarpoolOccupantPopper {
 const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, setSnackbarProps }) => {
     const dancerMapState = useDancerMapState();
     const activeDancerState = isDancerNotEmptySeat(action)
-        ? dancerMapState.getChildState(action.activeDancer.id)
+        ? dancerMapState.getChildState(action.activeDancerID)
         : undefined;
 
     const showPromoteToDriver = canPromoteToDriver(action);
@@ -149,9 +139,7 @@ const POPPER_PAPER_SX = { padding: 2 } as const;
 // #region Special cases of `OccupantActionParameters`
 /** An extension of {@link OccupantActionParameters} where the active dancer is a real dancer an not an empty seat */
 interface NotEmptySeatParameters extends OccupantActionParameters {
-    activeDancer: OccupantActionParameters["activeDancer"] & {
-        id: ID;
-    };
+    activeDancerID: NonNullable<OccupantActionParameters["activeDancerID"]>;
 }
 
 /**
@@ -161,15 +149,11 @@ interface NotEmptySeatParameters extends OccupantActionParameters {
  * @returns Whether it is possible to perform actions that assume that the active dancer is not an empty seat
  */
 function isDancerNotEmptySeat(action: OccupantActionParameters | null): action is NotEmptySeatParameters {
-    return !!action?.activeDancer.id;
+    return !!action?.activeDancerID;
 }
 
 /** An extension of {@link NotEmptySeatParameters} where the active dancer currently in a carpool */
-interface DancerInACarpoolParameters extends NotEmptySeatParameters {
-    activeDancer: NotEmptySeatParameters["activeDancer"] & {
-        carpoolState: CarpoolState;
-    };
-}
+type DancerInACarpoolParameters = NotEmptySeatParameters;
 
 /**
  * Checks that, given the parameters, it is possible to perform actions that require the active dancer to be an actual
@@ -179,12 +163,8 @@ interface DancerInACarpoolParameters extends NotEmptySeatParameters {
  *          seat
  */
 function isDancerInACarpool(action: OccupantActionParameters | null): action is DancerInACarpoolParameters {
-    const activeDancer = action?.activeDancer;
-    if (!activeDancer) {
-        return false;
-    }
-
-    return !!(activeDancer.id && activeDancer.carpoolState);
+    return isDancerNotEmptySeat(action)
+        && action.carpoolArrangementState.mapFromDancerIDs.has(action.activeDancerID);
 }
 // #endregion
 
@@ -199,7 +179,7 @@ type PromoteToDriverParameters = NotEmptySeatParameters;
  */
 function canPromoteToDriver(action: OccupantActionParameters | null): action is PromoteToDriverParameters {
     return isDancerNotEmptySeat(action)
-        && action.carpoolArrangementState.canPromoteToDriver(action.activeDancer.id);
+        && action.carpoolArrangementState.canPromoteToDriver(action.activeDancerID);
 }
 
 interface PromoteToDriverButtonProps {
@@ -214,12 +194,12 @@ const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, d
 
     const onSnackbarClose = useCallback(() => setSnackbarProps(null), [setSnackbarProps]);
     const onSnackbarGoToCar = useCallback(() => {
-        focusOnDancerID(action.activeDancer.id);
+        focusOnDancerID(action.activeDancerID);
         onSnackbarClose();
-    }, [action.activeDancer.id, onSnackbarClose]);
+    }, [action.activeDancerID, onSnackbarClose]);
 
     const onClick = useCallback(() => {
-        action.carpoolArrangementState.promoteToDriver(action.activeDancer.id);
+        action.carpoolArrangementState.promoteToDriver(action.activeDancerID);
 
         // Don't select the driver. Instead, show a snackbar that gives the user the option to focus on it.
         action.onClose(false);
@@ -260,7 +240,7 @@ type UnassignOccupantParameters = DancerInACarpoolParameters;
 function canUnassignOccupant(action: OccupantActionParameters | null): action is UnassignOccupantParameters {
     // The active dancer must not be an empty seat, must be in a carpool, and must not be the driver of that carpool.
     return isDancerInACarpool(action)
-        && action.carpoolArrangementState.isPassenger(action.activeDancer.id) === true;
+        && action.carpoolArrangementState.isPassenger(action.activeDancerID) === true;
 }
 
 interface UnassignOccupantButtonProps {
@@ -272,7 +252,7 @@ const UnassignOccupantButton: React.FC<UnassignOccupantButtonProps> = ({ action,
     const values = useMemo(() => ({ name: occupantName }), [occupantName]);
 
     const onClick = useCallback(() => {
-        action.carpoolArrangementState.unassignOccupant(action.activeDancer.id);
+        action.carpoolArrangementState.unassignOccupant(action.activeDancerID);
         action.onClose(false);
     }, [action]);
 
@@ -296,7 +276,7 @@ type DeleteCarpoolParameters = DancerInACarpoolParameters;
 function canDeleteCarpool(action: OccupantActionParameters | null): action is UnassignOccupantParameters {
     // The active dancer must not be an empty seat, must be in a carpool, and must be the driver of that carpool.
     return isDancerInACarpool(action)
-        && action.carpoolArrangementState.isPassenger(action.activeDancer.id) === false;
+        && action.carpoolArrangementState.isPassenger(action.activeDancerID) === false;
 }
 
 interface DeleteCarpoolButtonProps {
@@ -305,7 +285,7 @@ interface DeleteCarpoolButtonProps {
 
 const DeleteCarpoolButton: React.FC<DeleteCarpoolButtonProps> = ({ action }) => {
     const onClick = useCallback(() => {
-        action.carpoolArrangementState.deleteCarpoolWithDancer(action.activeDancer.id);
+        action.carpoolArrangementState.deleteCarpoolWithDancer(action.activeDancerID);
         action.onClose(false);
     }, [action]);
 

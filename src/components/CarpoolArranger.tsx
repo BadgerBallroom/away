@@ -9,7 +9,6 @@ import { useCallback, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
-import CarpoolState from "../model/CarpoolState";
 import { DancerListState } from "../model/DancerKLM";
 import { useDeepStateChangeHandler, useDeepStateChangeListener } from "../model/DeepStateHooks";
 import { useElementSelectionManager } from "../model/ElementSelectionHooks";
@@ -96,7 +95,6 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         selectionParentRef.current?.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`) ?? [],
     ));
 
-    const mapFromDancersToCarpools = state.mapFromDancerIDs;
     const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
             return true;
@@ -114,27 +112,18 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
             return true;
         }
 
-        // If the tile that was clicked is a dancer, get the carpool state from the dancer ID.
-        // Otherwise, get the carpool stage from the dancer ID of the driver.
-        const activeDancer = {
-            id: activeDancerID,
-            carpoolState: mapFromDancersToCarpools.get(activeDancerID ?? driverDancerID!),
-        };
-
-        const priorSelectedDancers = new Map<ID, CarpoolState | undefined>();
-        const priorSelectedEmptySpotCarpools = new Set<CarpoolState>();
+        const priorSelectedDancers = new Set<ID>();
+        const priorSelectedEmptySpotCarpools = new Set<ID>();
         for (const element of selection.selected) {
             const id = element.dataset.dancerId;
-            const driverDancerID = element.dataset.driverDancerId;
-            if (!id && !driverDancerID) {
+            if (id) {
+                priorSelectedDancers.add(id);
                 continue;
             }
 
-            const carpoolState = mapFromDancersToCarpools.get(id ?? driverDancerID!);
-            if (id) {
-                priorSelectedDancers.set(id, carpoolState);
-            } else if (carpoolState) {
-                priorSelectedEmptySpotCarpools.add(carpoolState);
+            const driverDancerID = element.dataset.driverDancerId;
+            if (driverDancerID) {
+                priorSelectedEmptySpotCarpools.add(driverDancerID);
             }
         }
 
@@ -144,7 +133,8 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
             showCarpoolOccupantPopover({
                 anchorEl: ref,
                 carpoolArrangementState: state,
-                activeDancer,
+                activeDancerID,
+                driverDancerID,
                 priorSelectedDancers,
                 priorSelectedEmptySpotCarpools,
                 onClose: (shouldSelect, options) => {
@@ -161,7 +151,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                 },
             });
         });
-    }, [mapFromDancersToCarpools, state, selection, showCarpoolOccupantPopover]);
+    }, [state, selection, showCarpoolOccupantPopover]);
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
