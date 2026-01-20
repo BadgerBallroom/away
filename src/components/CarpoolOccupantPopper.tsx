@@ -144,6 +144,8 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
                         <Grid>
                             <DeleteCarpoolButton
                                 action={action}
+                                activeDancerName={activeDancerName}
+                                setSnackbarProps={setSnackbarProps}
                             />
                         </Grid>
                     }
@@ -330,13 +332,38 @@ function canDeleteCarpool(action: OccupantActionParameters | null): action is Un
 
 interface DeleteCarpoolButtonProps {
     action: DeleteCarpoolParameters;
+    activeDancerName: string;
+    setSnackbarProps: SetSnackbarProps;
 }
 
-const DeleteCarpoolButton: React.FC<DeleteCarpoolButtonProps> = ({ action }) => {
+const DeleteCarpoolButton: React.FC<DeleteCarpoolButtonProps> = ({ action, activeDancerName, setSnackbarProps }) => {
+    const intl = useIntl();
+
+    const onSnackbarClose = useCallback(() => setSnackbarProps(null), [setSnackbarProps]);
+    const onSnackbarGoToDancers = useCallback(() => {
+        // Based on `canDeleteCarpool`, the active dancer was the driver of the carpool.
+        focusOnDancerID(action.activeDancerID);
+        onSnackbarClose();
+    }, [action.activeDancerID, onSnackbarClose]);
+
     const onClick = useCallback(() => {
-        action.carpoolArrangementState.deleteCarpoolWithDancer(action.activeDancerID);
-        action.onClose(false);
-    }, [action]);
+        const occupants = action.carpoolArrangementState.deleteCarpoolWithDancer(action.activeDancerID);
+        action.onClose(false, {
+            selectDancers: new Set(occupants),
+        });
+
+        setSnackbarProps({
+            autoHideDuration: 10000,
+            message: intl.formatMessage({ id: MessageID.carpoolDeleteSnack }),
+            action: <>
+                <Button onClick={onSnackbarGoToDancers}>
+                    {intl.formatMessage({ id: MessageID.carpoolDeleteSnackGoToDancer }, { name: activeDancerName })}
+                </Button>
+                <SnackbarCloseButton onClick={onSnackbarClose} />
+            </>,
+            onClose: onSnackbarClose,
+        });
+    }, [action, intl, activeDancerName, onSnackbarGoToDancers, onSnackbarClose, setSnackbarProps]);
 
     return <Button onClick={onClick} variant="outlined" startIcon={<DeleteForeverIcon />}>
         <FormattedMessage id={MessageID.carpoolDelete} />

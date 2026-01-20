@@ -26,6 +26,10 @@ export const enum MessageID {
     carpoolAssignOccupantMore = "carpoolAssignOccupantMore",
     /** Button that deletes a carpool */
     carpoolDelete = "carpoolDelete",
+    /** Snackbar that appears after deleting a carpool */
+    carpoolDeleteSnack = "carpoolDeleteSnack",
+    /** Button that puts focus on the former driver of the carpool that was just deleted */
+    carpoolDeleteSnackGoToDancer = "carpoolDeleteSnackGoToDancer",
     /** Tooltip for a button to edit a car's departure time */
     carpoolEditDepartureTime = "carpoolEditDepartureTime",
     /** Tooltip for an empty seat in a car */
@@ -173,6 +177,8 @@ export const MESSAGES: Messages = {
         carpoolAssignOccupant: "Assign {name} to carpool",
         carpoolAssignOccupantMore: "Assign {count} dancers to carpool",
         carpoolDelete: "Delete Carpool",
+        carpoolDeleteSnack: "Deleted carpool",
+        carpoolDeleteSnackGoToDancer: "Go to {name}",
         carpoolEditDepartureTime: "Edit Departure Time",
         carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
