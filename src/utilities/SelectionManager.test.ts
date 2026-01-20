@@ -165,4 +165,31 @@ describe("SelectionManager", () => {
 
         expectSelectionToEqual(selection, [1, 2, 3, 5, 6, 7]);
     });
+
+    describe("replaceSelection", () => {
+        test("replaces selection", () => {
+            const expectedSelection = [1, 2, 3];
+            const { selection, onSelectableElementClick: onClick, replaceSelection } = renderSelectionManager();
+
+            act(() => {
+                onClick(makeClickEvent(), 3);
+                replaceSelection(new Set(expectedSelection));
+            });
+
+            expectSelectionToEqual(selection, expectedSelection);
+        });
+    });
+
+    describe("clearSelection", () => {
+        test("clears selection", () => {
+            const { selection, onSelectableElementClick: onClick, clearSelection } = renderSelectionManager();
+
+            act(() => {
+                onClick(makeClickEvent(), 3);
+                clearSelection();
+            });
+
+            expectSelectionToEqual(selection, []);
+        });
+    });
 });

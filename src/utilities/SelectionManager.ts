@@ -7,6 +7,8 @@ export interface SelectionManager {
      * you should not use it to trigger re-renders.
     */
     selection: SelectionManager.Selection;
+    /** Clears the selection and resets it to the given indices. */
+    replaceSelection: (indices: ReadonlySet<number>) => void;
     /** Clears the selection. */
     clearSelection: () => void;
     /**
@@ -83,15 +85,27 @@ export function useSelectionManager(): SelectionManager {
         setSelection(new SelectionManager.Selection(selectionSet));
     }, [selectionSet]);
 
+    const replaceSelection = useCallback((indices: ReadonlySet<number>) => {
+        // While it may be tempting to return early if the old selection set equals the new selection set, that actually
+        // is a bad idea because we have no way of knowing whether every index represents the same item as before. The
+        // array may have been reordered, or it may have otherwise mutated, in which case a render should be triggered.
+
+        // To avoid re-rendering components that weren't selected, we must clear the existing set instead of
+        // constructing a new one.
+        selectionSet.clear();
+        for (const index of indices) {
+            selectionSet.add(index);
+        }
+        triggerStateChange();
+    }, [selectionSet, triggerStateChange]);
+
     return {
         selection,
+        replaceSelection,
         clearSelection: useCallback(() => {
-            // To avoid re-rendering components that weren't selected, we must clear the existing set instead of
-            // constructing a new one.
-            selectionSet.clear();
-            triggerStateChange();
+            replaceSelection(new Set());
             lastNonShiftSelectedRef.current = -1;
-        }, [selectionSet, triggerStateChange]),
+        }, [replaceSelection]),
         addRangeToSelection: useCallback((start, end) => {
             for (; start < end; ++start) {
                 selectionSet.add(start);
