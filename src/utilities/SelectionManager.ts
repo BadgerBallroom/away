@@ -89,9 +89,9 @@ export function useSelectionManager(): SelectionManager {
             // To avoid re-rendering components that weren't selected, we must clear the existing set instead of
             // constructing a new one.
             selectionSet.clear();
-            setSelection(new SelectionManager.Selection(selectionSet));
+            triggerStateChange();
             lastNonShiftSelectedRef.current = -1;
-        }, [selectionSet]),
+        }, [selectionSet, triggerStateChange]),
         addRangeToSelection: useCallback((start, end) => {
             for (; start < end; ++start) {
                 selectionSet.add(start);
