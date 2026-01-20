@@ -46,9 +46,12 @@ export interface OccupantActionParameters {
      * A callback that should cause the popper to close.
      * @param shouldSelect Whether the active dancer should become selected
      * @param options.isImmediatelyReopening Whether the popper is immediately showing again (default: `false`)
+     * @param options.selectDancers Dancers to select (default: the ones who were selected before), ignored if
+     *                              {@link shouldSelect} is `true`
      */
     onClose: (shouldSelect: boolean, options?: {
         isImmediatelyReopening?: boolean,
+        selectDancers?: Set<ID>,
     }) => void;
 }
 

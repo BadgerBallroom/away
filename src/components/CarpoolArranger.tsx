@@ -5,7 +5,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/material/styles";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
@@ -91,9 +91,47 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
     });
 
     const selectionParentRef = useRef<HTMLElement>(undefined);
-    const { selection, clearSelection } = useElementSelectionManager<HTMLElement>(() => Array.from(
-        selectionParentRef.current?.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`) ?? [],
-    ));
+
+    /**
+     * Gets the {@link DancerTileContainer}s in the specified parent.
+     * @param parent The DOM element to search in (default: {@link selectionParentRef})
+     */
+    const getDancerTileContainers = useCallback((parent?: Element) => {
+        if (!parent) {
+            parent = selectionParentRef.current;
+        }
+
+        if (!parent) {
+            return [];
+        }
+
+        return Array.from(parent.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`));
+    }, []);
+
+    const { selection, replaceSelection } = useElementSelectionManager(getDancerTileContainers);
+
+    const [dancerIDsToSelect, setDancerIDsToSelect] = useState<Set<ID> | null>(null);
+    useEffect(() => {
+        if (!dancerIDsToSelect) {
+            return;
+        }
+
+        const newSelection = new Set<number>();
+
+        // Because this is in a `useEffect`, React will run this after rendering. Therefore, if the dancers moved around
+        // as a result of a user interaction, this will have the dancers in the new order.
+        const tiles = getDancerTileContainers();
+        for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+            const dancerID = tile.dataset.dancerId;
+            if (dancerID && dancerIDsToSelect.has(dancerID)) {
+                newSelection.add(i);
+            }
+        }
+
+        replaceSelection(newSelection);
+        setDancerIDsToSelect(null);
+    }, [dancerIDsToSelect, getDancerTileContainers, replaceSelection]);
 
     const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
@@ -142,6 +180,11 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                         showCarpoolOccupantPopover(null);
                     }
 
+                    if (!shouldSelect) {
+                        // If `shouldSelect` is `true`, then the normal selection action should happen instead of this.
+                        setDancerIDsToSelect(options?.selectDancers ?? priorSelectedDancers);
+                    }
+
                     // This function can be called multiple times, but it is safe to resolve a Promise more than once.
                     // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise:
                     // "You will also hear the term resolved used with promises — this means that the promise is settled
@@ -155,9 +198,9 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
-            clearSelection();
+            setDancerIDsToSelect(new Set());
         }
-    }, [clearSelection]);
+    }, []);
 
     return <>
         <Heading>
