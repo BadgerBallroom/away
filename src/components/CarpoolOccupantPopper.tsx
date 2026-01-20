@@ -48,10 +48,13 @@ export interface OccupantActionParameters {
      * @param options.isImmediatelyReopening Whether the popper is immediately showing again (default: `false`)
      * @param options.selectDancers Dancers to select (default: the ones who were selected before), ignored if
      *                              {@link shouldSelect} is `true`
+     * @param options.restoreFocus Whether to restore focus to approximately the same location on the page as before
+     *                             (default: `true`)
      */
     onClose: (shouldSelect: boolean, options?: {
         isImmediatelyReopening?: boolean,
         selectDancers?: Set<ID>,
+        restoreFocus?: boolean,
     }) => void;
 }
 
@@ -83,7 +86,7 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
     const open = showPromoteToDriver || showUnassignOccupant || showSwapDancers || showDeleteCarpool;
 
     const onClickAway = useCallback(() => {
-        action?.onClose(true);
+        action?.onClose(true, { restoreFocus: false });
     }, [action]);
     useHotkeys("Escape", onClickAway);
 
@@ -93,7 +96,7 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
     useEffect(() => {
         // If the action changed, call `onClose` on the previous action.
         if (previousAction.current !== action) {
-            previousAction.current?.onClose(true, { isImmediatelyReopening: open });
+            previousAction.current?.onClose(true, { isImmediatelyReopening: open, restoreFocus: false });
             previousAction.current = action;
         }
 

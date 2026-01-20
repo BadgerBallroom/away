@@ -133,6 +133,40 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         setDancerIDsToSelect(null);
     }, [dancerIDsToSelect, getDancerTileContainers, replaceSelection]);
 
+    const [criteriaForDancerFocus, setCriteriaForDancerFocus] = useState<{
+        arrangement: {
+            /** The index of the dancer among all the dancers in the carpool arrangement */
+            index: number;
+        };
+        carpool: {
+            /** The carpool that the dancer is in */
+            closest: HTMLElement;
+            /** The index of the dancer amog all the dancers in the carpool */
+            index: number;
+        } | null;
+    } | null>(null);
+    useEffect(() => {
+        if (!criteriaForDancerFocus) {
+            return;
+        }
+
+        const [tiles, index] = (
+            criteriaForDancerFocus.carpool
+            && document.contains(criteriaForDancerFocus.carpool.closest)
+            && criteriaForDancerFocus.carpool.index >= 0
+        ) ? (
+            // Focus on the same position in the same carpool as before.
+            [getDancerTileContainers(criteriaForDancerFocus.carpool.closest), criteriaForDancerFocus.carpool.index]
+        ) : (
+            // Focus on the Nth dancer (or unoccupied spot) on the page, where N is the index of the previously focused
+            // dancer (or unoccupied spot).
+            [getDancerTileContainers(), criteriaForDancerFocus.arrangement.index]
+        );
+        tiles[Math.max(0, Math.min(tiles.length - 1, index))].focus();
+
+        setCriteriaForDancerFocus(null);
+    }, [criteriaForDancerFocus, getDancerTileContainers]);
+
     const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
             return true;
@@ -141,6 +175,19 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         if (!ref) {
             return true;
         }
+
+        const closestCarpool = ref.closest<HTMLElement>(`.${DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME}`);
+        const criteriaForDancerFocus = {
+            arrangement: {
+                index: getDancerTileContainers().indexOf(ref),
+            },
+            carpool: closestCarpool
+                ? {
+                    closest: closestCarpool,
+                    index: getDancerTileContainers(closestCarpool).indexOf(ref),
+                }
+                : null,
+        };
 
         // If the tile that was clicked is a dancer, it will have a dancer ID.
         // Otherwise, it is an empty spot in a car and will have the dancer ID of the driver.
@@ -185,6 +232,10 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                         setDancerIDsToSelect(options?.selectDancers ?? priorSelectedDancers);
                     }
 
+                    if (options?.restoreFocus !== false) {
+                        setCriteriaForDancerFocus(criteriaForDancerFocus);
+                    }
+
                     // This function can be called multiple times, but it is safe to resolve a Promise more than once.
                     // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise:
                     // "You will also hear the term resolved used with promises — this means that the promise is settled
@@ -194,7 +245,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                 },
             });
         });
-    }, [state, selection, showCarpoolOccupantPopover]);
+    }, [state, selection, showCarpoolOccupantPopover, getDancerTileContainers]);
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
