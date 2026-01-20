@@ -40,6 +40,8 @@ export const enum MessageID {
     carpoolLeavesBeforeOneOfOccupantsCan = "carpoolLeavesBeforeOneOfOccupantsCan",
     /** Button that promotes a dancer to a driver of their own car */
     carpoolPromoteDriver = "carpoolPromoteDriver",
+    /** Checkbox for whether to add the selected dancers to the car when promoting a dancer to a  driver */
+    carpoolPromoteDriverAndPassengers = "carpoolPromoteDriverAndPassengers",
     /** Snackbar that appears after promoting a dancer to a driver of their own car */
     carpoolPromoteDriverSnack = "carpoolPromoteDriverSnack",
     /** Button that puts focus on the dancer who was just promoted to a driver of their own car */
@@ -184,6 +186,7 @@ export const MESSAGES: Messages = {
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
         carpoolLeavesBeforeOneOfOccupantsCan: "This car leaves before one of the dancers can.",
         carpoolPromoteDriver: "Promote {name} to Driver",
+        carpoolPromoteDriverAndPassengers: "Add the following passengers:",
         carpoolPromoteDriverSnack: "Promoted {name} to driver",
         carpoolPromoteDriverSnackGoToCar: "Go to car",
         carpoolSwapOccupants: "Swap {name1} with {name2}",

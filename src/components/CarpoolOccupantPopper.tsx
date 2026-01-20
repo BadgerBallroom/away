@@ -5,12 +5,15 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Popper, { PopperProps } from "@mui/material/Popper";
 import { SnackbarProps } from "@mui/material/Snackbar";
-import { JSX, useCallback, useEffect, useMemo, useRef } from "react";
+import Stack from "@mui/material/Stack";
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
@@ -120,6 +123,7 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
                                 action={action}
                                 dancerName={activeDancerName}
                                 setSnackbarProps={setSnackbarProps}
+                                dancerMapState={dancerMapState}
                             />
                         </Grid>
                     }
@@ -237,11 +241,25 @@ interface PromoteToDriverButtonProps {
     action: PromoteToDriverParameters;
     dancerName: string;
     setSnackbarProps: SetSnackbarProps;
+    dancerMapState: DancerMapState;
 }
 
 /** A button that promotes the active dancer to the driver of their own car. */
-const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, dancerName, setSnackbarProps }) => {
+const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({
+    action,
+    dancerName,
+    setSnackbarProps,
+    dancerMapState,
+}) => {
     const intl = useIntl();
+
+    const priorSelectedDancers = useMemo(() => priorSelectedDancersWithoutActive(action), [action]);
+    // If the user selected at least two dancers before clicking the active one, they probably wanted to add those
+    // dancers as passengers in this car. If they only selected one, they probably only did so transiently.
+    const [addSelectedAsPassengers, setAddSelectedAsPassengers] = useState(priorSelectedDancers.size >= 2);
+    const onAddSelectedAsPassengersChanged = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        setAddSelectedAsPassengers(event.target.checked);
+    }, []);
 
     const onSnackbarClose = useCallback(() => setSnackbarProps(null), [setSnackbarProps]);
     const onSnackbarGoToCar = useCallback(() => {
@@ -250,7 +268,13 @@ const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, d
     }, [action.activeDancerID, onSnackbarClose]);
 
     const onClick = useCallback(() => {
-        action.carpoolArrangementState.promoteToDriver(action.activeDancerID);
+        const carpoolState = action.carpoolArrangementState.promoteToDriver(action.activeDancerID);
+
+        if (addSelectedAsPassengers && carpoolState) {
+            for (const id of priorSelectedDancers) {
+                action.carpoolArrangementState.moveDancerToCarpool(id, carpoolState, undefined, true);
+            }
+        }
 
         // Don't select the driver. Instead, show a snackbar that gives the user the option to focus on it.
         action.onClose(false);
@@ -266,14 +290,46 @@ const PromoteToDriverButton: React.FC<PromoteToDriverButtonProps> = ({ action, d
             </>,
             onClose: onSnackbarClose,
         });
-    }, [action, dancerName, intl, onSnackbarGoToCar, onSnackbarClose, setSnackbarProps]);
+    }, [
+        action,
+        addSelectedAsPassengers,
+        priorSelectedDancers,
+        dancerName,
+        intl,
+        onSnackbarGoToCar,
+        onSnackbarClose,
+        setSnackbarProps,
+    ]);
 
     const values = useMemo(() => ({ name: dancerName }), [dancerName]);
 
-    return <Button onClick={onClick} variant="outlined" startIcon={<DirectionsCarIcon />}>
-        <FormattedMessage id={MessageID.carpoolPromoteDriver} values={values} />
-    </Button>;
+    return <Stack direction="column">
+        <Button onClick={onClick} variant="outlined" startIcon={<DirectionsCarIcon />}>
+            <FormattedMessage id={MessageID.carpoolPromoteDriver} values={values} />
+        </Button>
+        {priorSelectedDancers.size > 0 && <>
+            <FormControlLabel
+                label={intl.formatMessage({ id: MessageID.carpoolPromoteDriverAndPassengers })}
+                control={
+                    <Checkbox
+                        checked={addSelectedAsPassengers}
+                        onChange={onAddSelectedAsPassengersChanged}
+                        color="primary"
+                    />
+                }
+                sx={PROMOTE_TO_DRIVER_CHECKBOX_SX}
+            />
+            <ul style={PROMOTE_TO_DRIVER_UL_STYLE}>
+                {Array.from(priorSelectedDancers).map(
+                    id => <li key={id}>{dancerMapState.getChildState(id)?.getChildValue("name")}</li>,
+                )}
+            </ul>
+        </>}
+    </Stack>;
 };
+
+const PROMOTE_TO_DRIVER_CHECKBOX_SX = { margin: 0 } as const;
+const PROMOTE_TO_DRIVER_UL_STYLE = { listStyleType: "disc", marginLeft: "65px" } as const;
 // #endregion
 
 // #region Unassign occupant

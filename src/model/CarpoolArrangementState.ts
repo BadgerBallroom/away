@@ -302,11 +302,14 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
      *                                     into which to move the dancer
      * @param position The index of the pre-existing dancer within carpool before which the new dancer should be
      *                 inserted (default: insert after the last pre-existing dancer)
+     * @param updateDeparture If this is `true` and the carpool departs before the dancer can, postpone the departure
+     *                        to the earliest time that the dancer can leave (default: `false`)
      */
     public moveDancerToCarpool(
         dancerID: ID,
         carpoolStateOrDriverDancerID: CarpoolState | ID,
         position?: number,
+        updateDeparture?: boolean,
     ): void {
         // Verify that the specified driver is actually the driver of an existing carpool.
         let newCarpoolState: CarpoolState | undefined;
@@ -342,6 +345,16 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
 
         // Add the dancer to the new carpool.
         newCarpoolOccupantsState.spliceStates(position, 0, idState);
+
+        if (updateDeparture) {
+            const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+            if (dancerState) {
+                const dancerDeparture = dancerState.getChildValue("earliestPossibleDeparture");
+                if (dancerDeparture && newCarpoolState.getChildValue("departure")?.isBefore(dancerDeparture)) {
+                    newCarpoolState.setChildState("departure", new DeepStatePrimitive(dancerDeparture));
+                }
+            }
+        }
     }
     // #endregion
 }

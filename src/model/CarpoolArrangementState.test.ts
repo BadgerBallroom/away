@@ -451,6 +451,17 @@ describe("CarpoolArrangementState", () => {
                 expect(changeListener).toHaveBeenCalledWith(true);
             });
 
+            test("updates the carpool's departure time if `updateDeparture` is true", () => {
+                carpoolArrangementState.moveDancerToCarpool("4", "1", undefined, true);
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        departure: dayjs("2026-01-15 16:30"),
+                        occupants: ["1", "2", "3", "4"],
+                    },
+                ]));
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
             test("does nothing if the dancer is already in the last position in the specified carpool", () => {
                 carpoolArrangementState.moveDancerToCarpool("3", "1");
                 expect(changeListener).not.toHaveBeenCalled();
