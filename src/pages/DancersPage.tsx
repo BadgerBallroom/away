@@ -4,9 +4,10 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SortIcon from "@mui/icons-material/Sort";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage } from "react-intl";
 import DancerCard from "../components/DancerCard";
@@ -41,18 +42,44 @@ const DancersPage: React.FC = () => {
     const dancerListState = useDancerListState();
 
     const importCSVInputID = "dancers-csv-file-input";
+    const [isImportingCSV, setIsImportingCSV] = useState(false);
     const onImportCSVClick = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files?.length) {
             return;
         }
 
-        await dancerListState.importCSV(event.target.files[0], console.warn.bind(console));
+        setIsImportingCSV(true);
+        try {
+            await dancerListState.importCSV(event.target.files[0], console.warn.bind(console));
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsImportingCSV(false);
 
-        // Clear the input element so that selecting the same file again triggers this handler.
-        event.target.value = "";
+            // Clear the input element so that selecting the same file again triggers this handler.
+            event.target.value = "";
+        }
     }, [dancerListState]);
+    const importCSVIcon = useMemo(() => (isImportingCSV
+        ? <CircularProgress size={20} color="inherit" />
+        : <FileUploadIcon />
+    ), [isImportingCSV]);
 
-    const onExportCSVClick = useCallback(() => dancerListState.exportCSV(), [dancerListState]);
+    const [isExportingCSV, setIsExportingCSV] = useState(false);
+    const onExportCSVClick = useCallback(async () => {
+        setIsExportingCSV(true);
+        try {
+            await dancerListState.exportCSV();
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsExportingCSV(false);
+        }
+    }, [dancerListState]);
+    const exportCSVIcon = useMemo(() => (isExportingCSV
+        ? <CircularProgress size={20} color="inherit" />
+        : <FileDownloadIcon />
+    ), [isExportingCSV]);
 
     const [showSortDialog, setShowSortDialog] = useState(false);
     const onSortClick = useCallback(() => setShowSortDialog(true), []);
@@ -103,7 +130,7 @@ const DancersPage: React.FC = () => {
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
-            <Button startIcon={<FileUploadIcon />} component="label">
+            <Button disabled={isImportingCSV} startIcon={importCSVIcon} component="label">
                 <FormattedMessage id={MessageID.importCSV} />
                 <input
                     hidden
@@ -115,7 +142,7 @@ const DancersPage: React.FC = () => {
                     onChange={onImportCSVClick}
                 />
             </Button>
-            <Button startIcon={<FileDownloadIcon />} onClick={onExportCSVClick}>
+            <Button disabled={isExportingCSV} startIcon={exportCSVIcon} onClick={onExportCSVClick}>
                 <FormattedMessage id={MessageID.exportCSV} />
             </Button>
             <Button startIcon={<SortIcon />} onClick={onSortClick} disabled={dancerListState.length < 2}>

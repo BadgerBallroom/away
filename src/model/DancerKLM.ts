@@ -1,4 +1,4 @@
-import Papa from "papaparse";
+import type Papa from "papaparse";
 import dayjsComparator from "../utilities/dayjsComparator";
 import saveToDownload from "../utilities/saveToDownload";
 import Dancer, { AccommodationCollator, CanDriveCarpoolCollator, GenderCollator, PrefersSameGenderCollator } from "./Dancer";
@@ -168,7 +168,8 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
 
     // #region CSV
     /** Exports the dancers to a CSV file and prompts the user to download it. */
-    public exportCSV(): void {
+    public async exportCSV(): Promise<void> {
+        const Papa = await loadPapa();
         const mapState = this.parent.map;
         saveToDownload(Papa.unparse({
             "fields": ["id", ...DancerState.CSV_HEADING],
@@ -182,7 +183,8 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
      * @param file A file from an `<input type="file" accept=".csv,text/csv">` element
      * @param onErrors A handler for parse errors, perhaps to display an error message
      */
-    public importCSV(file: File, onErrors?: (errors: Papa.ParseError[]) => void): Promise<void> {
+    public async importCSV(file: File, onErrors?: (errors: Papa.ParseError[]) => void): Promise<void> {
+        const Papa = await loadPapa();
         return new Promise(resolve => {
             const existingDancerIDs = new Set(this.getValue());
             const mapState = this.parent.map;
@@ -208,4 +210,8 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
         });
     }
     // #endregion
+}
+
+async function loadPapa(): Promise<typeof Papa> {
+    return (await import("papaparse")).default;
 }

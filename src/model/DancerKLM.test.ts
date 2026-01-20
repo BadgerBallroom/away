@@ -57,8 +57,8 @@ describe("DancerListState", () => {
             dancerListState = session.getChildState("dancers").getChildState("list");
         });
 
-        test("it generates a CSV representation of the dancers", () => {
-            dancerListState.exportCSV();
+        test("it generates a CSV representation of the dancers", async () => {
+            await dancerListState.exportCSV();
 
             expect(saveToDownload).toHaveBeenCalledWith(
                 new MultilineString([
