@@ -94,12 +94,12 @@ const DancersPage: React.FC = () => {
         dancerListState.popMulti(selectionSet);
         clearSelection();
     }, [dancerListState, selectionSet, clearSelection]);
-    useHotkeys("Delete", onDeleteSelectionClick);
+    useHotkeys("Delete, Backspace", onDeleteSelectionClick);
 
     const onSelectAllClick = useCallback(() => {
         addRangeToSelection(0, dancerListState.length);
     }, [addRangeToSelection, dancerListState]);
-    useHotkeys("Ctrl+A", onSelectAllClick, { preventDefault: true });
+    useHotkeys("Ctrl+A, Cmd+A", onSelectAllClick, { preventDefault: true });
 
     useEffect(() => {
         dancerListState.addTemporaryDancer();
