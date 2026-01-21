@@ -7,6 +7,7 @@ export default function makeSelectionManagerClickEvent(
     return {
         altKey: false,
         ctrlKey: false,
+        metaKey: false,
         shiftKey: false,
         ...overrides,
     };

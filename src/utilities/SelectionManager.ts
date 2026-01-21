@@ -19,19 +19,21 @@ export interface SelectionManager {
     /**
      * A callback for mutating the set. Set it as the `onClick` handler of the HTML element that represents each element
      * in the array. This will automatically handle when the user is pressing Shift or Ctrl to select multiple items.
-     * @param event A `SelectionEvent`, which conveys whether Shift, Ctrl, or Alt was pressed
+     * @param event A `SelectionEvent`, which conveys whether Alt, Cmd, Ctrl, or Shift was pressed
      * @param index The index of the array element whose HTML element was clicked
      */
     onSelectableElementClick: (event: SelectionManager.ClickEvent, index: number) => void;
 }
 
 export namespace SelectionManager {
-    /** Conveys whether Shift, Ctrl, or Alt was pressed when the user clicked on an item */
+    /** Conveys whether Alt, Cmd, Ctrl, or Shift was pressed when the user clicked on an item */
     export interface ClickEvent {
         /** Whether the Alt/Option key was pressed when the user clicked on an item */
         altKey: boolean;
         /** Whether the Ctrl key was pressed when the user clicked on an item */
         ctrlKey: boolean;
+        /** Whether the Cmd/Meta key was pressed when the user clicked on an item */
+        metaKey: boolean;
         /** Whether the Shift key was pressed when the user clicked on an item */
         shiftKey: boolean;
     }
@@ -113,12 +115,12 @@ export function useSelectionManager(): SelectionManager {
             triggerStateChange();
         }, [selectionSet, triggerStateChange]),
         onSelectableElementClick: useCallback((event: SelectionManager.ClickEvent, index: number) => {
-            const altOrCtrl = event.altKey || event.ctrlKey;
+            const cmdOrCtrl = event.metaKey || event.ctrlKey;
 
             if (selectionSet.has(index) && !event.shiftKey) {
                 // This item is already selected, and the Shift key is not being pressed.
-                // If the Ctrl or Alt key is pressed, deselect this item. Otherwise, deselect other items.
-                if (altOrCtrl) {
+                // If the Cmd or Ctrl key is pressed, deselect this item. Otherwise, deselect other items.
+                if (cmdOrCtrl) {
                     selectionSet.delete(index);
                 } else {
                     selectionSet.clear();
@@ -126,9 +128,9 @@ export function useSelectionManager(): SelectionManager {
                 }
             } else {
                 // This item is not selected currently.
-                // If the Ctrl or Alt key is pressed, select this item, but don't select other items.
-                // Inversely, if the Ctrl and Alt keys are not pressed, do deselect all other items.
-                if (!altOrCtrl) {
+                // If the Cmd or Ctrl key is pressed, select this item, but don't select other items.
+                // Inversely, if the Cmd and Ctrl keys are not pressed, do deselect all other items.
+                if (!cmdOrCtrl) {
                     selectionSet.clear();
                 }
 
