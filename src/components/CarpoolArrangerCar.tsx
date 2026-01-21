@@ -3,6 +3,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import WarningIcon from "@mui/icons-material/Warning";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import { Dayjs } from "dayjs";
@@ -10,7 +11,10 @@ import { useCallback, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolState from "../model/CarpoolState";
+import { CanDriveCarpool } from "../model/Dancer";
+import { DancerState } from "../model/DancerState";
 import { useDeepState, useDeepStateChangeListener } from "../model/DeepStateHooks";
+import { ID } from "../model/KeyListAndMap";
 import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
 import DancerTile, { DancerTilePlaceholder } from "./DancerTile";
 import DancerTileContainer, { DANCER_TILE_HORIZONTAL_NAVIGATION_ANCESTOR_CLASSNAME, ShouldSelectDancer } from "./DancerTileContainer";
@@ -66,10 +70,21 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
     }
 
     const { id: driverDancerID, state: driverDancerState } = dancerIDsAndStates[0];
-    const carCapacity = driverDancerState.getChildValue("canDriveMaxPeople");
-    if (carCapacity === 0) {
-        return null;
-    }
+    const canDriveCarpool = driverDancerState.getChildValue("canDriveCarpool");
+    const carHasDriver = canDriveCarpool === CanDriveCarpool.Yes || canDriveCarpool === CanDriveCarpool.YesIfNeeded;
+    const carCapacity = carHasDriver ? driverDancerState.getChildValue("canDriveMaxPeople") : 0;
+    const driverName = driverDancerState.getChildValue("name");
+    const overCapacity = dancerIDsAndStates.length > carCapacity;
+
+    const renderDancer = ({ id, state: dancerState }: { id: ID; state: DancerState; }) => (
+        <DancerTileContainer
+            key={dancerState.evanescentID}
+            shouldSelect={shouldSelectDancer}
+            data-dancer-id={id}
+        >
+            <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
+        </DancerTileContainer>
+    );
 
     const emptySeats: number[] = [];
     for (let i = dancerIDsAndStates.length; i < carCapacity; ++i) {
@@ -99,15 +114,25 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
                     }
                 </Button>
             </Box>
-            {dancerIDsAndStates.map(({ id, state: dancerState }) =>
-                <DancerTileContainer
-                    key={dancerState.evanescentID}
-                    shouldSelect={shouldSelectDancer}
-                    data-dancer-id={id}
-                >
-                    <DancerTile dancerState={dancerState} carpoolDepartureTime={carpoolDepartureTime} elevation={3} />
-                </DancerTileContainer>,
-            )}
+            {renderDancer(dancerIDsAndStates[0])}
+            {carHasDriver ?
+                <Chip
+                    label={carCapacity.toString(10)}
+                    color={overCapacity ? "warning" : "success"}
+                    title={intl.formatMessage({ id: MessageID.carpoolCapacity }, { driverName, carCapacity })}
+                    sx={CHIP_SX}
+                /> :
+                <Box title={intl.formatMessage({ id: MessageID.carpoolDriverCannotDrive }, { driverName })}>
+                    <WarningIcon fontSize="large" color="warning" />
+                </Box>
+            }
+            {dancerIDsAndStates.slice(1, carHasDriver ? carCapacity : undefined).map(renderDancer)}
+            {carHasDriver && overCapacity && <>
+                <Box title={intl.formatMessage({ id: MessageID.carpoolCapacityExceeded }, { carCapacity })}>
+                    <WarningIcon fontSize="large" color="warning" />
+                </Box>
+                {dancerIDsAndStates.slice(carCapacity).map(renderDancer)}
+            </>}
             {emptySeats.map((key, index) =>
                 <DancerTileContainer
                     key={key}
@@ -139,3 +164,5 @@ const CarpoolContainer = styled(Paper)(({ theme }) => ({
     alignItems: "center",
     borderColor: getBorderColor(theme),
 }));
+
+const CHIP_SX = { cursor: "default" } as const;

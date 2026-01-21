@@ -24,12 +24,18 @@ export const enum MessageID {
     carpoolAssignOccupant = "carpoolAssignOccupant",
     /** Button that adds more than one dancer to a carpool */
     carpoolAssignOccupantMore = "carpoolAssignOccupantMore",
+    /** Tooltip for a chip that displays the maximum number of people that the driver can drive */
+    carpoolCapacity = "carpoolCapacity",
+    /** Tooltip for a warning icon that appears when a car is over capacity */
+    carpoolCapacityExceeded = "carpoolCapacityExceeded",
     /** Button that deletes a carpool */
     carpoolDelete = "carpoolDelete",
     /** Snackbar that appears after deleting a carpool */
     carpoolDeleteSnack = "carpoolDeleteSnack",
     /** Button that puts focus on the former driver of the carpool that was just deleted */
     carpoolDeleteSnackGoToDancer = "carpoolDeleteSnackGoToDancer",
+    /** Tooltip for a warning icon that appears when a carpool's driver cannot drive */
+    carpoolDriverCannotDrive = "carpoolDriverCannotDrive",
     /** Tooltip for a button to edit a car's departure time */
     carpoolEditDepartureTime = "carpoolEditDepartureTime",
     /** Tooltip for an empty seat in a car */
@@ -178,9 +184,12 @@ export const MESSAGES: Messages = {
         carpoolArrangementPrintedPassengersHeading: "Passengers",
         carpoolAssignOccupant: "Assign {name} to carpool",
         carpoolAssignOccupantMore: "Assign {count} dancers to carpool",
+        carpoolCapacity: "Maximum occupancy with {driverName} as driver: {carCapacity}",
+        carpoolCapacityExceeded: "This car is over the maximum capacity of {carCapacity}",
         carpoolDelete: "Delete Carpool",
         carpoolDeleteSnack: "Deleted carpool",
         carpoolDeleteSnackGoToDancer: "Go to {name}",
+        carpoolDriverCannotDrive: "{driverName} cannot drive",
         carpoolEditDepartureTime: "Edit Departure Time",
         carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
         carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
