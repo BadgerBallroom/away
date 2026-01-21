@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Toolbar from "@mui/material/Toolbar";
 import { styled } from "@mui/material/styles";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
@@ -108,7 +109,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         return Array.from(parent.querySelectorAll<HTMLElement>(`.${DANCER_TILE_CONTAINER_CLASSNAME}`));
     }, []);
 
-    const { selection, replaceSelection } = useElementSelectionManager(getDancerTileContainers);
+    const { selection, replaceSelection, addRangeToSelection } = useElementSelectionManager(getDancerTileContainers);
 
     /**
      * Converts {@link selection} from a set of HTML elements to a set of dancer IDs. For unoccupied spots in cars, the
@@ -189,6 +190,11 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 
         setCriteriaForDancerFocus(null);
     }, [criteriaForDancerFocus, getDancerTileContainers]);
+
+    const onSelectAllClick = useCallback(() => {
+        addRangeToSelection(0, getDancerTileContainers().length);
+    }, [addRangeToSelection, getDancerTileContainers]);
+    useHotkeys("Ctrl+A, Cmd+A", onSelectAllClick, { preventDefault: true });
 
     const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
