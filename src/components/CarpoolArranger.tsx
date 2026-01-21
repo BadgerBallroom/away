@@ -110,6 +110,29 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 
     const { selection, replaceSelection } = useElementSelectionManager(getDancerTileContainers);
 
+    /**
+     * Converts {@link selection} from a set of HTML elements to a set of dancer IDs. For unoccupied spots in cars, the
+     * dancer IDs of the drivers are put in a separate set.
+     * @returns The IDs of the set of selected dancers and the IDs of the drivers of the selected unoccupied spots
+     */
+    const convertSelectionToIDs = useCallback(() => {
+        const selectedDancers = new Set<ID>();
+        const driversOfSelectedEmptySeats = new Set<ID>();
+        for (const element of selection.selected) {
+            const id = element.dataset.dancerId;
+            if (id) {
+                selectedDancers.add(id);
+                continue;
+            }
+
+            const driverDancerID = element.dataset.driverDancerId;
+            if (driverDancerID) {
+                driversOfSelectedEmptySeats.add(driverDancerID);
+            }
+        }
+        return { selectedDancers, driversOfSelectedEmptySeats };
+    }, [selection]);
+
     const [dancerIDsToSelect, setDancerIDsToSelect] = useState<Set<ID> | null>(null);
     useEffect(() => {
         if (!dancerIDsToSelect) {
@@ -197,20 +220,10 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
             return true;
         }
 
-        const priorSelectedDancers = new Set<ID>();
-        const priorSelectedEmptySpotCarpools = new Set<ID>();
-        for (const element of selection.selected) {
-            const id = element.dataset.dancerId;
-            if (id) {
-                priorSelectedDancers.add(id);
-                continue;
-            }
-
-            const driverDancerID = element.dataset.driverDancerId;
-            if (driverDancerID) {
-                priorSelectedEmptySpotCarpools.add(driverDancerID);
-            }
-        }
+        const {
+            selectedDancers: priorSelectedDancers,
+            driversOfSelectedEmptySeats: priorSelectedEmptySpotCarpools,
+        } = convertSelectionToIDs();
 
         // Attempt to show a menu of things that can be done to the dancer. The menu will call `onClose` with whether
         // the dancer should be selected. Resolve the `Promise` at that point with that value.
@@ -245,7 +258,7 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
                 },
             });
         });
-    }, [state, selection, showCarpoolOccupantPopover, getDancerTileContainers]);
+    }, [state, convertSelectionToIDs, showCarpoolOccupantPopover, getDancerTileContainers]);
 
     const onSelectionParentClick = useCallback((event: React.MouseEvent) => {
         if (!isInsideDancerTileContainer(event.target)) {
