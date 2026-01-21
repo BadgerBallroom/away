@@ -12,6 +12,7 @@ import Snackbar, { SnackbarProps } from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import { Dayjs } from "dayjs";
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
@@ -96,6 +97,7 @@ const CarpoolsPage: React.FC = () => {
     const [printingID, setPrintingID] = useState("");
     const onPrint = useCallback(() => setPrintingID(selectedCarpoolArrangement), [selectedCarpoolArrangement]);
     const onPrintDialogClose = useCallback(() => setPrintingID(""), []);
+    useHotkeys("Ctrl+P, Cmd+P", onPrint, { preventDefault: true });
 
     const [carpoolWhoseDepartureToEdit, setCarpoolWhoseDepartureToEdit] = useState<CarpoolState | null>(null);
     const [carpoolSuggestedDeparture, setCarpoolSuggestedDeparture] = useState<Dayjs | null>(null);
