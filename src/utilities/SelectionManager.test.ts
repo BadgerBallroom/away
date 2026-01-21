@@ -1,15 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import SelectionManager, { useSelectionManager } from "./SelectionManager";
-
-/** Makes a `ClickEvent` with the default values and the specified overrides. */
-function makeClickEvent(overrides?: Partial<SelectionManager.ClickEvent>): SelectionManager.ClickEvent {
-    return {
-        altKey: false,
-        ctrlKey: false,
-        shiftKey: false,
-        ...overrides,
-    };
-}
+import { default as makeClickEvent } from "./testing/makeSelectionManagerClickEvent";
 
 function renderSelectionManager(): SelectionManager {
     return renderHook(() => useSelectionManager()).result.current;

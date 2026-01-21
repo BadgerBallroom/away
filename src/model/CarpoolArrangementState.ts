@@ -15,6 +15,16 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
     carpools: CarpoolStateArray,
 }> {
     private _session: Session;
+    private _mapFromDancerIDs = new Map<ID, CarpoolState>();
+
+    /**
+     * A map from each dancer ID to the state of the carpool that the dancer is in.
+     * If a dancer ID is not in this map, the dancer is not assigned to any carpool.
+     * The map is replaced with a new object whenever the value changes, so it can be used to trigger React rerenders.
+     */
+    public get mapFromDancerIDs(): ReadonlyMap<ID, CarpoolState> {
+        return this._mapFromDancerIDs;
+    }
 
     // #region DeepState overrides
     /**
@@ -33,7 +43,20 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
                     return new CarpoolStateArray(session, value as CarpoolArrangement["carpools"]);
             }
         }, true);
+
         this._session = session;
+
+        // This change listener never has to be removed because it should last as long as this object.
+        this.addChangeListener(() => {
+            this._mapFromDancerIDs = new Map<ID, CarpoolState>();
+            const carpoolStates = this.getChildState("carpools").getChildStates();
+            for (const carpoolState of carpoolStates) {
+                for (const id of carpoolState.getChildValue("occupants")) {
+                    this._mapFromDancerIDs.set(id, carpoolState);
+                }
+            }
+        });
+
         this.setValue(value ?? CarpoolArrangement.DEFAULT);
     }
 
@@ -143,27 +166,195 @@ export class CarpoolArrangementState extends DeepStateObject<CarpoolArrangement,
         }
     }
 
-    /** Returns a `DancerListState` of dancers who are traveling with the team but are not assigned to a carpool. */
-    public findUnassignedDancers(): Set<ID> {
+    /** Returns the IDs of the dancers who are traveling with the team but are not assigned to a carpool. */
+    public findUnassignedDancers(): ID[] {
         const dancerKLMState = this._session.getChildState("dancers");
-        const idsOfUnassignedDancers = new Set<ID>();
+        const result: ID[] = [];
 
-        // Add the IDs of the dancers who are traveling with the team.
         for (const { id, state } of dancerKLMState.list.getIDsAndReferencedStates()) {
-            if (state.getChildValue("canDriveCarpool") !== CanDriveCarpool.TravelingOnOwn) {
-                idsOfUnassignedDancers.add(id);
+            if (
+                state.getChildValue("canDriveCarpool") !== CanDriveCarpool.TravelingOnOwn
+                && !this.mapFromDancerIDs.has(id)
+            ) {
+                result.push(id);
             }
         }
 
-        // Remove the IDs of dancers who are assigned to a carpool.
-        for (const carpoolState of this.getChildState("carpools").getChildStates()) {
-            for (const id of carpoolState.getChildValue("occupants")) {
-                idsOfUnassignedDancers.delete(id);
+        return result;
+    }
+    // #endregion
+
+    // #region Moving dancers around the arrangement
+    /**
+     * Computes whether the dancer can become (and is not already) the driver of their own car.
+     * @param dancerID The ID of the dancer
+     * @returns Whether the dancer can a driver
+     */
+    public canPromoteToDriver(dancerID: ID): boolean {
+        const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+        if (!dancerState) {
+            return false;
+        }
+
+        // The dancer must be able to drive.
+        const canDriveCarpool = dancerState.getChildValue("canDriveCarpool");
+        if (canDriveCarpool !== CanDriveCarpool.Yes && canDriveCarpool !== CanDriveCarpool.YesIfNeeded) {
+            return false;
+        }
+
+        // The dancer must not already be a driver. One way not to be a driver is not to be in a carpool.
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return true;
+        }
+
+        // The dancer is in a carpool, but as long as they are not the first occupant, they are not a driver.
+        return carpoolState.driverDancerID !== dancerID;
+    }
+
+    /**
+     * Creates a new carpool within this carpool arrangement. Makes the specified dancer the driver of that carpool.
+     * Does nothing if the specified dancer cannot become a driver.
+     * @param dancerID The dancer to turn into a driver
+     * @returns The state of the newly created carpool if driver was promoted, else `undefined`
+     */
+    public promoteToDriver(dancerID: ID): CarpoolState | undefined {
+        if (!this.canPromoteToDriver(dancerID)) {
+            return undefined;
+        }
+
+        // If the dancer is currently in a carpool, remove them from that carpool.
+        this.mapFromDancerIDs.get(dancerID)?.getChildState("occupants").remove(dancerID);
+
+        const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+        if (!dancerState) {
+            return undefined;
+        }
+
+        const carpoolState = new CarpoolState(this._session, {
+            departure: dancerState.getChildValue("earliestPossibleDeparture"),
+            occupants: [dancerID],
+        });
+
+        // Adding the new carpool to this carpool arrangement should trigger an update to `mapFromDancerIDs`.
+        this.getChildState("carpools").pushState(carpoolState);
+
+        return carpoolState;
+    }
+
+    /**
+     * @returns `true` if the specified dancer is a passenger, `false` if they are a driver, and `undefined` if they are
+     *          not assigned to any carpool
+     */
+    public isPassenger(dancerID: ID): boolean | undefined {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return undefined;
+        }
+        return carpoolState.getChildValue("occupants").indexOf(dancerID) > 0;
+    }
+
+    /**
+     * Removes a dancer from whatever carpool that they are in.
+     * Does not put the dancer in any other carpool.
+     * If the dancer is the only one in their carpool, the whole carpool is deleted.
+     * Note that if the driver is deleted, then the first passenger becomes the driver, even if they can't drive!
+     */
+    public unassignOccupant(dancerID: ID): void {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return;
+        }
+
+        const carpoolOccupantsState = carpoolState.getChildState("occupants");
+        if (!carpoolOccupantsState) {
+            return;
+        }
+
+        if (carpoolOccupantsState.length < 2) {
+            this.getChildState("carpools").remove(carpoolState);
+        } else {
+            carpoolOccupantsState.remove(dancerID);
+        }
+    }
+
+    /**
+     * Deletes the carpool that contains the specified dancer. Does not put the dancers in any other carpool.
+     * @param dancerID The dancer whose carpool to delete
+     * @returns All the former occupants of the carpool
+     */
+    public deleteCarpoolWithDancer(dancerID: ID): ID[] {
+        const carpoolState = this.mapFromDancerIDs.get(dancerID);
+        if (!carpoolState) {
+            return [];
+        }
+        const occupants = carpoolState.getChildValue("occupants");
+        this.getChildState("carpools").remove(carpoolState);
+        return occupants;
+    }
+
+    /**
+     * Moves a dancer into a carpool. Removes them from the carpool that they are currently in (if any).
+     * Does nothing if the specified driver is not actually the driver of a carpool.
+     * Note that if the dancer was a driver, whoever is left to drive that car might not be able to drive!
+     * @param dancerID The ID of the dancer to move
+     * @param carpoolStateOrDriverDancerID Either the state of the carpool or the dancer ID of the driver of the carpool
+     *                                     into which to move the dancer
+     * @param position The index of the pre-existing dancer within carpool before which the new dancer should be
+     *                 inserted (default: insert after the last pre-existing dancer)
+     * @param updateDeparture If this is `true` and the carpool departs before the dancer can, postpone the departure
+     *                        to the earliest time that the dancer can leave (default: `false`)
+     */
+    public moveDancerToCarpool(
+        dancerID: ID,
+        carpoolStateOrDriverDancerID: CarpoolState | ID,
+        position?: number,
+        updateDeparture?: boolean,
+    ): void {
+        // Verify that the specified driver is actually the driver of an existing carpool.
+        let newCarpoolState: CarpoolState | undefined;
+        let driverDancerID: ID;
+        if (carpoolStateOrDriverDancerID instanceof CarpoolState) {
+            newCarpoolState = carpoolStateOrDriverDancerID;
+            driverDancerID = newCarpoolState.driverDancerID;
+        } else {
+            newCarpoolState = this.mapFromDancerIDs.get(carpoolStateOrDriverDancerID);
+            driverDancerID = carpoolStateOrDriverDancerID;
+            if (!newCarpoolState || newCarpoolState.driverDancerID !== driverDancerID) {
+                return;
             }
         }
 
-        // The set now contains the IDs of dancers who are traveling with the team but are not assigned to a carpool.
-        return idsOfUnassignedDancers;
+        const newCarpoolOccupantsState = newCarpoolState.getChildState("occupants");
+        if (position === undefined) {
+            position = newCarpoolOccupantsState.length;
+        }
+
+        if (
+            newCarpoolOccupantsState.getChildValue(position) === dancerID ||
+            newCarpoolOccupantsState.getChildValue(position - 1) === dancerID
+        ) {
+            // The dancer is already in the requested position.
+            return;
+        }
+
+        // Remove the dancer from the carpool that they are currently in. This returns the state of the ID.
+        // If the dancer was not in a carpool previously, just put their ID in a new state.
+        const idState = this.mapFromDancerIDs.get(dancerID)?.getChildState("occupants").remove(dancerID)
+            ?? new DeepStatePrimitive(dancerID);
+
+        // Add the dancer to the new carpool.
+        newCarpoolOccupantsState.spliceStates(position, 0, idState);
+
+        if (updateDeparture) {
+            const dancerState = this._session.getChildState("dancers").map.getChildState(dancerID);
+            if (dancerState) {
+                const dancerDeparture = dancerState.getChildValue("earliestPossibleDeparture");
+                if (dancerDeparture && newCarpoolState.getChildValue("departure")?.isBefore(dancerDeparture)) {
+                    newCarpoolState.setChildState("departure", new DeepStatePrimitive(dancerDeparture));
+                }
+            }
+        }
     }
     // #endregion
 }

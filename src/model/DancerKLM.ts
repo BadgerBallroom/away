@@ -12,7 +12,7 @@ export type DancerKLM = KeyListAndMap<Dancer>;
 
 /** Holds a map of ID-dancer pairs and an array to store the order of IDs. */
 export class DancerKLMState
-    extends KeyListAndMapState<Dancer, DancerState, DancerListState, KeyMapState<Dancer, DancerState>> {
+    extends KeyListAndMapState<Dancer, DancerState, DancerListState, DancerMapState> {
     constructor(initialValue?: DancerKLM) {
         super(
             initialValue,
@@ -211,6 +211,8 @@ export class DancerListState extends KeyListState<Dancer, DancerState> {
     }
     // #endregion
 }
+
+export type DancerMapState = KeyMapState<Dancer, DancerState>;
 
 async function loadPapa(): Promise<typeof Papa> {
     return (await import("papaparse")).default;

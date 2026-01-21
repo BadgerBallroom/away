@@ -9,15 +9,26 @@ import { FormattedMessage } from "react-intl";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { CarpoolContainerContainer } from "./CarpoolArrangerCar";
+import { ShowCarpoolDeparturePopover } from "./CarpoolDeparturePopover";
+import { ShouldSelectDancer } from "./DancerTileContainer";
 
 const EVEN_ROW_SX = {} as const;
 const ODD_ROW_SX = { bgcolor: "rgba(128, 128, 128, 0.2)" } as const;
 
 interface CarpoolArrangerDayProps {
+    /** The carpools that depart on the day */
     carpoolsForDay: CarpoolArrangementState.CarpoolsForDay;
+    /** A function that is called when the user clicks on a dancer and returns whether to select the dancer */
+    shouldSelectDancer: ShouldSelectDancer;
+    /** A callback that opens the dialog to edit a date and time */
+    showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
 }
 
-const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay }) => {
+const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({
+    carpoolsForDay,
+    shouldSelectDancer,
+    showCarpoolDeparturePopover,
+}) => {
     return <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             {carpoolsForDay.day?.format("LL") ?? <FormattedMessage id={MessageID.noDate} />}
@@ -36,6 +47,8 @@ const CarpoolArrangerDay: React.FC<CarpoolArrangerDayProps> = ({ carpoolsForDay 
                                 <CarpoolContainerContainer
                                     key={carpoolState.evanescentID}
                                     carpoolState={carpoolState}
+                                    shouldSelectDancer={shouldSelectDancer}
+                                    showCarpoolDeparturePopover={showCarpoolDeparturePopover}
                                 />,
                             )}
                         </ScheduleCell>

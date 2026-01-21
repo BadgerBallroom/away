@@ -38,7 +38,7 @@ describe("CarpoolArrangementState", () => {
         session = new Session({
             name: "Test",
             dancers: {
-                list: ["1", "2", "3", "4", "5", "6", "7"],
+                list: ["1", "2", "3", "4", "5", "6", "7", "8"],
                 map: {
                     "1": {
                         name: "Alice",
@@ -103,6 +103,15 @@ describe("CarpoolArrangementState", () => {
                         prefersSameGender: false,
                         gender: Gender.Female,
                     },
+                    "8": {
+                        name: "Henry",
+                        canDriveCarpool: CanDriveCarpool.YesIfNeeded,
+                        canDriveMaxPeople: 4,
+                        earliestPossibleDeparture: dayjs("2026-01-15 18:30"),
+                        accommodation: Accommodation.StayingOnOwn,
+                        prefersSameGender: false,
+                        gender: Gender.Male,
+                    },
                 },
             },
             carpoolArrangements: {
@@ -127,10 +136,10 @@ describe("CarpoolArrangementState", () => {
                                 departure: dayjs("2026-01-14 20:00"),
                                 occupants: ["6"],
                             },
-                            // Gabby is in a car by herself.
+                            // Gabby and Henry are in a car.
                             {
                                 departure: dayjs("2026-01-15 15:30"),
-                                occupants: ["7"],
+                                occupants: ["7", "8"],
                             },
                         ],
                     },
@@ -197,7 +206,349 @@ describe("CarpoolArrangementState", () => {
 
     describe("findUnassignedDancers", () => {
         test("returns dancers who are not in a carpool", () => {
-            expect(carpoolArrangementState.findUnassignedDancers()).toEqual(new Set(["4"]));
+            expect(carpoolArrangementState.findUnassignedDancers()).toEqual(["4"]);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("canPromoteToDriver", () => {
+        test("returns false if no dancer has the specified ID", () => {
+            expect(carpoolArrangementState.canPromoteToDriver("invalid")).toBe(false);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns false if the dancer is already a driver", () => {
+            expect(carpoolArrangementState.canPromoteToDriver("1")).toBe(false);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns false if the dancer is unable to drive", () => {
+            expect(carpoolArrangementState.canPromoteToDriver("2")).toBe(false);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns true if the dancer can drive and is currently a passenger", () => {
+            expect(carpoolArrangementState.canPromoteToDriver("3")).toBe(true);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns true if the dancer can drive and is not in any carpool", () => {
+            expect(carpoolArrangementState.canPromoteToDriver("4")).toBe(true);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("promoteToDriver", () => {
+        test("does nothing if no dancer has the specified ID", () => {
+            expect(carpoolArrangementState.promoteToDriver("invalid")).toBeUndefined();
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("does nothing if the dancer does not exist but somehow can drive", () => {
+            vi.spyOn(carpoolArrangementState, "canPromoteToDriver").mockReturnValue(true);
+            expect(carpoolArrangementState.promoteToDriver("invalid")).toBeUndefined();
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("does nothing if the dancer cannot become a driver", () => {
+            vi.spyOn(carpoolArrangementState, "canPromoteToDriver").mockReturnValue(false);
+            expect(carpoolArrangementState.promoteToDriver("1")).toBeUndefined();
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("moves the dancer to a new car if they can become a driver", () => {
+            // Promote Dean, who is not currently in a car but can drive.
+            const carpoolState = carpoolArrangementState.promoteToDriver("4");
+            expect(carpoolState).not.toBeUndefined();
+            expect(carpoolState).toBe(carpoolArrangementState.mapFromDancerIDs.get("4"));
+            expect(carpoolState?.driverDancerID).toBe("4");
+            expect(carpoolArrangementState.getValue()).toEqual({
+                name: "Test",
+                carpools: expect.arrayContaining([
+                    // Dean is now in a car by himself.
+                    {
+                        departure: dayjs("2026-01-15 16:30"),
+                        occupants: ["4"],
+                    },
+                    // The rest of the cars are unchanged.
+                    {
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["1", "2", "3"],
+                    },
+                    {
+                        departure: dayjs("2026-01-15 19:00"),
+                        occupants: ["5"],
+                    },
+                    {
+                        departure: dayjs("2026-01-14 20:00"),
+                        occupants: ["6"],
+                    },
+                    {
+                        departure: dayjs("2026-01-15 15:30"),
+                        occupants: ["7", "8"],
+                    },
+                ]),
+            });
+            expect(changeListener).toHaveBeenLastCalledWith(true);
+        });
+
+        test("removes the dancer from their current carpool if they are in one", () => {
+            // Promote Carol, who is currently a passenger but can drive.
+            carpoolArrangementState.promoteToDriver("3");
+            expect(carpoolArrangementState.getValue()).toEqual({
+                name: "Test",
+                carpools: expect.arrayContaining([
+                    // Carol is no longer in this car.
+                    {
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["1", "2"],
+                    },
+                    // Carol is now in this car.
+                    {
+                        departure: dayjs("2026-01-15 16:00"),
+                        occupants: ["3"],
+                    },
+                    // The rest of the cars are unchanged.
+                    {
+                        departure: dayjs("2026-01-15 19:00"),
+                        occupants: ["5"],
+                    },
+                    {
+                        departure: dayjs("2026-01-14 20:00"),
+                        occupants: ["6"],
+                    },
+                    {
+                        departure: dayjs("2026-01-15 15:30"),
+                        occupants: ["7", "8"],
+                    },
+                ]),
+            });
+            expect(changeListener).toHaveBeenLastCalledWith(true);
+        });
+    });
+
+    describe("isPassenger", () => {
+        test("returns true if the dancer is a passenger", () => {
+            expect(carpoolArrangementState.isPassenger("2")).toBe(true);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns false if the dancer is the driver", () => {
+            expect(carpoolArrangementState.isPassenger("1")).toBe(false);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("returns false if the dancer is not in any carpool", () => {
+            expect(carpoolArrangementState.isPassenger("non-existent")).toBeUndefined();
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("unassignOccupant", () => {
+        test("removes the dancer from whatever carpool that they are in", () => {
+            // Remove Bob from the car with Alice and Carol.
+            carpoolArrangementState.unassignOccupant("2");
+            expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                {
+                    // Alice and Carol should remain in the car.
+                    departure: dayjs("2026-01-15 15:00"),
+                    occupants: ["1", "3"],
+                },
+            ]));
+            expect(changeListener).toHaveBeenCalledWith(true);
+        });
+
+        test("does nothing if the specified dancer is not in a carpool", () => {
+            carpoolArrangementState.unassignOccupant("4");
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("does nothing if the specified dancer does not exist", () => {
+            carpoolArrangementState.unassignOccupant("non-existent");
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("deleteCarpoolWithDancer", () => {
+        test("removes the carpool that contains the specified dancer", () => {
+            expect(carpoolArrangementState.deleteCarpoolWithDancer("1")).toEqual(["1", "2", "3"]);
+
+            // Only Elsa, Frank, and Gabby are still in carpools.
+            expect(carpoolArrangementState.getChildValue("carpools")).toEqual([
+                {
+                    departure: dayjs("2026-01-15 19:00"),
+                    occupants: ["5"],
+                },
+                {
+                    departure: dayjs("2026-01-14 20:00"),
+                    occupants: ["6"],
+                },
+                {
+                    departure: dayjs("2026-01-15 15:30"),
+                    occupants: ["7", "8"],
+                },
+            ]);
+            expect(changeListener).toHaveBeenCalledWith(true);
+        });
+
+        test("does nothing if the specified dancer is not in any carpool", () => {
+            expect(carpoolArrangementState.deleteCarpoolWithDancer("4")).toEqual([]);
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("moveDancerToCarpool", () => {
+        describe("moving a dancer to the last position of the new carpool", () => {
+            test("moves a passenger to the specified carpool", () => {
+                // Move Henry from Gabby's to Elsa's car.
+                carpoolArrangementState.moveDancerToCarpool("8", "5");
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        // Elsa's car
+                        departure: dayjs("2026-01-15 19:00"),
+                        occupants: ["5", "8"],
+                    },
+                    {
+                        // Gabby's car
+                        departure: dayjs("2026-01-15 15:30"),
+                        occupants: ["7"],
+                    },
+                ]));
+                expect(carpoolArrangementState.mapFromDancerIDs.get("8")?.driverDancerID).toBe("5");
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("moves a driver to the specified carpool", () => {
+                // Move Elsa to Gabby's car. Elsa no longer drives her own car.
+                carpoolArrangementState.moveDancerToCarpool("5", "7");
+
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        // Gabby's car
+                        departure: dayjs("2026-01-15 15:30"),
+                        occupants: ["7", "8", "5"],
+                    },
+                ]));
+                expect(carpoolArrangementState.mapFromDancerIDs.get("5")?.driverDancerID).toBe("7");
+
+                // Elsa should not be the driver of any car.
+                for (const carpoolState of carpoolArrangementState.getChildState("carpools").getChildStates()) {
+                    expect(carpoolState.driverDancerID).not.toBe("5");
+                }
+
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("moves a dancer within a carpool", () => {
+                // Put Alice behind Bob.
+                carpoolArrangementState.moveDancerToCarpool("1", "1");
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["2", "3", "1"],
+                    },
+                ]));
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("updates the carpool's departure time if `updateDeparture` is true", () => {
+                carpoolArrangementState.moveDancerToCarpool("4", "1", undefined, true);
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        departure: dayjs("2026-01-15 16:30"),
+                        occupants: ["1", "2", "3", "4"],
+                    },
+                ]));
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("does nothing if the dancer is already in the last position in the specified carpool", () => {
+                carpoolArrangementState.moveDancerToCarpool("3", "1");
+                expect(changeListener).not.toHaveBeenCalled();
+            });
+        });
+
+        describe("moving the passenger to an arbitrary position in the new carpool", () => {
+            test("moves a passenger to the specified carpool", () => {
+                // Move Henry from Gabby's car to Alice's car, in front of Bob.
+                carpoolArrangementState.moveDancerToCarpool("8", "1", 1);
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        // Alice's car
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["1", "8", "2", "3"],
+                    },
+                    {
+                        // Gabby's car
+                        departure: dayjs("2026-01-15 15:30"),
+                        occupants: ["7"],
+                    },
+                ]));
+                expect(carpoolArrangementState.mapFromDancerIDs.get("8")?.driverDancerID).toBe("1");
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("moves a driver to the specified carpool", () => {
+                // Move Elsa to Alice's car, in front of Carol. Elsa no longer drives her own car.
+                carpoolArrangementState.moveDancerToCarpool("5", "1", 2);
+
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        // Alice's car
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["1", "2", "5", "3"],
+                    },
+                ]));
+                expect(carpoolArrangementState.mapFromDancerIDs.get("5")?.driverDancerID).toBe("1");
+
+                // Elsa should not be the driver of any car.
+                for (const carpoolState of carpoolArrangementState.getChildState("carpools").getChildStates()) {
+                    expect(carpoolState.driverDancerID).not.toBe("5");
+                }
+
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("moves a dancer within a carpool", () => {
+                // Put Carol in front of Alice.
+                carpoolArrangementState.moveDancerToCarpool("3", "1", 0);
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["3", "1", "2"],
+                    },
+                ]));
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("moves a dancer within the given carpool", () => {
+                const carpoolState = carpoolArrangementState.mapFromDancerIDs.get("1");
+                assert(carpoolState !== undefined);
+
+                // Put Carol in front of Alice.
+                carpoolArrangementState.moveDancerToCarpool("3", carpoolState, 0);
+                expect(carpoolArrangementState.getChildValue("carpools")).toEqual(expect.arrayContaining([
+                    {
+                        departure: dayjs("2026-01-15 15:00"),
+                        occupants: ["3", "1", "2"],
+                    },
+                ]));
+                expect(changeListener).toHaveBeenCalledWith(true);
+            });
+
+            test("does nothing if the dancer is already at the specified position", () => {
+                carpoolArrangementState.moveDancerToCarpool("3", "1", 2);
+                expect(changeListener).not.toHaveBeenCalled();
+            });
+        });
+
+        test("does nothing if the specified driver is not in a car", () => {
+            carpoolArrangementState.moveDancerToCarpool("8", "4");
+            expect(changeListener).not.toHaveBeenCalled();
+        });
+
+        test("does nothing if the specified driver is in a car but not the driver", () => {
+            carpoolArrangementState.moveDancerToCarpool("8", "2");
             expect(changeListener).not.toHaveBeenCalled();
         });
     });

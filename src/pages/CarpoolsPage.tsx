@@ -1,22 +1,31 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import PrintIcon from "@mui/icons-material/Print";
-import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Button, { ButtonOwnProps } from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import Snackbar, { SnackbarProps } from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import { Dayjs } from "dayjs";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
+import CarpoolDeparturePopover, { CarpoolDeparturePopoverProps } from "../components/CarpoolDeparturePopover";
 import CarpoolMakerProgressDialog from "../components/CarpoolMakerProgressDialog";
+import CarpoolOccupantPopper, { OccupantActionParameters } from "../components/CarpoolOccupantPopper";
 import { CarpoolPrintDialogFromID } from "../components/CarpoolPrintDialog";
 import WorkspaceWithToolbar from "../components/WorkspaceWithToolbar";
 import ZeroState from "../components/ZeroState";
 import { MessageID } from "../i18n/messages";
 import CarpoolArrangementState from "../model/CarpoolArrangementState";
 import { CarpoolMakerMessage, CarpoolMakerProgress } from "../model/CarpoolMakerMessage";
+import CarpoolState from "../model/CarpoolState";
 import { useDeepState } from "../model/DeepStateHooks";
 import { ID } from "../model/KeyListAndMap";
 import { useDancerListState, useSession } from "../model/SessionHooks";
@@ -25,11 +34,7 @@ export function Component() {
     return <CarpoolsPage />;
 }
 
-interface CarpoolsPageProps {
-    hideAutoGen?: boolean;
-}
-
-const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
+const CarpoolsPage: React.FC = () => {
     const session = useSession();
 
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
@@ -71,35 +76,71 @@ const CarpoolsPage: React.FC<CarpoolsPageProps> = ({ hideAutoGen }) => {
         setCarpoolMakerProgress(null);
     }, [carpoolMaker, handleFinishedCarpools]);
 
-    const onConfirmMakingCarpools = useCallback(() => {
-        if (!carpoolMaker.current) {
-            return;
-        }
+    const newButtonsProps = {
+        onConfirmMakingCarpools: useCallback(() => {
+            if (!carpoolMaker.current) {
+                return;
+            }
 
-        // Immediately display the progress dialog so that the user can't switch away before the first progres update.
-        setCarpoolMakerProgress(CarpoolMakerProgress.DEFAULT);
+            // Immediately display the progress dialog so that the user can't switch away before the first progress
+            // update.
+            setCarpoolMakerProgress(CarpoolMakerProgress.DEFAULT);
 
-        carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
-    }, [carpoolMaker, session]);
+            carpoolMaker.current.postMessage(CarpoolMakerMessage.create("makeCarpools", session.toString()));
+        }, [carpoolMaker, session]),
+        onCreateNewArrangement: useCallback(() => {
+            const newID = carpoolArrangementKLMState.add(new CarpoolArrangementState(session)).id;
+            setSelectedCarpoolArrangement(newID);
+        }, [session, carpoolArrangementKLMState]),
+    };
 
     const [printingID, setPrintingID] = useState("");
     const onPrint = useCallback(() => setPrintingID(selectedCarpoolArrangement), [selectedCarpoolArrangement]);
     const onPrintDialogClose = useCallback(() => setPrintingID(""), []);
+    useHotkeys("Ctrl+P, Cmd+P", onPrint, { preventDefault: true });
+
+    const [carpoolWhoseDepartureToEdit, setCarpoolWhoseDepartureToEdit] = useState<CarpoolState | null>(null);
+    const [carpoolSuggestedDeparture, setCarpoolSuggestedDeparture] = useState<Dayjs | null>(null);
+    const onCarpoolDeparturePopoverClose = useCallback(() => setCarpoolWhoseDepartureToEdit(null), []);
+    const showCarpoolDeparturePopover = useCallback(({
+        carpoolState,
+        suggestedDepartureTime,
+    }: Omit<CarpoolDeparturePopoverProps, "onClose">) => {
+        setCarpoolWhoseDepartureToEdit(carpoolState);
+        setCarpoolSuggestedDeparture(suggestedDepartureTime === undefined ? null : suggestedDepartureTime);
+    }, []);
+
+    const [occupantActionParameters, setOccupantActionParameters] = useState<OccupantActionParameters | null>(null);
+
+    const [snackbarProps, setSnackbarProps] = useState<Omit<SnackbarProps, "open"> | null>(null);
+
+    const [additionalToolbarChildren, setAdditionalToolbarChildren] = useState<ReactNode>(null);
 
     return <WorkspaceWithToolbar
         toolbarChildren={<>
-            {!hideAutoGen &&
-                <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} />
-            }
+            <NewButtons {...newButtonsProps} />
             <PrintButton onClick={onPrint} />
+            {additionalToolbarChildren}
         </>}
     >
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
+        <CarpoolDeparturePopover
+            carpoolState={carpoolWhoseDepartureToEdit}
+            suggestedDepartureTime={carpoolSuggestedDeparture}
+            onClose={onCarpoolDeparturePopoverClose}
+        />
+        <CarpoolOccupantPopper action={occupantActionParameters} setSnackbarProps={setSnackbarProps} />
+        <Snackbar open={snackbarProps !== null} {...snackbarProps} />
         <CarpoolPrintDialogFromID arrangementID={printingID} onClose={onPrintDialogClose} />
         {carpoolArrangementList.length ? <>
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />
-            <CarpoolArrangerFromID arrangementID={selectedCarpoolArrangement} />
-        </> : <ZeroState><FormattedMessage id={MessageID.carpoolsZero} /></ZeroState>}
+            <CarpoolArrangerFromID
+                arrangementID={selectedCarpoolArrangement}
+                setAdditionalToolbarChildren={setAdditionalToolbarChildren}
+                showCarpoolDeparturePopover={showCarpoolDeparturePopover}
+                showCarpoolOccupantPopover={setOccupantActionParameters}
+            />
+        </> : <CarpoolZeroState {...newButtonsProps} />}
     </WorkspaceWithToolbar>;
 };
 
@@ -125,12 +166,52 @@ function makeCarpoolMaker(
     return carpoolMaker;
 }
 
-interface GenerateCarpoolsButtonProps {
+type CarpoolZeroStateProps = NewButtonsProps;
+
+const CARPOOL_ZERO_STATE_BUTTON_SX = {
+    marginRight: "8px",
+} as const;
+
+const CarpoolZeroState: React.FC<CarpoolZeroStateProps> = (newButtonsProps) => {
+    return <ZeroState>
+        <Stack spacing={2}>
+            <FormattedMessage id={MessageID.carpoolsZero} />
+            <Box>
+                <NewButtons
+                    {...newButtonsProps}
+                    sx={CARPOOL_ZERO_STATE_BUTTON_SX}
+                    variant="contained"
+                />
+            </Box>
+        </Stack>
+    </ZeroState>;
+};
+
+type ForwardedButtonProps = Pick<ButtonOwnProps, "sx" | "variant">;
+
+interface NewButtonsProps extends ForwardedButtonProps {
+    onConfirmMakingCarpools: () => void;
+    onCreateNewArrangement: () => void;
+}
+
+/** Buttons that create new carpool arrangements, automatically or manually. */
+const NewButtons: React.FC<NewButtonsProps> = ({
+    onConfirmMakingCarpools,
+    onCreateNewArrangement,
+    ...props
+}) => {
+    return <>
+        <GenerateCarpoolsButton onConfirm={onConfirmMakingCarpools} {...props} />
+        <NewArrangementButton onConfirm={onCreateNewArrangement} {...props} />
+    </>;
+};
+
+interface NewArrangementButtonProps extends ForwardedButtonProps {
     onConfirm: () => void;
 }
 
 /** A button for starting the carpool maker. Displays a confirmation dialog. */
-const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfirm }) => {
+const GenerateCarpoolsButton: React.FC<NewArrangementButtonProps> = ({ onConfirm, ...props }) => {
     const dancerListState = useDancerListState();
     const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -152,6 +233,7 @@ const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfi
             onClick={onButtonClick}
             disabled={!dancerListState.length}
             startIcon={<AutoFixHighIcon />}
+            {...props}
         >
             <FormattedMessage id={MessageID.carpoolsGenerate} />
         </Button>
@@ -172,6 +254,19 @@ const GenerateCarpoolsButton: React.FC<GenerateCarpoolsButtonProps> = ({ onConfi
                 <Button onClick={onCancel}><FormattedMessage id={MessageID.cancel} /></Button>
             </DialogActions>
         </Dialog>
+    </>;
+};
+
+/** A button for creating a blank carpool arrangement (with all dancers unassigned). */
+const NewArrangementButton: React.FC<NewArrangementButtonProps> = ({ onConfirm, ...props }) => {
+    return <>
+        <Button
+            onClick={onConfirm}
+            startIcon={<CreateNewFolderIcon />}
+            {...props}
+        >
+            <FormattedMessage id={MessageID.carpoolsNew} />
+        </Button>
     </>;
 };
 

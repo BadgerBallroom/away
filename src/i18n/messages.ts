@@ -8,6 +8,8 @@ export const enum MessageID {
     appNameForTitle = "appNameForTitle",
     /** "Cancel" */
     cancel = "cancel",
+    /** "Close" */
+    close = "close",
     /** Label for a carpool arrangement's name's field */
     carpoolArrangementNameLabel = "carpoolArrangementNameLabel",
     /** Heading for the "Suggested Departure" heading in a printout of a carpool arrangement */
@@ -18,12 +20,56 @@ export const enum MessageID {
     carpoolArrangementPrintedFrameTitle = "carpoolArrangementPrintedFrameTitle",
     /** Heading for the "Passengers" heading in a printout of a carpool arrangement */
     carpoolArrangementPrintedPassengersHeading = "carpoolArrangementPrintedPassengersHeading",
+    /** Button that adds a dancer to a carpool */
+    carpoolAssignOccupant = "carpoolAssignOccupant",
+    /** Button that adds more than one dancer to a carpool */
+    carpoolAssignOccupantMore = "carpoolAssignOccupantMore",
+    /** Tooltip for a chip that displays the maximum number of people that the driver can drive */
+    carpoolCapacity = "carpoolCapacity",
+    /** Tooltip for a warning icon that appears when a car is over capacity */
+    carpoolCapacityExceeded = "carpoolCapacityExceeded",
+    /** Button that deletes a carpool */
+    carpoolDelete = "carpoolDelete",
+    /** Snackbar that appears after deleting a carpool */
+    carpoolDeleteSnack = "carpoolDeleteSnack",
+    /** Button that puts focus on the former driver of the carpool that was just deleted */
+    carpoolDeleteSnackGoToDancer = "carpoolDeleteSnackGoToDancer",
+    /** Tooltip for a warning icon that appears when a carpool's driver cannot drive */
+    carpoolDriverCannotDrive = "carpoolDriverCannotDrive",
+    /** Tooltip for a button to edit a car's departure time */
+    carpoolEditDepartureTime = "carpoolEditDepartureTime",
+    /** Tooltip for an empty seat in a car */
+    carpoolEmptySeatTitle = "carpoolEmptySeatTitle",
+    /** Tooltip when the user hovers over a dancer's departure time that is after the carpool's departure time */
+    carpoolLeavesBeforeOccupantCan = "carpoolLeavesBeforeOccupantCan",
+    /** Tooltip when the user hovers over a carpool's departure time that is before a dancer's departure time */
+    carpoolLeavesBeforeOneOfOccupantsCan = "carpoolLeavesBeforeOneOfOccupantsCan",
+    /** Button that promotes a dancer to a driver of their own car */
+    carpoolPromoteDriver = "carpoolPromoteDriver",
+    /** Checkbox for whether to add the selected dancers to the car when promoting a dancer to a  driver */
+    carpoolPromoteDriverAndPassengers = "carpoolPromoteDriverAndPassengers",
+    /** Snackbar that appears after promoting a dancer to a driver of their own car */
+    carpoolPromoteDriverSnack = "carpoolPromoteDriverSnack",
+    /** Button that puts focus on the dancer who was just promoted to a driver of their own car */
+    carpoolPromoteDriverSnackGoToCar = "carpoolPromoteDriverSnackGoToCar",
+    /** Button that swaps two occupants among carpools */
+    carpoolSwapOccupants = "carpoolSwapOccupants",
+    /** Button that swaps more than two occupants among carpools */
+    carpoolSwapOccupantsMore = "carpoolSwapOccupantsMore",
+    /** Button that removes an occupant from the carpool that they are in */
+    carpoolUnassignOccupant = "carpoolUnassignOccupant",
+    /** Button that removes all selected occupants from the carpools that they are in */
+    carpoolUnassignSelected = "carpoolUnassignSelected",
+    /** Text for a banner above the grid of dancers who have not been assigned to any carpool */
+    carpoolUnassigned = "carpoolUnassigned",
     /** Text or title for any button that makes carpools automatically */
     carpoolsGenerate = "carpoolsGenerate",
     /** Text for the body of a confirmation dialog for making carpools automatically */
     carpoolsGenerateConfirm = "carpoolsGenerateConfirm",
     /** Text that indicates that carpools are being made automatically */
     carpoolsGenerateProgress = "carpoolsGenerateProgress",
+    /** Text or title for any button that makes a new carpool arrangement with all dancers unassigned to cars */
+    carpoolsNew = "carpoolsNew",
     /** Text that appears when no carpool arrangements have been created */
     carpoolsZero = "carpoolsZero",
     /** Label for a dancer's housing preference field */
@@ -117,8 +163,6 @@ export const enum MessageID {
     yes = "yes",
     /** "Yes, if needed" */
     yesIfNeeded = "yesIfNeeded",
-    /** A banner that explains future changes to the Carpools page */
-    zCarpoolsFuture = "zCarpoolsFuture",
     /** A banner that explains future changes to the Dancers page */
     zDancersFuture = "zDancersFuture",
 }
@@ -134,14 +178,37 @@ export const MESSAGES: Messages = {
         appName: "Away",
         appNameForTitle: "{pageTitle} - BBDT Away",
         cancel: "Cancel",
+        close: "Close",
         carpoolArrangementNameLabel: "Description",
         carpoolArrangementPrintedDepartureHeading: "Suggested Departure",
         carpoolArrangementPrintedDriverHeading: "Driver",
         carpoolArrangementPrintedFrameTitle: "Carpools Printed",
         carpoolArrangementPrintedPassengersHeading: "Passengers",
+        carpoolAssignOccupant: "Assign {name} to carpool",
+        carpoolAssignOccupantMore: "Assign {count} dancers to carpool",
+        carpoolCapacity: "Maximum occupancy with {driverName} as driver: {carCapacity}",
+        carpoolCapacityExceeded: "This car is over the maximum capacity of {carCapacity}",
+        carpoolDelete: "Delete Carpool",
+        carpoolDeleteSnack: "Deleted carpool",
+        carpoolDeleteSnackGoToDancer: "Go to {name}",
+        carpoolDriverCannotDrive: "{driverName} cannot drive",
+        carpoolEditDepartureTime: "Edit Departure Time",
+        carpoolEmptySeatTitle: "Empty seat {index} of {count} in car driven by {name}",
+        carpoolLeavesBeforeOccupantCan: "The car leaves before this dancer can.",
+        carpoolLeavesBeforeOneOfOccupantsCan: "This car leaves before one of the dancers can.",
+        carpoolPromoteDriver: "Promote {name} to Driver",
+        carpoolPromoteDriverAndPassengers: "Add the following passengers:",
+        carpoolPromoteDriverSnack: "Promoted {name} to driver",
+        carpoolPromoteDriverSnackGoToCar: "Go to car",
+        carpoolSwapOccupants: "Swap {name1} with {name2}",
+        carpoolSwapOccupantsMore: "Swap {name} with {count} dancers",
+        carpoolUnassignOccupant: "Unassign {name} from carpool",
+        carpoolUnassignSelected: "Unassign Selected",
+        carpoolUnassigned: "These dancers are not in a carpool!",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",
         carpoolsGenerateProgress: "Generating carpools\u2026",
+        carpoolsNew: "New Arrangement",
         carpoolsZero: "No carpools have been arranged yet.",
         dancerAccommodation: "Housing preference",
         dancerAccommodationFreeHousingPreferred: "Free housing preferred",
@@ -162,7 +229,7 @@ export const MESSAGES: Messages = {
         dancersAdd: "Add Dancer",
         dancerTravelingOnOwn: "Not traveling with team",
         delete: "Delete",
-        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you manually edit carpools\nLetting you save all data for one competition to a single file\nWarning you, after carpools are generated automatically, if some passengers could not be paired with drivers",
+        developmentRoadmap: "Some features are planned for the future:\nPartner matching\nHousing arranging\nLetting you save all data for one competition to a single file",
         exportCSV: "Export CSV",
         fileNew: "New Session",
         fileNewConfirm: "Are you sure that you want to start a new session? This will discard all data!",
@@ -187,7 +254,6 @@ export const MESSAGES: Messages = {
         untitled: "Untitled",
         yes: "Yes",
         yesIfNeeded: "Yes, if needed",
-        zCarpoolsFuture: "In the future, you will be able to edit carpools manually.",
         zDancersFuture: "In the future, you will be able to edit multiple dancers at once, to change more fields via keyboard, and to undo deleting a dancer.",
     },
 };
