@@ -200,6 +200,23 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         setCriteriaForDancerFocus(null);
     }, [criteriaForDancerFocus, getDancerTileContainers]);
 
+    useHotkeys("Home", () => {
+        setCriteriaForDancerFocus({
+            arrangement: {
+                index: 0,
+            },
+            carpool: null,
+        });
+    });
+    useHotkeys("End", () => {
+        setCriteriaForDancerFocus({
+            arrangement: {
+                index: Infinity,
+            },
+            carpool: null,
+        });
+    });
+
     const onSelectAllClick = useCallback(() => {
         addRangeToSelection(0, getDancerTileContainers().length);
     }, [addRangeToSelection, getDancerTileContainers]);

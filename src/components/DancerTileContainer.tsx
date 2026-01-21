@@ -70,18 +70,19 @@ const DancerTileContainer: React.FC<DancerTileContainerProps> = ({
     }, [onClickSerializer, setOnClickSerializer, shouldSelect, onClickSelect]);
 
     const onKeyDown = useCallback((event: React.KeyboardEvent) => {
+        const amountToMove = event.ctrlKey || event.metaKey ? Infinity : 1;
         switch (event.key) {
             case "ArrowUp":
-                focusOnAdjacentTile(ref.current, 0, -1);
+                focusOnAdjacentTile(ref.current, 0, -amountToMove);
                 break;
             case "ArrowDown":
-                focusOnAdjacentTile(ref.current, 0, 1);
+                focusOnAdjacentTile(ref.current, 0, amountToMove);
                 break;
             case "ArrowLeft":
-                focusOnAdjacentTile(ref.current, -1, 0);
+                focusOnAdjacentTile(ref.current, -amountToMove, 0);
                 break;
             case "ArrowRight":
-                focusOnAdjacentTile(ref.current, 1, 0);
+                focusOnAdjacentTile(ref.current, amountToMove, 0);
                 break;
             case " ":
             case "Enter":
