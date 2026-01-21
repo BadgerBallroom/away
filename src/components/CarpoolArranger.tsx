@@ -1,5 +1,7 @@
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -27,6 +29,8 @@ import ElementSelectionContext from "./ElementSelectionContext";
 interface CarpoolArrangerFromIDProps {
     /** The ID of the `CarpoolArrangement` that the user will edit */
     arrangementID: ID;
+    /** A function that lets this, as a child component, put more buttons on the workspace toolbar */
+    setAdditionalToolbarChildren: (children: React.ReactNode) => void;
     /** A callback that opens the popover to edit a date and time */
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
     /** A callback that opens the popover with actions to perform on a dancer */
@@ -36,6 +40,7 @@ interface CarpoolArrangerFromIDProps {
 /** Lets the user edit the `CarpoolArrangement` with the given ID. */
 export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
     arrangementID,
+    setAdditionalToolbarChildren,
     showCarpoolDeparturePopover,
     showCarpoolOccupantPopover,
 }) => {
@@ -58,6 +63,7 @@ export const CarpoolArrangerFromID: React.FC<CarpoolArrangerFromIDProps> = ({
     return <CarpoolArranger
         state={carpoolArrangementState}
         onDeleteClick={onDeleteClick}
+        setAdditionalToolbarChildren={setAdditionalToolbarChildren}
         showCarpoolDeparturePopover={showCarpoolDeparturePopover}
         showCarpoolOccupantPopover={showCarpoolOccupantPopover}
     />;
@@ -71,6 +77,8 @@ interface SharedProps {
 interface CarpoolArrangerProps extends SharedProps {
     /** A function to execute when the user clicks on the Delete button */
     onDeleteClick?: () => void;
+    /** A function that lets this, as a child component, put more buttons on the workspace toolbar */
+    setAdditionalToolbarChildren: (children: React.ReactNode) => void;
     /** A callback that opens the dialog to edit a date and time */
     showCarpoolDeparturePopover: ShowCarpoolDeparturePopover;
     /** A callback that opens the popover with actions to perform on a dancer */
@@ -81,6 +89,7 @@ interface CarpoolArrangerProps extends SharedProps {
 const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
     state,
     onDeleteClick,
+    setAdditionalToolbarChildren,
     showCarpoolDeparturePopover,
     showCarpoolOccupantPopover,
 }) => {
@@ -195,6 +204,25 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
         addRangeToSelection(0, getDancerTileContainers().length);
     }, [addRangeToSelection, getDancerTileContainers]);
     useHotkeys("Ctrl+A, Cmd+A", onSelectAllClick, { preventDefault: true });
+
+    const canUnassignSelected =
+        Array.from(convertSelectionToIDs().selectedDancers).some(id => state.mapFromDancerIDs.has(id));
+    const onUnassignSelectedClick = useCallback(() => {
+        for (const id of convertSelectionToIDs().selectedDancers) {
+            state.unassignOccupant(id);
+        }
+        setDancerIDsToSelect(new Set());
+    }, [convertSelectionToIDs, state, setDancerIDsToSelect]);
+    useHotkeys("Delete, Backspace", onUnassignSelectedClick, { preventDefault: true });
+
+    useEffect(() => {
+        setAdditionalToolbarChildren(<>
+            <Button disabled={!canUnassignSelected} onClick={onUnassignSelectedClick} startIcon={<RemoveCircleIcon />}>
+                <FormattedMessage id={MessageID.carpoolUnassignSelected} />
+            </Button>
+        </>);
+        return () => setAdditionalToolbarChildren(null);
+    }, [canUnassignSelected, onUnassignSelectedClick, setAdditionalToolbarChildren]);
 
     const shouldSelectDancer: ShouldSelectDancer = useCallback(async (event, ref) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {

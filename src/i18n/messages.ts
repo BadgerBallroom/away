@@ -58,6 +58,8 @@ export const enum MessageID {
     carpoolSwapOccupantsMore = "carpoolSwapOccupantsMore",
     /** Button that removes an occupant from the carpool that they are in */
     carpoolUnassignOccupant = "carpoolUnassignOccupant",
+    /** Button that removes all selected occupants from the carpools that they are in */
+    carpoolUnassignSelected = "carpoolUnassignSelected",
     /** Text for a banner above the grid of dancers who have not been assigned to any carpool */
     carpoolUnassigned = "carpoolUnassigned",
     /** Text or title for any button that makes carpools automatically */
@@ -201,6 +203,7 @@ export const MESSAGES: Messages = {
         carpoolSwapOccupants: "Swap {name1} with {name2}",
         carpoolSwapOccupantsMore: "Swap {name} with {count} dancers",
         carpoolUnassignOccupant: "Unassign {name} from carpool",
+        carpoolUnassignSelected: "Unassign Selected",
         carpoolUnassigned: "These dancers are not in a carpool!",
         carpoolsGenerate: "Generate Carpools",
         carpoolsGenerateConfirm: "Carpools will now be generated automatically. This may take a few minutes.",

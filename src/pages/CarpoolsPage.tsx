@@ -11,7 +11,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Snackbar, { SnackbarProps } from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import { Dayjs } from "dayjs";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import CarpoolArrangementSelector from "../components/CarpoolArrangementSelector";
 import { CarpoolArrangerFromID } from "../components/CarpoolArranger";
@@ -112,10 +112,13 @@ const CarpoolsPage: React.FC = () => {
 
     const [snackbarProps, setSnackbarProps] = useState<Omit<SnackbarProps, "open"> | null>(null);
 
+    const [additionalToolbarChildren, setAdditionalToolbarChildren] = useState<ReactNode>(null);
+
     return <WorkspaceWithToolbar
         toolbarChildren={<>
             <NewButtons {...newButtonsProps} />
             <PrintButton onClick={onPrint} />
+            {additionalToolbarChildren}
         </>}
     >
         <CarpoolMakerProgressDialog carpoolMakerProgress={carpoolMakerProgress} onCancel={onCancelMakingCarpools} />
@@ -131,6 +134,7 @@ const CarpoolsPage: React.FC = () => {
             <CarpoolArrangementSelector value={selectedCarpoolArrangement} onChange={setSelectedCarpoolArrangement} />
             <CarpoolArrangerFromID
                 arrangementID={selectedCarpoolArrangement}
+                setAdditionalToolbarChildren={setAdditionalToolbarChildren}
                 showCarpoolDeparturePopover={showCarpoolDeparturePopover}
                 showCarpoolOccupantPopover={setOccupantActionParameters}
             />
