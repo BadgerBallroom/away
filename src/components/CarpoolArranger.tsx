@@ -234,7 +234,12 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 
     useEffect(() => {
         setAdditionalToolbarChildren(<>
-            <Button disabled={!canUnassignSelected} onClick={onUnassignSelectedClick} startIcon={<RemoveCircleIcon />}>
+            <Button
+                disabled={!canUnassignSelected}
+                onClick={onUnassignSelectedClick}
+                startIcon={<RemoveCircleIcon />}
+                sx={UNASSIGN_SELECTED_SX}
+            >
                 <FormattedMessage id={MessageID.carpoolUnassignSelected} />
             </Button>
         </>);
@@ -338,6 +343,8 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
 };
 
 export default CarpoolArranger;
+
+const UNASSIGN_SELECTED_SX = { display: { xs: "none", sm: "flex" } } as const;
 
 const Heading = styled(Paper)({ padding: "20px 0" });
 
