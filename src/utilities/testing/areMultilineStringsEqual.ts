@@ -1,4 +1,4 @@
-import { arraysEqual } from "../ArrayHooks";
+import arraysEqual from "../arraysEqual";
 
 /** A simple class that compares whether two strings are equal except for their line endings. */
 export class MultilineString {
