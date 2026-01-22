@@ -112,7 +112,7 @@ const CarpoolOccupantPopper: React.FC<CarpoolOccupantPopperProps> = ({ action, s
     return <Popper
         open={open}
         anchorEl={action?.anchorEl}
-        placement="right"
+        placement="auto"
     >
         <ClickAwayListener onClickAway={onClickAway}>
             <Paper elevation={4} sx={POPPER_PAPER_SX}>
