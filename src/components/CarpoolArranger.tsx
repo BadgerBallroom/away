@@ -93,8 +93,8 @@ const CarpoolArranger: React.FC<CarpoolArrangerProps> = ({
     showCarpoolDeparturePopover,
     showCarpoolOccupantPopover,
 }) => {
-    const [unassignedDancers, setUnassignedDancers] = useState(() => state.findUnassignedDancers());
-    const [carpoolsByDay, setCarpoolsByDay] = useState(() => state.groupByDepartureTime());
+    const [unassignedDancers, setUnassignedDancers] = useState<ID[]>([]);
+    const [carpoolsByDay, setCarpoolsByDay] = useState<CarpoolArrangementState.CarpoolsForDay[]>([]);
     useDeepStateChangeListener(state.getChildState("carpools"), () => {
         setUnassignedDancers(state.findUnassignedDancers());
         setCarpoolsByDay(state.groupByDepartureTime());

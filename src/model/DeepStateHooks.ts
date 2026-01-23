@@ -94,13 +94,15 @@ export function useDeepState<T>(
 }
 
 /**
- * Calls `onChange` when `deepState` is modified. This will probably eventually replace `useDeepState`.
+ * Calls `onChange` immediately and then when `deepState` is modified.
+ * This will probably eventually replace `useDeepState`.
  * @param deepState The state to monitor for change
  * @param onChange A callback that will be called when `deepState` is modified
  */
 export function useDeepStateChangeListener<T>(deepState: DeepStateBase<T>, onChange: () => void): void {
     const changeListener = useEffectEvent(onChange);
     useEffect(() => {
+        changeListener();
         deepState.addChangeListener(changeListener);
         return () => deepState.removeChangeListener(changeListener);
     }, [deepState]);

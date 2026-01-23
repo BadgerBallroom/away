@@ -27,14 +27,14 @@ const CarpoolArrangementSelector: React.FC<CarpoolArrangementSelectorProps> = ({
     const carpoolArrangementKLMState = session.getChildState("carpoolArrangements");
 
     const indexOfValue = useRef(carpoolArrangementKLMState.list.indexOf(value));
-    const getCarpoolArrangementIDsAndNames = () => carpoolArrangementKLMState.list.getIDsAndReferencedStates().map(
-        ({ id, state }) => ({ id, name: state.getChildValue("name") }),
-    );
     const [carpoolArrangementIDsAndNames, setCarpoolArrangementIDsAndNames] =
-        useState<{ id: ID, name: string }[]>(getCarpoolArrangementIDsAndNames());
+        useState<{ id: ID, name: string }[]>([]);
     useDeepStateChangeListener(carpoolArrangementKLMState, () => {
         // Refresh the array of the IDs and names of the carpool arrangements.
-        setCarpoolArrangementIDsAndNames(getCarpoolArrangementIDsAndNames());
+        setCarpoolArrangementIDsAndNames(
+            carpoolArrangementKLMState.list.getIDsAndReferencedStates()
+                .map(({ id, state }) => ({ id, name: state.getChildValue("name") })),
+        );
 
         // If the value is no longer valid, choose the one that is at the same position in the array.
         if (carpoolArrangementKLMState.list.indexOf(value) === -1) {

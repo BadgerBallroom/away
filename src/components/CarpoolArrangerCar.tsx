@@ -55,8 +55,7 @@ export const CarpoolContainerContainer: React.FC<CarpoolContainerContainerProps>
 
     // If the car departs too early for at least one occupant, this is the earliest time that would accommodate all
     // occupants. Otherwise, it is null.
-    const [suggestedDepartureTime, setSuggestedDepartureTime] =
-        useState<Dayjs | null>(carpoolState.getSuggestedDepartureTime());
+    const [suggestedDepartureTime, setSuggestedDepartureTime] = useState<Dayjs | null>(null);
     useDeepStateChangeListener(carpoolState, () => {
         setSuggestedDepartureTime(carpoolState.getSuggestedDepartureTime());
     });
